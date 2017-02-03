@@ -136,7 +136,7 @@ namespace HandyQuery.Language.Lexing.Gramma
                     var orConditions = blockItem.Split(new[] {'|'}, StringSplitOptions.RemoveEmptyEntries);
                     if (orConditions.Length > 1)
                     {
-                        var operands = new List<IGrammaElement>();
+                        var operands = new List<IGrammaBodyItem>();
 
                         foreach (var operand in orConditions)
                         {
@@ -149,7 +149,7 @@ namespace HandyQuery.Language.Lexing.Gramma
                             operands.Add(ParsePartBodyItem(operand));
                         }
 
-                        body.Add(new GrammaOrCondition( operands));
+                        body.Add(new GrammaOrCondition(operands));
                         continue;
                     }
 

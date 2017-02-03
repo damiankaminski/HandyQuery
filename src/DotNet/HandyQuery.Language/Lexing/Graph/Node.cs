@@ -8,10 +8,13 @@ namespace HandyQuery.Language.Lexing.Graph
         public readonly IGrammaBodyItem Item;
         public readonly List<Node> Children = new List<Node>(10);
 
-        public Node(IGrammaBodyItem item, IEnumerable<Node> parents)
+        public Node(IGrammaBodyItem item)
         {
             Item = item;
+        }
 
+        public void AddAsChildTo(IEnumerable<Node> parents)
+        {
             if (parents != null)
             {
                 foreach (var parent in parents)
@@ -21,7 +24,7 @@ namespace HandyQuery.Language.Lexing.Graph
             }
         }
 
-        public void AddChildNode(Node child)
+        private void AddChildNode(Node child)
         {
             Children.Add(child);
         }

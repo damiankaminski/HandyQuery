@@ -15,27 +15,53 @@ namespace HandyQuery.Language.Lexing.Graph
 
         public static LexerExecutionGraph Build(GrammaPart grammaRoot)
         {
-            var graph = new Builder().BuildGraph(grammaRoot, null).ToArray();
+            var builder = new Builder();
+            builder.BuildGraph(grammaRoot);
 
-            if (graph.Length != 1)
-            {
-                throw new LexerExecutionGraphException("Graph should have a root.");
-            }
-
-            return new LexerExecutionGraph(graph[0]);
+            return new LexerExecutionGraph(builder.Root);
         }
 
         internal sealed class Builder
         {
             private readonly List<IGrammaElement> _visitedElements = new List<IGrammaElement>();
 
-            public IEnumerable<Node> BuildGraph(IGrammaElement grammaElement, Node[] parents)
-            {
-                // TODO: detect and handle cycles (e.g. $Params = $Value ?$MoreParams \n $MoreParams = ParamsSeparator $Params)
-                // maybe arrays should be declared explicitly, e.g.
-                // $Params = $Value ?$MoreParams[]
-                // $MoreParams = ParamsSeparator $Params
+            public readonly Node Root = new Node(null);
 
+            public void BuildGraph(GrammaPart grammaRoot)
+            {
+                foreach (var item in grammaRoot.Body)
+                {
+                    Process(item, new[] {Root});
+                }
+            }
+
+            public void Process(IGrammaBodyItem grammaElement, Node[] parents)
+            {
+                switch (grammaElement.Type)
+                {
+                    case GrammaElementType.TokenizerUsage:
+                        ProcessGraphPart(grammaElement, parents).ToArray();
+                        break;
+
+                    case GrammaElementType.PartUsage:
+                        ProcessGraphPart(grammaElement, parents).ToArray();
+                        break;
+
+                    case GrammaElementType.OrCondition:
+                        var orCondition = grammaElement.As<GrammaOrCondition>();
+                        foreach (var operand in orCondition.Operands)
+                        {
+                            ProcessGraphPart(operand, parents).ToArray();
+                        }
+                        break;
+
+                    default:
+                        throw new LexerExecutionGraphException("Cannot process gramma.");
+                }
+            }
+
+            private IEnumerable<Node> ProcessGraphPart(IGrammaBodyItem grammaElement, Node[] parents)
+            {
                 if (_visitedElements.Contains(grammaElement))
                 {
                     yield break;
@@ -45,35 +71,23 @@ namespace HandyQuery.Language.Lexing.Graph
 
                 switch (grammaElement.Type)
                 {
-                    case GrammaElementType.Part:
-                        var part = grammaElement.As<GrammaPart>();
-                        var root = new Node(null, null);
-                        BuildGraphFromPartBody(new[] { root }, part.Body);
-                        yield return root;
+                    case GrammaElementType.TokenizerUsage:
+                        var tokenizerUsage = grammaElement.As<GrammaTokenizerUsage>();
+                        // TODO: generate additional route if `tokenizerUsage.IsOptional`
+                        var node = new Node(tokenizerUsage);
+                        node.AddAsChildTo(parents);
+
+                        yield return node;
                         break;
 
                     case GrammaElementType.PartUsage:
                         var partUsage = grammaElement.As<GrammaPartUsage>();
                         // TODO: generate additional route if `partUsage.IsOptional`
-                        foreach (var node in BuildGraphFromPartBody(parents, partUsage.Impl.Body).ToArray())
+                        foreach (var item in partUsage.Impl.Body)
                         {
-                            yield return node;
-                        }
-                        break;
-
-                    case GrammaElementType.TokenizerUsage:
-                        var tokenizerUsage = grammaElement.As<GrammaTokenizerUsage>();
-                        // TODO: generate additional route if `tokenizerUsage.IsOptional`
-                        yield return new Node(tokenizerUsage, parents);
-                        break;
-
-                    case GrammaElementType.OrCondition:
-                        var orCondition = grammaElement.As<GrammaOrCondition>();
-                        foreach (var operand in orCondition.Operands)
-                        {
-                            foreach (var node in BuildGraph(operand, parents).ToArray())
+                            foreach (var n in ProcessGraphPart(item, parents))
                             {
-                                yield return node;
+                                yield return n;
                             }
                         }
                         break;
@@ -81,17 +95,6 @@ namespace HandyQuery.Language.Lexing.Graph
                     default:
                         throw new LexerExecutionGraphException("Cannot process gramma.");
                 }
-            }
-
-            private IEnumerable<Node> BuildGraphFromPartBody(IEnumerable<Node> parents, GrammaPartBody body)
-            {
-                var itemParents = parents.ToArray();
-                foreach (var item in body)
-                {
-                    itemParents = BuildGraph(item, itemParents).ToArray();
-                }
-
-                return itemParents;
             }
         }
     }

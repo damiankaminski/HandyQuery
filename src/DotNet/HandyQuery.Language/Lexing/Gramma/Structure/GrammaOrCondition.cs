@@ -7,11 +7,11 @@ namespace HandyQuery.Language.Lexing.Gramma.Structure
     internal sealed class GrammaOrCondition : IGrammaBodyItem
     {
         public string Name => null;
-        public List<IGrammaElement> Operands { get; }
+        public List<IGrammaBodyItem> Operands { get; }
 
         public GrammaElementType Type => GrammaElementType.OrCondition;
 
-        public GrammaOrCondition(List<IGrammaElement> operands)
+        public GrammaOrCondition(List<IGrammaBodyItem> operands)
         {
             Operands = operands;
         }
