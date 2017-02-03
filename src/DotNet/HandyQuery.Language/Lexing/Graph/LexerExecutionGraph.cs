@@ -1,97 +1,148 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-using HandyQuery.Language.Lexing.Gramma.Structure;
+using HandyQuery.Language.Lexing.Graph.Builder;
 
 namespace HandyQuery.Language.Lexing.Graph
 {
     internal sealed class LexerExecutionGraph
     {
-        internal readonly Node Root;
+        internal readonly RootNode Root;
 
-        private LexerExecutionGraph(Node root)
+        internal LexerExecutionGraph(RootNode root)
         {
             Root = root;
         }
 
-        public static LexerExecutionGraph Build(GrammaPart grammaRoot)
+        public static LexerExecutionGraph Build(Grammar.Grammar grammar)
         {
-            var graph = new Builder().BuildGraph(grammaRoot, null).ToArray();
-
-            if (graph.Length != 1)
-            {
-                throw new LexerExecutionGraphException("Graph should have a root.");
-            }
-
-            return new LexerExecutionGraph(graph[0]);
+            var root = LexerExecutionGraphBuilder.BuildGraph(grammar);
+            return new LexerExecutionGraph(root);
         }
 
-        internal sealed class Builder
+        public bool IsEquivalentTo(LexerExecutionGraph expected)
         {
-            private readonly List<IGrammaElement> _visitedElements = new List<IGrammaElement>();
+            var thisNodes = EnumerateInnerNodes(Root, new HashSet<Node>()).ToList();
+            var expectedNodes = EnumerateInnerNodes(expected.Root, new HashSet<Node>()).ToList();
 
-            public IEnumerable<Node> BuildGraph(IGrammaElement grammaElement, Node[] parents)
+            // unique nodes are used to check if nodes are properly reused instead of copied with same content
+            var thisUniqueNodes = new HashSet<Node>(thisNodes.Select(x => x.Node));
+            var expectedUniqueNodes = new HashSet<Node>(expectedNodes.Select(x => x.Node));
+            
+            if (thisNodes.Count != expectedNodes.Count || thisUniqueNodes.Count != expectedUniqueNodes.Count)
             {
-                // TODO: detect and handle cycles (e.g. $Params = $Value ?$MoreParams \n $MoreParams = ParamsSeparator $Params)
-                // maybe arrays should be declared explicitly, e.g.
-                // $Params = $Value ?$MoreParams[]
-                // $MoreParams = ParamsSeparator $Params
-
-                if (_visitedElements.Contains(grammaElement))
-                {
-                    yield break;
-                }
-
-                _visitedElements.Add(grammaElement);
-
-                switch (grammaElement.Type)
-                {
-                    case GrammaElementType.Part:
-                        var part = grammaElement.As<GrammaPart>();
-                        var root = new Node(null, null);
-                        BuildGraphFromPartBody(new[] { root }, part.Body);
-                        yield return root;
-                        break;
-
-                    case GrammaElementType.PartUsage:
-                        var partUsage = grammaElement.As<GrammaPartUsage>();
-                        // TODO: generate additional route if `partUsage.IsOptional`
-                        foreach (var node in BuildGraphFromPartBody(parents, partUsage.Impl.Body).ToArray())
-                        {
-                            yield return node;
-                        }
-                        break;
-
-                    case GrammaElementType.TokenizerUsage:
-                        var tokenizerUsage = grammaElement.As<GrammaTokenizerUsage>();
-                        // TODO: generate additional route if `tokenizerUsage.IsOptional`
-                        yield return new Node(tokenizerUsage, parents);
-                        break;
-
-                    case GrammaElementType.OrCondition:
-                        var orCondition = grammaElement.As<GrammaOrCondition>();
-                        foreach (var operand in orCondition.Operands)
-                        {
-                            foreach (var node in BuildGraph(operand, parents).ToArray())
-                            {
-                                yield return node;
-                            }
-                        }
-                        break;
-
-                    default:
-                        throw new LexerExecutionGraphException("Cannot process gramma.");
-                }
+                return false;
             }
 
-            private IEnumerable<Node> BuildGraphFromPartBody(IEnumerable<Node> parents, GrammaPartBody body)
+            var visitedNodesA = new HashSet<Node>();
+            var visitedNodesB = new HashSet<Node>();
+            
+            return Compare(Root, expected.Root);
+            
+            bool Compare(Node a, Node b)
             {
-                var itemParents = parents.ToArray();
-                foreach (var item in body)
+                if (a == null && b == null) return true;
+                if (a == null || b == null) return false;
+                
+                var visitedA = visitedNodesA.Contains(a);
+                var visitedB = visitedNodesB.Contains(b);
+            
+                if (visitedA && visitedB) return true;
+                if (visitedA != visitedB) return false;
+
+                visitedNodesA.Add(a);
+                visitedNodesB.Add(b);
+            
+                if (a.GetType() != b.GetType())
                 {
-                    itemParents = BuildGraph(item, itemParents).ToArray();
+                    return false;
                 }
 
-                return itemParents;
+                switch (a)
+                {
+                    case RootNode na:
+                    {
+                        var nb = (RootNode)b;
+                        return Compare(na.Child, nb.Child);
+                    }
+
+                    case TerminalNode na:
+                    {
+                        var nb = (TerminalNode)b;
+                        if (na.Tokenizer.GetType().FullName != nb.Tokenizer.GetType().FullName) return false;
+                        return Compare(na.Child, nb.Child);
+                    }
+                    case BranchNode na:
+                    {
+                        var nb = (BranchNode)b;
+                        var naHeads = na.Heads.ToList();
+                        var nbHeads = nb.Heads.ToList();
+
+                        if (naHeads.Count != nbHeads.Count) return false;
+                        
+                        for (var i = 0; i < naHeads.Count; i++)
+                        {
+                            var aHead = naHeads[i];
+                            var bHead = nbHeads[i];
+
+                            if (Compare(aHead, bHead) == false) return false;
+                        }
+                        break;
+                    }
+                    case NonTerminalUsageNode na:
+                    {
+                        var nb = (NonTerminalUsageNode)b;
+                        if (na.Name != nb.Name) return false;
+                        if (Compare(na.Head, nb.Head) == false) return false;
+                        if (Compare(na.Child, nb.Child) == false) return false;
+                        break;
+                    }
+                    default:
+                        throw new ArgumentException($"Invalid node type: {a?.GetType()}", nameof(a));
+                }
+
+                return true;
+            }
+            
+            IEnumerable<(Node Node, bool Recursive)> EnumerateInnerNodes(Node node, HashSet<Node> visitedNodes)
+            {
+                if (visitedNodes.Contains(node))
+                {
+                    yield return (node, true);
+                }
+                else
+                {
+                    visitedNodes.Add(node);
+                    yield return (node, false);
+                
+                    switch (node)
+                    {
+                        case RootNode n:
+                            if(n.Child != null)
+                                foreach (var innerNode in EnumerateInnerNodes(n.Child, visitedNodes))
+                                    yield return innerNode;
+                            break;
+                        case TerminalNode n:
+                            if(n.Child != null)
+                                foreach (var innerNode in EnumerateInnerNodes(n.Child, visitedNodes))
+                                    yield return innerNode;
+                            break;
+                        case BranchNode n:
+                            foreach (var head in n.Heads)
+                            foreach (var innerNode in EnumerateInnerNodes(head, visitedNodes))
+                                yield return innerNode;
+                            break;
+                        case NonTerminalUsageNode n:
+                            foreach (var innerNode in EnumerateInnerNodes(n.Head, visitedNodes))
+                                yield return innerNode;
+                            if(n.Child != null)
+                                foreach (var innerNode in EnumerateInnerNodes(n.Child, visitedNodes))
+                                    yield return innerNode;
+                            break;
+                        default:
+                            throw new ArgumentException($"Invalid node type: {node?.GetType()}", nameof(node));
+                    }
+                }
             }
         }
     }

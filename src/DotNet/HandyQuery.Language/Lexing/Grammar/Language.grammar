@@ -1,0 +1,13 @@
+﻿<value> ::= Literal | <function-invokation>
+
+<filter>                 ::= GroupOpen <filter-body> GroupClose | <filter-body> 
+<filter-body>            ::= <filter-with-compare-op> | <filter-with-statement>
+<filter-with-compare-op> ::= ColumnName CompareOperator <value>
+<filter-with-statement>  ::= ColumnName Statement
+
+<function-invokation> ::= FunctionName ParamsOpen ParamsClose | FunctionName ParamsOpen <params> ParamsClose
+<params>              ::= <value> ParamsSeparator <params> | <value>
+
+<all-filters> ::= <filter> BooleanOperator <all-filters> | <filter>
+
+return <all-filters>

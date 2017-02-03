@@ -2,7 +2,7 @@
 using FluentAssertions;
 using HandyQuery.Language.Configuration;
 using HandyQuery.Language.Lexing;
-using HandyQuery.Language.Lexing.Gramma;
+using HandyQuery.Language.Lexing.Grammar;
 using HandyQuery.Language.Lexing.Tokens;
 using HandyQuery.Language.Tests.Model;
 using NUnit.Framework;
@@ -38,7 +38,7 @@ namespace HandyQuery.Language.Tests
                 new StatementToken(10, isEmpty.Length, config.GetCulture(CultureInfo.InvariantCulture).GetKeyword(isEmpty))
             };
 
-            var result = _lexer.Execute("FirstName is empty", config, CultureInfo.InvariantCulture);
+            var result = _lexer.Tokenize("FirstName is empty", config, CultureInfo.InvariantCulture);
 
             result.Errors.Should().BeEmpty();
             result.Tokens.IsSameAs(expected).Should().BeTrue();

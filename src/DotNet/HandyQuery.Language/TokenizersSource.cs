@@ -39,5 +39,16 @@ namespace HandyQuery.Language
         {
             return _tokenizers.TryGetValue(name, out tokenizer);
         }
+
+        public ITokenizer GetTokenizer(string name)
+        {
+            ITokenizer tokenizer;
+            if (TryGetTokenizer(name, out tokenizer) == false)
+            {
+                throw new QueryLanguageException($"Terminal '{name}' not found.");
+            }
+
+            return tokenizer;
+        }
     }
 }

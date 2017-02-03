@@ -65,7 +65,9 @@
   </Choose>
   <ItemGroup>
     <Compile Include="Debug.cs" />
+    <Compile Include="LexerExecutionGraphTests.cs" />
     <Compile Include="LexingTests.cs" />
+    <Compile Include="Lexing\Grammar\GrammarParserTests.cs" />
     <Compile Include="Model\DataSample.cs" />
     <Compile Include="Model\Emoloyee.cs" />
     <Compile Include="Model\Person.cs" />
