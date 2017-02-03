@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using HandyQuery.Language.Lexing.Gramma;
 using HandyQuery.Language.Lexing.Graph;
 using Newtonsoft.Json;
@@ -69,29 +70,13 @@ namespace HandyQuery.Language.Tests
 
         public void Process(Node node, JsonNode parent, int y)
         {
-            if (_visitedNodes.Contains(node))
-            {
-                return;
-            }
-
-            _visitedNodes.Add(node);
-
             int x;
             if (_xAxis.TryGetValue(y, out x) == false)
             {
                 _xAxis[y] = x;
             }
 
-            var jsonNode = new JsonNode()
-            {
-                Id = Guid.NewGuid().ToString(),
-                Label = node.ToString(),
-                X = _xAxis[y]++ * XAxisMultiplier,
-                Y = y * YAxisMultiplier,
-                Size = 1,
-                Node = node
-            };
-            _nodes.Add(jsonNode);
+            var jsonNode = GetJsonNode(node, y);
 
             if (parent != null)
             {
@@ -103,12 +88,41 @@ namespace HandyQuery.Language.Tests
                 });
             }
 
+            if (_visitedNodes.Contains(node))
+            {
+                return;
+            }
+
+            _visitedNodes.Add(node);
+
             for (var index = 0; index < node.Children.Count; index++)
             {
                 var nodeChild = node.Children[index];
-                if (index > 0) _xAxis[y + index] = ++x;
+                //if (index > 0) _xAxis[y + index] = ++x;
                 Process(nodeChild, jsonNode, y + index);
             }
+        }
+
+        private JsonNode GetJsonNode(Node node, int y)
+        {
+            var existing = _nodes.FirstOrDefault(x => x.Node == node);
+            if (existing != null)
+            {
+                return existing;
+            }
+
+            var jsonNode = new JsonNode()
+            {
+                Id = Guid.NewGuid().ToString(),
+                Label = node.ToString(),
+                X = _xAxis[y]++*XAxisMultiplier,
+                Y = y*YAxisMultiplier,
+                Size = 1,
+                Node = node
+            };
+
+            _nodes.Add(jsonNode);
+            return jsonNode;
         }
 
         internal sealed class JsonNode

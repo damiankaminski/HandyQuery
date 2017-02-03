@@ -23,52 +23,24 @@ namespace HandyQuery.Language.Lexing.Graph
 
         internal sealed class Builder
         {
-            private readonly List<IGrammaElement> _visitedElements = new List<IGrammaElement>();
-
             public readonly Node Root = new Node(null);
+
+            private readonly Stack<PartContext> _partsUsageStack = new Stack<PartContext>();
+
+            private class PartContext
+            {
+                public GrammaPartUsage Usage { get; set; }
+                public Node[] EntryNodes;
+            }
 
             public void BuildGraph(GrammaPart grammaRoot)
             {
-                foreach (var item in grammaRoot.Body)
-                {
-                    Process(item, new[] {Root});
-                }
-            }
-
-            public void Process(IGrammaBodyItem grammaElement, Node[] parents)
-            {
-                switch (grammaElement.Type)
-                {
-                    case GrammaElementType.TokenizerUsage:
-                        ProcessGraphPart(grammaElement, parents).ToArray();
-                        break;
-
-                    case GrammaElementType.PartUsage:
-                        ProcessGraphPart(grammaElement, parents).ToArray();
-                        break;
-
-                    case GrammaElementType.OrCondition:
-                        var orCondition = grammaElement.As<GrammaOrCondition>();
-                        foreach (var operand in orCondition.Operands)
-                        {
-                            ProcessGraphPart(operand, parents).ToArray();
-                        }
-                        break;
-
-                    default:
-                        throw new LexerExecutionGraphException("Cannot process gramma.");
-                }
+                // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
+                ProcessGraphPart(new GrammaPartUsage(grammaRoot.Name, false, grammaRoot), new[] {Root}).ToArray();
             }
 
             private IEnumerable<Node> ProcessGraphPart(IGrammaBodyItem grammaElement, Node[] parents)
             {
-                if (_visitedElements.Contains(grammaElement))
-                {
-                    yield break;
-                }
-
-                _visitedElements.Add(grammaElement);
-
                 switch (grammaElement.Type)
                 {
                     case GrammaElementType.TokenizerUsage:
@@ -81,11 +53,15 @@ namespace HandyQuery.Language.Lexing.Graph
                         break;
 
                     case GrammaElementType.PartUsage:
-                        var partUsage = grammaElement.As<GrammaPartUsage>();
-                        // TODO: generate additional route if `partUsage.IsOptional`
-                        foreach (var item in partUsage.Impl.Body)
+                        foreach (var n in ProcessPartUsage(grammaElement, parents)) yield return n;
+                        break;
+
+                    case GrammaElementType.OrCondition:
+                        var orCondition = grammaElement.As<GrammaOrCondition>();
+
+                        foreach (var operand in orCondition.Operands)
                         {
-                            foreach (var n in ProcessGraphPart(item, parents))
+                            foreach (var n in ProcessGraphPart(operand, parents))
                             {
                                 yield return n;
                             }
@@ -95,6 +71,51 @@ namespace HandyQuery.Language.Lexing.Graph
                     default:
                         throw new LexerExecutionGraphException("Cannot process gramma.");
                 }
+            }
+
+            private IEnumerable<Node> ProcessPartUsage(IGrammaBodyItem grammaElement, Node[] parents)
+            {
+                // TODO: generate additional route if `partUsage.IsOptional`
+
+                var partUsage = grammaElement.As<GrammaPartUsage>();
+
+                if (_partsUsageStack.Count > 1)
+                {
+                    var cycleCandidate = _partsUsageStack.ToArray()
+                        .FirstOrDefault(x => ReferenceEquals(x.Usage.Impl, partUsage.Impl));
+                    var isCycle = cycleCandidate != null && cycleCandidate.EntryNodes != null;
+
+                    if (isCycle)
+                    {
+                        foreach (var entryNode in cycleCandidate.EntryNodes)
+                        {
+                            entryNode.AddAsChildTo(parents);
+                        }
+                        yield break;
+                    }
+                }
+
+                var context = new PartContext()
+                {
+                    Usage = partUsage
+                };
+                _partsUsageStack.Push(context);
+
+                var newParents = parents;
+                for (var i = 0; i < partUsage.Impl.Body.Count; i++)
+                {
+                    var item = partUsage.Impl.Body[i];
+                    newParents = ProcessGraphPart(item, newParents).ToArray();
+
+                    if (i == 0) context.EntryNodes = newParents;
+
+                    foreach (var n in newParents)
+                    {
+                        yield return n;
+                    }
+                }
+
+                _partsUsageStack.Pop();
             }
         }
     }

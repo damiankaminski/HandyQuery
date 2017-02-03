@@ -1,14 +1,4 @@
-﻿$Value = Literal
-$Params = $Value ?$MoreParams
-$MoreParams = ParamsSeparator $Params
-
-return $Params
-
-
-
-
-
-$Value = Literal|$FunctionInvokation
+﻿$Value = Literal|$FunctionInvokation
 
 $Filter = ?GroupOpen $FilterWithCompareOp|$FilterWithStatement ?GroupClose
 $FilterWithCompareOp = ColumnName CompareOperator $Value
