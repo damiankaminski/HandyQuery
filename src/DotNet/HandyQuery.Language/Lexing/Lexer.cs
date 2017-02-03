@@ -10,13 +10,13 @@ namespace HandyQuery.Language.Lexing
 {
     internal sealed class Lexer
     {
-        private readonly LexerExecutionGraph _executionGraph;
+        internal readonly LexerExecutionGraph ExecutionGraph;
 
         private readonly Stack<Stack<IGrammaBodyItem>> _state = new Stack<Stack<IGrammaBodyItem>>(); // TODO: move it inner class to make Execute thread safe
 
         private Lexer(LexerExecutionGraph executionGraph)
         {
-            _executionGraph = executionGraph;
+            ExecutionGraph = executionGraph;
         }
 
         public static Lexer Build(GrammaPart root)

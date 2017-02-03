@@ -61,6 +61,7 @@
     <Compile Include="HandyQueryInitializationException.cs" />
     <Compile Include="Lexing\Graph\LexerExecutionGraph.cs" />
     <Compile Include="Lexing\Graph\LexerExecutionGraphException.cs" />
+    <Compile Include="Lexing\Graph\Node.cs" />
     <Compile Include="Lexing\Lexer.cs" />
     <Compile Include="Lexing\LexerConfig.cs" />
     <Compile Include="Lexing\Gramma\Structure\GrammaPartBody.cs" />

@@ -1,7 +1,9 @@
-﻿$Params = $Value ?$MoreParams
+﻿$Value = Literal
+$Params = $Value ?$MoreParams
 $MoreParams = ParamsSeparator $Params
 
 return $Params
+
 
 
 

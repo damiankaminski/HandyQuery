@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using HandyQuery.Language.Lexing.Gramma.Structure;
 
@@ -7,16 +6,16 @@ namespace HandyQuery.Language.Lexing.Graph
 {
     internal sealed class LexerExecutionGraph
     {
-        private readonly Node _root;
+        internal readonly Node Root;
 
         private LexerExecutionGraph(Node root)
         {
-            _root = root;
+            Root = root;
         }
 
         public static LexerExecutionGraph Build(GrammaPart grammaRoot)
         {
-            var graph = BuildGraph(grammaRoot, null).ToArray();
+            var graph = new Builder().BuildGraph(grammaRoot, null).ToArray();
 
             if (graph.Length != 1)
             {
@@ -26,92 +25,74 @@ namespace HandyQuery.Language.Lexing.Graph
             return new LexerExecutionGraph(graph[0]);
         }
 
-        private static IEnumerable<Node> BuildGraph(IGrammaElement grammaElement, Node[] parents)
+        internal sealed class Builder
         {
-            // TODO: detect and handle cycles (e.g. $Params = $Value ?$MoreParams \n $MoreParams = ParamsSeparator $Params)
-            // maybe arrays should be declared explicitly, e.g.
-            // $Params = $Value ?$MoreParams[]
-            // $MoreParams = ParamsSeparator $Params
+            private readonly List<IGrammaElement> _visitedElements = new List<IGrammaElement>();
 
-            switch (grammaElement.Type)
+            public IEnumerable<Node> BuildGraph(IGrammaElement grammaElement, Node[] parents)
             {
-                case GrammaElementType.Part:
-                    var part = grammaElement.As<GrammaPart>();
-                    var root = new Node(null, null);
-                    BuildGraphFromPartBody(new [] { root }, part.Body);
-                    yield return root;
-                    break;
+                // TODO: detect and handle cycles (e.g. $Params = $Value ?$MoreParams \n $MoreParams = ParamsSeparator $Params)
+                // maybe arrays should be declared explicitly, e.g.
+                // $Params = $Value ?$MoreParams[]
+                // $MoreParams = ParamsSeparator $Params
 
-                case GrammaElementType.PartUsage:
-                    var partUsage = grammaElement.As<GrammaPartUsage>();
-                    // TODO: generate additional route if `partUsage.IsOptional`
-                    foreach (var node in BuildGraphFromPartBody(parents, partUsage.Impl.Body).ToArray())
-                    {
-                        yield return node;
-                    }
-                    break;
+                if (_visitedElements.Contains(grammaElement))
+                {
+                    yield break;
+                }
 
-                case GrammaElementType.TokenizerUsage:
-                    var tokenizerUsage = grammaElement.As<GrammaTokenizerUsage>();
-                    // TODO: generate additional route if `tokenizerUsage.IsOptional`
-                    yield return new Node(tokenizerUsage, parents);
-                    break;
+                _visitedElements.Add(grammaElement);
 
-                case GrammaElementType.OrCondition:
-                    var orCondition = grammaElement.As<GrammaOrCondition>();
-                    foreach (var operand in orCondition.Operands)
-                    {
-                        foreach (var node in BuildGraph(operand, parents).ToArray())
+                switch (grammaElement.Type)
+                {
+                    case GrammaElementType.Part:
+                        var part = grammaElement.As<GrammaPart>();
+                        var root = new Node(null, null);
+                        BuildGraphFromPartBody(new[] { root }, part.Body);
+                        yield return root;
+                        break;
+
+                    case GrammaElementType.PartUsage:
+                        var partUsage = grammaElement.As<GrammaPartUsage>();
+                        // TODO: generate additional route if `partUsage.IsOptional`
+                        foreach (var node in BuildGraphFromPartBody(parents, partUsage.Impl.Body).ToArray())
                         {
                             yield return node;
                         }
-                    }
-                    break;
+                        break;
 
-                default:
-                    throw new LexerExecutionGraphException("Cannot process gramma.");
-            }
-        }
+                    case GrammaElementType.TokenizerUsage:
+                        var tokenizerUsage = grammaElement.As<GrammaTokenizerUsage>();
+                        // TODO: generate additional route if `tokenizerUsage.IsOptional`
+                        yield return new Node(tokenizerUsage, parents);
+                        break;
 
-        private static IEnumerable<Node> BuildGraphFromPartBody(IEnumerable<Node> parents, GrammaPartBody body)
-        {
-            var itemParents = parents.ToArray();
-            foreach (var item in body)
-            {
-                itemParents = BuildGraph(item, itemParents).ToArray();
-            }
+                    case GrammaElementType.OrCondition:
+                        var orCondition = grammaElement.As<GrammaOrCondition>();
+                        foreach (var operand in orCondition.Operands)
+                        {
+                            foreach (var node in BuildGraph(operand, parents).ToArray())
+                            {
+                                yield return node;
+                            }
+                        }
+                        break;
 
-            return itemParents;
-        }
-    }
-
-    internal sealed class Node
-    {
-        public readonly IGrammaBodyItem Item;
-        public readonly List<Node> Children = new List<Node>(10);
-
-        public Node(IGrammaBodyItem item, IEnumerable<Node> parents)
-        {
-            Item = item;
-
-            if (parents != null)
-            {
-                foreach (var parent in parents)
-                {
-                    parent?.AddChildNode(this);
+                    default:
+                        throw new LexerExecutionGraphException("Cannot process gramma.");
                 }
             }
-        }
 
-        public void AddChildNode(Node child)
-        {
-            Children.Add(child);
-        }
+            private IEnumerable<Node> BuildGraphFromPartBody(IEnumerable<Node> parents, GrammaPartBody body)
+            {
+                var itemParents = parents.ToArray();
+                foreach (var item in body)
+                {
+                    itemParents = BuildGraph(item, itemParents).ToArray();
+                }
 
-        public override string ToString()
-        {
-            var name = Item?.Name ?? "Root";
-            return $"{name} ({string.Join(",", Children.Select(x => x.Item?.Name))})";
+                return itemParents;
+            }
         }
     }
 }
