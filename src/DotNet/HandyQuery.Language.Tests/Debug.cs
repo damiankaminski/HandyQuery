@@ -98,7 +98,7 @@ namespace HandyQuery.Language.Tests
             for (var index = 0; index < node.Children.Count; index++)
             {
                 var nodeChild = node.Children[index];
-                //if (index > 0) _xAxis[y + index] = ++x;
+                if (index > 0) _xAxis[y + index] = ++x;
                 Process(nodeChild, jsonNode, y + index);
             }
         }

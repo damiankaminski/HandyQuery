@@ -8,8 +8,6 @@ $FunctionInvokation = FunctionName ParamsOpen ?$Params ParamsClose
 $Params = $Value ?$MoreParams
 $MoreParams = ParamsSeparator $Params
 
-$InRange = In ParamsOpen ?$Params ParamsClose
-
 $AllFilters = $Filter ?$MoreFilters
 $MoreFilters = BooleanOperator $AllFilters
 

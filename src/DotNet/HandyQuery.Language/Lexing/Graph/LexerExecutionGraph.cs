@@ -30,7 +30,7 @@ namespace HandyQuery.Language.Lexing.Graph
             private class PartContext
             {
                 public GrammaPartUsage Usage { get; set; }
-                public Node[] EntryNodes;
+                public Node[] EntryNodes { get; set; }
             }
 
             public void BuildGraph(GrammaPart grammaRoot)
@@ -39,6 +39,7 @@ namespace HandyQuery.Language.Lexing.Graph
                 ProcessGraphPart(new GrammaPartUsage(grammaRoot.Name, false, grammaRoot), new[] {Root}).ToArray();
             }
 
+            // TODO: get rid of yield as it may mess up order of execution, return simply an array
             private IEnumerable<Node> ProcessGraphPart(IGrammaBodyItem grammaElement, Node[] parents)
             {
                 switch (grammaElement.Type)
@@ -53,7 +54,7 @@ namespace HandyQuery.Language.Lexing.Graph
                         break;
 
                     case GrammaElementType.PartUsage:
-                        foreach (var n in ProcessPartUsage(grammaElement, parents)) yield return n;
+                        foreach (var n in ProcessPartUsage(grammaElement, parents).ToArray()) yield return n;
                         break;
 
                     case GrammaElementType.OrCondition:
@@ -61,7 +62,7 @@ namespace HandyQuery.Language.Lexing.Graph
 
                         foreach (var operand in orCondition.Operands)
                         {
-                            foreach (var n in ProcessGraphPart(operand, parents))
+                            foreach (var n in ProcessGraphPart(operand, parents).ToArray())
                             {
                                 yield return n;
                             }
@@ -73,6 +74,10 @@ namespace HandyQuery.Language.Lexing.Graph
                 }
             }
 
+            // TODO: get rid of yield as it may mess up order of execution, return simply an array
+            /// <summary>
+            /// Processes a single part (which may invoke other parts) and returns result of last item in the body.
+            /// </summary>
             private IEnumerable<Node> ProcessPartUsage(IGrammaBodyItem grammaElement, Node[] parents)
             {
                 // TODO: generate additional route if `partUsage.IsOptional`
@@ -87,10 +92,13 @@ namespace HandyQuery.Language.Lexing.Graph
 
                     if (isCycle)
                     {
+                        // TODO: $FunctionInvokation usage in $FunctionInvokation seems to be bad
                         foreach (var entryNode in cycleCandidate.EntryNodes)
                         {
+                            yield return entryNode;
                             entryNode.AddAsChildTo(parents);
                         }
+
                         yield break;
                     }
                 }
@@ -104,14 +112,18 @@ namespace HandyQuery.Language.Lexing.Graph
                 var newParents = parents;
                 for (var i = 0; i < partUsage.Impl.Body.Count; i++)
                 {
+                    var isLast = i == partUsage.Impl.Body.Count - 1;
                     var item = partUsage.Impl.Body[i];
                     newParents = ProcessGraphPart(item, newParents).ToArray();
 
                     if (i == 0) context.EntryNodes = newParents;
 
-                    foreach (var n in newParents)
+                    if (isLast)
                     {
-                        yield return n;
+                        foreach (var n in newParents)
+                        {
+                            yield return n;
+                        }
                     }
                 }
 
