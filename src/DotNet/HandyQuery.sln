@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25123.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HandyQuery.Language", "HandyQuery.Language\HandyQuery.Language.csproj", "{1D252801-F472-4197-B49E-B55ED901857A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HandyQuery.Language.Tests", "HandyQuery.Language.Tests\HandyQuery.Language.Tests.csproj", "{F5F4D0FE-DC28-47F8-B01E-654D2F6315F3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1D252801-F472-4197-B49E-B55ED901857A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1D252801-F472-4197-B49E-B55ED901857A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1D252801-F472-4197-B49E-B55ED901857A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1D252801-F472-4197-B49E-B55ED901857A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F5F4D0FE-DC28-47F8-B01E-654D2F6315F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F5F4D0FE-DC28-47F8-B01E-654D2F6315F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F5F4D0FE-DC28-47F8-B01E-654D2F6315F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F5F4D0FE-DC28-47F8-B01E-654D2F6315F3}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

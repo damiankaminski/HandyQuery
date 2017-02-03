@@ -1,0 +1,3 @@
+﻿Nice to have:
+ - warning if IN used with no params (always false)
+ - no AND precedence, require parens always

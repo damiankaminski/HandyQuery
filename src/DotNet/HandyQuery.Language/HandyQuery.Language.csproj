@@ -1,0 +1,123 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{1D252801-F472-4197-B49E-B55ED901857A}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>HandyQuery.Language</RootNamespace>
+    <AssemblyName>HandyQuery.Language</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Configuration\CultureConfig.cs" />
+    <Compile Include="Configuration\ICultureConfig.cs" />
+    <Compile Include="Configuration\ISyntaxConfig.cs" />
+    <Compile Include="Configuration\Keywords\CompareOperatorKeyword.cs" />
+    <Compile Include="Configuration\Keywords\LogicalOperatorKeyword.cs" />
+    <Compile Include="Configuration\Keywords\StatementKeyword.cs" />
+    <Compile Include="Configuration\LanguageInternalConfig.cs" />
+    <Compile Include="Configuration\SyntaxConfig.cs" />
+    <Compile Include="Configuration\SyntaxInfo.cs" />
+    <Compile Include="Error.cs" />
+    <Compile Include="ErrorList.cs" />
+    <Compile Include="Extensions\ExpressionExtensions.cs" />
+    <Compile Include="Extensions\TypeExtensions.cs" />
+    <Compile Include="HandyType.cs" />
+    <Compile Include="Configuration\ColumnInfo.cs" />
+    <Compile Include="Configuration\Keywords\Keyword.cs" />
+    <Compile Include="Configuration\LanguageConfig.cs" />
+    <Compile Include="Configuration\TokenType.cs" />
+    <Compile Include="HandyQueryInitializationException.cs" />
+    <Compile Include="Lexing\Graph\LexerExecutionGraph.cs" />
+    <Compile Include="Lexing\Graph\LexerExecutionGraphException.cs" />
+    <Compile Include="Lexing\Lexer.cs" />
+    <Compile Include="Lexing\LexerConfig.cs" />
+    <Compile Include="Lexing\Gramma\Structure\GrammaPartBody.cs" />
+    <Compile Include="Lexing\Gramma\Structure\GrammaOrCondition.cs" />
+    <Compile Include="Lexing\Gramma\Structure\GrammaPart.cs" />
+    <Compile Include="Lexing\Gramma\Structure\GrammaPartUsage.cs" />
+    <Compile Include="Lexing\Gramma\Structure\GrammaTokenizerUsage.cs" />
+    <Compile Include="Lexing\Gramma\Structure\IGrammaBodyItem.cs" />
+    <Compile Include="Lexing\Gramma\Structure\IGrammaElement.cs" />
+    <Compile Include="Lexing\Gramma\Structure\GrammaElementType.cs" />
+    <Compile Include="Lexing\Gramma\LexerGenerator.cs" />
+    <Compile Include="Lexing\Gramma\GrammaLexerGeneratorException.cs" />
+    <Compile Include="Lexing\LexerResult.cs" />
+    <Compile Include="Lexing\LexerStringReader.cs" />
+    <Compile Include="Lexing\Tokenizers\Abstract\ITokenizer.cs" />
+    <Compile Include="Lexing\TokenizationResult.cs" />
+    <Compile Include="Lexing\LexerRuntimeInfo.cs" />
+    <Compile Include="Lexing\Tokenizers\Abstract\KeywordTokenizerBase.cs" />
+    <Compile Include="Lexing\Tokenizers\BooleanOperatorTokenizer.cs" />
+    <Compile Include="Lexing\Tokenizers\ColumnNameTokenizer.cs" />
+    <Compile Include="Lexing\Tokenizers\CompareOperatorTokenizer.cs" />
+    <Compile Include="Lexing\Tokenizers\FunctionNameTokenizer.cs" />
+    <Compile Include="Lexing\Tokenizers\GroupCloseTokenizer.cs" />
+    <Compile Include="Lexing\Tokenizers\GroupOpenTokenizer.cs" />
+    <Compile Include="Lexing\Tokenizers\InTokenizer.cs" />
+    <Compile Include="Lexing\Tokenizers\LiteralTokenizer.cs" />
+    <Compile Include="Lexing\Tokenizers\ParamsCloseTokenizer.cs" />
+    <Compile Include="Lexing\Tokenizers\ParamsOpenTokenizer.cs" />
+    <Compile Include="Lexing\Tokenizers\ParamsSeparatorTokenizer.cs" />
+    <Compile Include="Lexing\Tokenizers\StatementTokenizer.cs" />
+    <Compile Include="Lexing\TokenList.cs" />
+    <Compile Include="Lexing\Tokens\Abstract\KeywordTokenBase.cs" />
+    <Compile Include="Lexing\Tokens\Abstract\TokenBase.cs" />
+    <Compile Include="Lexing\Tokens\ColumnToken.cs" />
+    <Compile Include="Lexing\Tokens\StatementToken.cs" />
+    <Compile Include="Lexing\Tokens\WhitespaceToken.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="QueryLanguageException.cs" />
+    <Compile Include="SystemTypesAttribute.cs" />
+    <Compile Include="TokenizersSource.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Lexing\Gramma\Language.gramma" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="TODO.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Lexing\Gramma\Readme.md" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
