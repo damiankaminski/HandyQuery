@@ -8,7 +8,7 @@ namespace HandyQuery.Language.Lexing.Graph
     {
         internal readonly Node Root;
 
-        private LexerExecutionGraph(Node root)
+        internal LexerExecutionGraph(Node root)
         {
             Root = root;
         }
@@ -19,6 +19,11 @@ namespace HandyQuery.Language.Lexing.Graph
             builder.BuildGraph(grammaRoot);
 
             return new LexerExecutionGraph(builder.Root);
+        }
+
+        public bool Equals(LexerExecutionGraph graph)
+        {
+            return Root.Equals(graph.Root);
         }
 
         internal sealed class Builder

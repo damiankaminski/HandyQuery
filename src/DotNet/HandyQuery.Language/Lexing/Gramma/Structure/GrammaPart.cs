@@ -29,6 +29,18 @@
             Name = name;
         }
 
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            return obj is GrammaPart && Equals((GrammaPart)obj);
+        }
+
+        public bool Equals(GrammaPart part)
+        {
+            return part.Name == Name && part.Body.Equals(Body);
+        }
+
         public override string ToString()
         {
             return $"{Name} = {Body}";

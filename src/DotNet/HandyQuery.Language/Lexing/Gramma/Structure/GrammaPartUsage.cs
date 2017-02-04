@@ -14,6 +14,18 @@
             Impl = impl;
         }
 
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            return obj is GrammaPartUsage && Equals((GrammaPartUsage)obj);
+        }
+
+        public bool Equals(GrammaPartUsage usage)
+        {
+            return usage.Name == Name && usage.IsOptional == IsOptional && usage.Impl.Equals(Impl);
+        }
+
         public override string ToString()
         {
             return IsOptional ? "?" + Name : Name;

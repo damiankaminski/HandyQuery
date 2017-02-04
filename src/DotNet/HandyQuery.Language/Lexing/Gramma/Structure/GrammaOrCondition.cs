@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using HandyQuery.Language.Extensions;
 
 namespace HandyQuery.Language.Lexing.Gramma.Structure
 {
@@ -14,6 +15,18 @@ namespace HandyQuery.Language.Lexing.Gramma.Structure
         public GrammaOrCondition(List<IGrammaBodyItem> operands)
         {
             Operands = operands;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            return obj is GrammaOrCondition && Equals((GrammaOrCondition)obj);
+        }
+
+        public bool Equals(GrammaOrCondition or)
+        {
+            return Operands.IsSameAs(or.Operands);
         }
 
         public override string ToString()

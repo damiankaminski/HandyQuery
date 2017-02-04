@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Sockets;
 using System.Reflection;
 using HandyQuery.Language.Lexing.Gramma.Structure;
 using HandyQuery.Language.Lexing.Tokenizers.Abstract;
@@ -34,7 +35,7 @@ namespace HandyQuery.Language.Lexing.Gramma
         /// <summary>
         /// Language gramma definition parser implementation.
         /// </summary>
-        private class ParserImpl
+        internal sealed class ParserImpl
         {
             private readonly LexerStringReader _reader;
             private readonly Dictionary<string, GrammaPart> _parts = new Dictionary<string, GrammaPart>();
@@ -68,6 +69,8 @@ namespace HandyQuery.Language.Lexing.Gramma
                         _reader.MoveToNextLine();
                         continue;
                     }
+
+                    _reader.ReadTillEndOfWhitespace();
 
                     if (_reader.StartsWith(GrammaPart))
                     {

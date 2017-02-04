@@ -17,6 +17,18 @@ namespace HandyQuery.Language.Lexing.Gramma.Structure
             Impl = impl;
         }
 
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            return obj is GrammaTokenizerUsage && Equals((GrammaTokenizerUsage)obj);
+        }
+
+        public bool Equals(GrammaTokenizerUsage usage)
+        {
+            return usage.Name == Name && usage.IsOptional == IsOptional && usage.Impl.GetType() == Impl.GetType();
+        }
+
         public override string ToString()
         {
             return IsOptional ? "?" + Name : Name;

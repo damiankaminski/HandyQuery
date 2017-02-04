@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using HandyQuery.Language.Extensions;
 using HandyQuery.Language.Lexing.Gramma.Structure;
 
 namespace HandyQuery.Language.Lexing.Graph
@@ -24,9 +25,37 @@ namespace HandyQuery.Language.Lexing.Graph
             }
         }
 
+        public Node AddChild(Node child)
+        {
+            Children.Add(child);
+            return this;
+        }
+
         private void AddChildNode(Node child)
         {
             Children.Add(child);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            return obj is Node && Equals((Node) obj);
+        }
+
+        public bool Equals(Node node)
+        {
+            if (node.Item?.Equals(Item) == false)
+            {
+                return false;
+            }
+
+            if (node.Children.IsSameAs(Children) == false)
+            {
+                return false;
+            }
+
+            return true;
         }
 
         public override string ToString()
