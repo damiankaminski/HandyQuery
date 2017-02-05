@@ -65,16 +65,16 @@
     <Compile Include="Lexing\Graph\Node.cs" />
     <Compile Include="Lexing\Lexer.cs" />
     <Compile Include="Lexing\LexerConfig.cs" />
-    <Compile Include="Lexing\Gramma\Structure\GrammaPartBody.cs" />
-    <Compile Include="Lexing\Gramma\Structure\GrammaOrCondition.cs" />
-    <Compile Include="Lexing\Gramma\Structure\GrammaPart.cs" />
-    <Compile Include="Lexing\Gramma\Structure\GrammaPartUsage.cs" />
-    <Compile Include="Lexing\Gramma\Structure\GrammaTokenizerUsage.cs" />
-    <Compile Include="Lexing\Gramma\Structure\IGrammaBodyItem.cs" />
-    <Compile Include="Lexing\Gramma\Structure\IGrammaElement.cs" />
-    <Compile Include="Lexing\Gramma\Structure\GrammaElementType.cs" />
-    <Compile Include="Lexing\Gramma\LexerGenerator.cs" />
-    <Compile Include="Lexing\Gramma\GrammaLexerGeneratorException.cs" />
+    <Compile Include="Lexing\Grammar\Structure\GrammaPartBody.cs" />
+    <Compile Include="Lexing\Grammar\Structure\GrammaOrCondition.cs" />
+    <Compile Include="Lexing\Grammar\Structure\GrammaPart.cs" />
+    <Compile Include="Lexing\Grammar\Structure\GrammaPartUsage.cs" />
+    <Compile Include="Lexing\Grammar\Structure\GrammaTokenizerUsage.cs" />
+    <Compile Include="Lexing\Grammar\Structure\IGrammaBodyItem.cs" />
+    <Compile Include="Lexing\Grammar\Structure\IGrammaElement.cs" />
+    <Compile Include="Lexing\Grammar\Structure\GrammaElementType.cs" />
+    <Compile Include="Lexing\Grammar\LexerGenerator.cs" />
+    <Compile Include="Lexing\Grammar\GrammaLexerGeneratorException.cs" />
     <Compile Include="Lexing\LexerResult.cs" />
     <Compile Include="Lexing\LexerStringReader.cs" />
     <Compile Include="Lexing\Tokenizers\Abstract\ITokenizer.cs" />
@@ -105,13 +105,13 @@
     <Compile Include="TokenizersSource.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Lexing\Gramma\Language.gramma" />
+    <EmbeddedResource Include="Lexing\Grammar\Language.gramma" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="TODO.txt" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Lexing\Gramma\Readme.md" />
+    <None Include="Lexing\Grammar\Readme.md" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
