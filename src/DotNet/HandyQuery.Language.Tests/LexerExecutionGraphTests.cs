@@ -20,7 +20,7 @@ namespace HandyQuery.Language.Tests
         [TestCaseSource(nameof(GetTestCases))]
         public void ShouldCreateProperGraph(TestCase testCase)
         {
-            var expected = new LexerExecutionGraph(testCase.Root);
+            var expected = new LexerExecutionGraph(testCase.ExpectedRoot);
 
             var graph = CreateGraph(testCase.Grammar);
 
@@ -29,24 +29,145 @@ namespace HandyQuery.Language.Tests
 
         private static IEnumerable<TestCase> GetTestCases()
         {
-            yield return new TestCase()
             {
-                Name = "Simple part",
-                Grammar = @"
-                    $AllFilters = ColumnName Statement
-                    return $AllFilters
-                ",
-                Root = new Node(null).AddChild(
+                yield return new TestCase("Most simple grammar")
+                {
+                    Grammar = @"
+                        $AllFilters = ColumnName Statement
+                        return $AllFilters
+                    ",
+                    ExpectedRoot = new Node(null).AddChild(
                     CreateNode("ColumnName").AddChild(
                         CreateNode("Statement")))
-            };
+                };
+            }
+
+            {
+                yield return new TestCase("Part usage")
+                {
+                    Grammar = @"
+                        $Value = Literal
+                        $AllFilters = ColumnName CompareOperator $Value
+                        return $AllFilters
+                    ",
+                    ExpectedRoot = new Node(null).AddChild(
+                        CreateNode("ColumnName").AddChild(
+                            CreateNode("CompareOperator").AddChild(
+                                CreateNode("Literal"))))
+                };
+            }
+
+            {
+                var groupClose = CreateNode("GroupClose", true);
+                yield return new TestCase("Or usage with part")
+                {
+                    Grammar = @"
+                        $Value = Literal
+
+                        $Filter = ?GroupOpen $FilterWithCompareOp|$FilterWithStatement ?GroupClose
+                        $FilterWithCompareOp = ColumnName CompareOperator $Value
+                        $FilterWithStatement = ColumnName Statement
+
+                        return $Filter
+                    ",
+                    ExpectedRoot = new Node(null).AddChild(
+                        CreateNode("GroupOpen", true).AddChild(
+                            CreateNode("ColumnName").AddChild(
+                                CreateNode("CompareOperator").AddChild(
+                                    CreateNode("Literal").AddChild(
+                                        groupClose)))).AddChild(
+                            CreateNode("ColumnName").AddChild(
+                                CreateNode("Statement").AddChild(
+                                    groupClose))))
+                };
+            }
+
+            {
+                var groupClose = CreateNode("GroupClose", true);
+                yield return new TestCase("Or usage with tokenizers")
+                {
+                    Grammar = @"
+                        $Filter = ?GroupOpen ColumnName|Statement ?GroupClose
+                        return $Filter
+                    ",
+                    ExpectedRoot = new Node(null).AddChild(
+                        CreateNode("GroupOpen", true).AddChild(
+                            CreateNode("ColumnName").AddChild(
+                                groupClose)).AddChild(
+                            CreateNode("Statement").AddChild(
+                                groupClose)))
+                };
+            }
+
+            {
+                var groupClose = CreateNode("GroupClose", true);
+                yield return new TestCase("Or usage with part and tokenizer")
+                {
+                    Grammar = @"
+                        $Value = Literal
+
+                        $Filter = ?GroupOpen $FilterWithCompareOp|Statement ?GroupClose
+                        $FilterWithCompareOp = ColumnName CompareOperator $Value
+
+                        return $Filter
+                    ",
+                    ExpectedRoot = new Node(null).AddChild(
+                        CreateNode("GroupOpen", true).AddChild(
+                            CreateNode("ColumnName").AddChild(
+                                CreateNode("CompareOperator").AddChild(
+                                    CreateNode("Literal").AddChild(
+                                        groupClose)))).AddChild(
+                            CreateNode("Statement").AddChild(
+                                groupClose)))
+                };
+            }
+
+            {
+                var literal = CreateNode("Literal");
+                var paramsSeparator = CreateNode("ParamsSeparator");
+                paramsSeparator.AddChild(literal);
+                var @params = literal.AddChild(paramsSeparator);
+                yield return new TestCase("Simple cycles")
+                {
+                    Grammar = @"
+                        $Value = Literal
+
+                        $FunctionInvokation = FunctionName ParamsOpen ?$Params ParamsClose
+                        $Params = $Value ?$MoreParams
+                        $MoreParams = ParamsSeparator $Params
+
+                        return $FunctionInvokation
+                    ",
+                    ExpectedRoot = new Node(null).AddChild(
+                        CreateNode("FunctionName").AddChild(
+                            CreateNode("ParamsOpen").AddChild(
+                                @params.AddChild(
+                                    CreateNode("ParamsClose")))))
+                };
+            }
+            
+            // TODO: advanced cycles (cycles with or condition)
+            /*
+            $Value = Literal|$FunctionInvokation
+
+            $FunctionInvokation = FunctionName ParamsOpen ?$Params ParamsClose
+            $Params = $Value ?$MoreParams
+            $MoreParams = ParamsSeparator $Params
+
+            return $FunctionInvokation
+            */
         }
 
         public sealed class TestCase
         {
-            public string Name { get; set; }
+            private string Name { get; }
             public string Grammar { get; set; }
-            internal Node Root { get; set; }
+            internal Node ExpectedRoot { get; set; }
+
+            public TestCase(string name)
+            {
+                Name = name;
+            }
 
             public override string ToString()
             {

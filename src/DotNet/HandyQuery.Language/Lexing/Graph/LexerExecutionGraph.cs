@@ -8,6 +8,8 @@ namespace HandyQuery.Language.Lexing.Graph
     {
         internal readonly Node Root;
 
+        private HashSet<Node> _getAllChildrenVisitedNodes;
+
         internal LexerExecutionGraph(Node root)
         {
             Root = root;
@@ -21,9 +23,38 @@ namespace HandyQuery.Language.Lexing.Graph
             return new LexerExecutionGraph(builder.Root);
         }
 
-        public bool Equals(LexerExecutionGraph graph)
+        public bool Equals(LexerExecutionGraph expected)
         {
-            return Root.Equals(graph.Root);
+            return Root.Equals(expected.Root) &&
+                GetTotalChildrenInstances(Root) == GetTotalChildrenInstances(expected.Root);
+        }
+
+        private int GetTotalChildrenInstances(Node node)
+        {
+            _getAllChildrenVisitedNodes = new HashSet<Node>();
+            return GetAllChildren(node).Count;
+        }
+
+        private HashSet<Node> GetAllChildren(Node node)
+        {
+            if (_getAllChildrenVisitedNodes.Contains(node))
+            {
+                return new HashSet<Node>();
+            }
+
+            _getAllChildrenVisitedNodes.Add(node);
+            var all = new HashSet<Node>();
+
+            foreach (var nodeChild in node.Children)
+            {
+                all.Add(nodeChild);
+                var childrenOfChild = GetAllChildren(nodeChild);
+                foreach (var childOfChild in childrenOfChild)
+                {
+                    all.Add(childOfChild);
+                }
+            }
+            return all;
         }
 
         private sealed class Builder
