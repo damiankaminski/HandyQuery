@@ -2,7 +2,7 @@
 using FluentAssertions;
 using HandyQuery.Language.Configuration;
 using HandyQuery.Language.Lexing;
-using HandyQuery.Language.Lexing.Gramma;
+using HandyQuery.Language.Lexing.Grammar;
 using HandyQuery.Language.Lexing.Tokens;
 using HandyQuery.Language.Tests.Model;
 using NUnit.Framework;

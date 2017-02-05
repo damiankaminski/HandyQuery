@@ -2,12 +2,11 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Sockets;
 using System.Reflection;
-using HandyQuery.Language.Lexing.Gramma.Structure;
+using HandyQuery.Language.Lexing.Grammar.Structure;
 using HandyQuery.Language.Lexing.Tokenizers.Abstract;
 
-namespace HandyQuery.Language.Lexing.Gramma
+namespace HandyQuery.Language.Lexing.Grammar
 {
     internal sealed class LexerGenerator
     {
@@ -20,11 +19,11 @@ namespace HandyQuery.Language.Lexing.Gramma
             var tokenizersSource = new TokenizersSource();
 
             using (var stream = Assembly.GetExecutingAssembly()
-                .GetManifestResourceStream("HandyQuery.Language.Lexing.Gramma.Language.gramma"))
+                .GetManifestResourceStream("HandyQuery.Language.Lexing.Grammar.Language.grammar"))
             using (var textStream = new StreamReader(stream))
             {
-                var gramma = textStream.ReadToEnd();
-                var reader = new LexerStringReader(gramma, 0);
+                var grammar = textStream.ReadToEnd();
+                var reader = new LexerStringReader(grammar, 0);
                 var parser = new ParserImpl(reader, tokenizersSource);
                 var root = parser.Parse();
 
@@ -33,17 +32,17 @@ namespace HandyQuery.Language.Lexing.Gramma
         }
 
         /// <summary>
-        /// Language gramma definition parser implementation.
+        /// Language grammar definition parser implementation.
         /// </summary>
         internal sealed class ParserImpl
         {
             private readonly LexerStringReader _reader;
-            private readonly Dictionary<string, GrammaPart> _parts = new Dictionary<string, GrammaPart>();
+            private readonly Dictionary<string, GrammarPart> _parts = new Dictionary<string, GrammarPart>();
             private readonly TokenizersSource _tokenizersSource;
 
             private const string Comment = "//";
             private const string Return = "return ";
-            private const string GrammaPart = "$";
+            private const string GrammarPart = "$";
             private const string Optional = "?";
 
             public ParserImpl(LexerStringReader reader, TokenizersSource tokenizersSource)
@@ -52,9 +51,9 @@ namespace HandyQuery.Language.Lexing.Gramma
                 _tokenizersSource = tokenizersSource;
             }
 
-            public GrammaPart Parse()
+            public GrammarPart Parse()
             {
-                GrammaPart final = null;
+                GrammarPart final = null;
 
                 while (_reader.IsInRange())
                 {
@@ -72,23 +71,23 @@ namespace HandyQuery.Language.Lexing.Gramma
 
                     _reader.ReadTillEndOfWhitespace();
 
-                    if (_reader.StartsWith(GrammaPart))
+                    if (_reader.StartsWith(GrammarPart))
                     {
                         // ____________________________________
                         // $Value = Literal|$FunctionInvokation
 
                         var partName = _reader.ReadTillEndOfWord(); // $Value
-                        var part = GetGrammaPartByName(partName);
+                        var part = GetPartByName(partName);
 
                         if (part.FullyParsed)
                         {
-                            throw new GrammaLexerGeneratorException($"Cannot declare '{partName}' more than once.");
+                            throw new GrammarLexerGeneratorException($"Cannot declare '{partName}' more than once.");
                         }
 
                         // skip '=' char
                         _reader.MoveBy(3); 
 
-                        part.Body = ParseGrammaPartBody();
+                        part.Body = ParsePartBody();
                         continue;
                     }
 
@@ -101,23 +100,23 @@ namespace HandyQuery.Language.Lexing.Gramma
 
                 if (final == null)
                 {
-                    throw new GrammaLexerGeneratorException("Unable to parse language gramma.");
+                    throw new GrammarLexerGeneratorException("Unable to parse language gramma.");
                 }
 
                 var notExistingPart = _parts.Select(x => x.Value).FirstOrDefault(x => x.FullyParsed == false);
                 if (notExistingPart != null)
                 {
-                    throw new GrammaLexerGeneratorException($"Part '{notExistingPart.Name}' is not declared. Are you sure your gramma is fine?");
+                    throw new GrammarLexerGeneratorException($"Part '{notExistingPart.Name}' is not declared. Are you sure your gramma is fine?");
                 }
 
                 return final;
             }
 
-            private GrammaPart GetGrammaPartByName(string partName)
+            private GrammarPart GetPartByName(string partName)
             {
                 if (_parts.ContainsKey(partName) == false)
                 {
-                    _parts.Add(partName, new GrammaPart(partName));
+                    _parts.Add(partName, new GrammarPart(partName));
                 }
 
                 return _parts[partName];
@@ -127,32 +126,32 @@ namespace HandyQuery.Language.Lexing.Gramma
             ///          ___________________________
             /// $Value = Literal|$FunctionInvokation
             /// </remarks>
-            private GrammaPartBody ParseGrammaPartBody()
+            private GrammarPartBody ParsePartBody()
             {
                 var bodyString = _reader.ReadTillNewLine();
                 var blockItems = bodyString.Split(new[] {' '}, StringSplitOptions.RemoveEmptyEntries);
 
-                var body = new GrammaPartBody();
+                var body = new GrammarPartBody();
 
                 foreach (var blockItem in blockItems)
                 {
                     var orConditions = blockItem.Split(new[] {'|'}, StringSplitOptions.RemoveEmptyEntries);
                     if (orConditions.Length > 1)
                     {
-                        var operands = new List<IGrammaBodyItem>();
+                        var operands = new List<IGrammarBodyItem>();
 
                         foreach (var operand in orConditions)
                         {
                             if (operand.StartsWith(Optional))
                             {
-                                throw new GrammaLexerGeneratorException($"Error occurred while parsing '{blockItem}'. " +
+                                throw new GrammarLexerGeneratorException($"Error occurred while parsing '{blockItem}'. " +
                                                                          "Cannot use optional character '?' in OR conditions.");
                             }
 
                             operands.Add(ParsePartBodyItem(operand));
                         }
 
-                        body.Add(new GrammaOrCondition(operands));
+                        body.Add(new GrammarOrCondition(operands));
                         continue;
                     }
 
@@ -170,27 +169,27 @@ namespace HandyQuery.Language.Lexing.Gramma
             ///                  ___________________
             /// $Value = Literal|$FunctionInvokation
             /// </remarks>
-            private IGrammaBodyItem ParsePartBodyItem(string blockItem)
+            private IGrammarBodyItem ParsePartBodyItem(string blockItem)
             {
                 var isOptional = blockItem.StartsWith(Optional);
                 var name = blockItem;
                 if (isOptional) name = name.Substring(Optional.Length);
 
-                IGrammaBodyItem result;
+                IGrammarBodyItem result;
 
-                if (name.StartsWith(GrammaPart))
+                if (name.StartsWith(GrammarPart))
                 {
-                    result = new GrammaPartUsage(name, isOptional, GetGrammaPartByName(name));
+                    result = new GrammarPartUsage(name, isOptional, GetPartByName(name));
                 }
                 else
                 {
                     ITokenizer tokenizer;
                     if (_tokenizersSource.TryGetTokenizer(name, out tokenizer) == false)
                     {
-                        throw new GrammaLexerGeneratorException($"Tokenizer '{name}' does not exist.");
+                        throw new GrammarLexerGeneratorException($"Tokenizer '{name}' does not exist.");
                     }
 
-                    result = new GrammaTokenizerUsage(name, isOptional, tokenizer);
+                    result = new GrammarTokenizerUsage(name, isOptional, tokenizer);
                 }
 
                 return result;
@@ -200,17 +199,17 @@ namespace HandyQuery.Language.Lexing.Gramma
             /// _____________
             /// return $Value
             /// </remarks>
-            private GrammaPart ParseReturn()
+            private GrammarPart ParseReturn()
             {
                 _reader.MoveBy(Return.Length);
                 var partName = _reader.ReadTillEndOfWord();
-                GrammaPart grammaElement;
-                if (_parts.TryGetValue(partName, out grammaElement) == false)
+                GrammarPart grammarElement;
+                if (_parts.TryGetValue(partName, out grammarElement) == false)
                 {
-                    throw new GrammaLexerGeneratorException($"Part '{partName}' does not exist.");
+                    throw new GrammarLexerGeneratorException($"Part '{partName}' does not exist.");
                 }
 
-                return grammaElement;
+                return grammarElement;
             }
         }
     }

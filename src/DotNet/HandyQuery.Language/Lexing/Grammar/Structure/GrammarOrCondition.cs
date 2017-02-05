@@ -3,16 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using HandyQuery.Language.Extensions;
 
-namespace HandyQuery.Language.Lexing.Gramma.Structure
+namespace HandyQuery.Language.Lexing.Grammar.Structure
 {
-    internal sealed class GrammaOrCondition : IGrammaBodyItem
+    internal sealed class GrammarOrCondition : IGrammarBodyItem
     {
         public string Name => null;
-        public List<IGrammaBodyItem> Operands { get; }
+        public List<IGrammarBodyItem> Operands { get; }
 
-        public GrammaElementType Type => GrammaElementType.OrCondition;
+        public GrammarElementType Type => GrammarElementType.OrCondition;
 
-        public GrammaOrCondition(List<IGrammaBodyItem> operands)
+        public GrammarOrCondition(List<IGrammarBodyItem> operands)
         {
             Operands = operands;
         }
@@ -21,10 +21,10 @@ namespace HandyQuery.Language.Lexing.Gramma.Structure
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            return obj is GrammaOrCondition && Equals((GrammaOrCondition)obj);
+            return obj is GrammarOrCondition && Equals((GrammarOrCondition)obj);
         }
 
-        public bool Equals(GrammaOrCondition or)
+        public bool Equals(GrammarOrCondition or)
         {
             return Operands.IsSameAs(or.Operands);
         }

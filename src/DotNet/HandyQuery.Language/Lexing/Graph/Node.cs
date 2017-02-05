@@ -1,15 +1,15 @@
 ﻿using System.Collections.Generic;
 using HandyQuery.Language.Extensions;
-using HandyQuery.Language.Lexing.Gramma.Structure;
+using HandyQuery.Language.Lexing.Grammar.Structure;
 
 namespace HandyQuery.Language.Lexing.Graph
 {
     internal sealed class Node
     {
-        public readonly IGrammaBodyItem Item;
+        public readonly IGrammarBodyItem Item;
         public readonly List<Node> Children = new List<Node>(10);
 
-        public Node(IGrammaBodyItem item)
+        public Node(IGrammarBodyItem item)
         {
             Item = item;
         }

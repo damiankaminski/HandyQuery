@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using HandyQuery.Language.Lexing.Gramma.Structure;
+using HandyQuery.Language.Lexing.Grammar.Structure;
 
 namespace HandyQuery.Language.Lexing.Graph
 {
@@ -13,10 +13,10 @@ namespace HandyQuery.Language.Lexing.Graph
             Root = root;
         }
 
-        public static LexerExecutionGraph Build(GrammaPart grammaRoot)
+        public static LexerExecutionGraph Build(GrammarPart grammarRoot)
         {
             var builder = new Builder();
-            builder.BuildGraph(grammaRoot);
+            builder.BuildGraph(grammarRoot);
 
             return new LexerExecutionGraph(builder.Root);
         }
@@ -34,23 +34,23 @@ namespace HandyQuery.Language.Lexing.Graph
 
             private class PartContext
             {
-                public GrammaPartUsage Usage { get; set; }
+                public GrammarPartUsage Usage { get; set; }
                 public Node[] EntryNodes { get; set; }
             }
 
-            public void BuildGraph(GrammaPart grammaRoot)
+            public void BuildGraph(GrammarPart grammarRoot)
             {
                 // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
-                ProcessGraphPart(new GrammaPartUsage(grammaRoot.Name, false, grammaRoot), new[] {Root}).ToArray();
+                ProcessGraphPart(new GrammarPartUsage(grammarRoot.Name, false, grammarRoot), new[] {Root}).ToArray();
             }
 
             // TODO: get rid of yield as it may mess up order of execution, return simply an array
-            private IEnumerable<Node> ProcessGraphPart(IGrammaBodyItem grammaElement, Node[] parents)
+            private IEnumerable<Node> ProcessGraphPart(IGrammarBodyItem grammarElement, Node[] parents)
             {
-                switch (grammaElement.Type)
+                switch (grammarElement.Type)
                 {
-                    case GrammaElementType.TokenizerUsage:
-                        var tokenizerUsage = grammaElement.As<GrammaTokenizerUsage>();
+                    case GrammarElementType.TokenizerUsage:
+                        var tokenizerUsage = grammarElement.As<GrammarTokenizerUsage>();
                         // TODO: generate additional route if `tokenizerUsage.IsOptional`
                         var node = new Node(tokenizerUsage);
                         node.AddAsChildTo(parents);
@@ -58,12 +58,12 @@ namespace HandyQuery.Language.Lexing.Graph
                         yield return node;
                         break;
 
-                    case GrammaElementType.PartUsage:
-                        foreach (var n in ProcessPartUsage(grammaElement, parents).ToArray()) yield return n;
+                    case GrammarElementType.PartUsage:
+                        foreach (var n in ProcessPartUsage(grammarElement, parents).ToArray()) yield return n;
                         break;
 
-                    case GrammaElementType.OrCondition:
-                        var orCondition = grammaElement.As<GrammaOrCondition>();
+                    case GrammarElementType.OrCondition:
+                        var orCondition = grammarElement.As<GrammarOrCondition>();
 
                         foreach (var operand in orCondition.Operands)
                         {
@@ -75,7 +75,7 @@ namespace HandyQuery.Language.Lexing.Graph
                         break;
 
                     default:
-                        throw new LexerExecutionGraphException("Cannot process gramma.");
+                        throw new LexerExecutionGraphException("Cannot process grammar.");
                 }
             }
 
@@ -83,11 +83,11 @@ namespace HandyQuery.Language.Lexing.Graph
             /// <summary>
             /// Processes a single part (which may invoke other parts) and returns result of last item in the body.
             /// </summary>
-            private IEnumerable<Node> ProcessPartUsage(IGrammaBodyItem grammaElement, Node[] parents)
+            private IEnumerable<Node> ProcessPartUsage(IGrammarBodyItem grammarElement, Node[] parents)
             {
                 // TODO: generate additional route if `partUsage.IsOptional`
 
-                var partUsage = grammaElement.As<GrammaPartUsage>();
+                var partUsage = grammarElement.As<GrammarPartUsage>();
 
                 if (_partsUsageStack.Count > 1)
                 {

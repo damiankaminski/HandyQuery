@@ -1,13 +1,13 @@
-﻿namespace HandyQuery.Language.Lexing.Gramma.Structure
+﻿namespace HandyQuery.Language.Lexing.Grammar.Structure
 {
-    internal sealed class GrammaPartUsage : IGrammaBodyItem
+    internal sealed class GrammarPartUsage : IGrammarBodyItem
     {
         public string Name { get; }
         public bool IsOptional { get; }
-        public GrammaPart Impl { get; }
-        public GrammaElementType Type => GrammaElementType.PartUsage;
+        public GrammarPart Impl { get; }
+        public GrammarElementType Type => GrammarElementType.PartUsage;
 
-        public GrammaPartUsage(string name, bool isOptional, GrammaPart impl)
+        public GrammarPartUsage(string name, bool isOptional, GrammarPart impl)
         {
             Name = name;
             IsOptional = isOptional;
@@ -18,10 +18,10 @@
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            return obj is GrammaPartUsage && Equals((GrammaPartUsage)obj);
+            return obj is GrammarPartUsage && Equals((GrammarPartUsage)obj);
         }
 
-        public bool Equals(GrammaPartUsage usage)
+        public bool Equals(GrammarPartUsage usage)
         {
             return usage.Name == Name && usage.IsOptional == IsOptional && usage.Impl.Equals(Impl);
         }

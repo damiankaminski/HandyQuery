@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using HandyQuery.Language.Lexing.Gramma;
+using HandyQuery.Language.Lexing.Grammar;
 using HandyQuery.Language.Lexing.Graph;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;

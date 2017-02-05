@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using HandyQuery.Language.Configuration;
-using HandyQuery.Language.Lexing.Gramma.Structure;
+using HandyQuery.Language.Lexing.Grammar.Structure;
 using HandyQuery.Language.Lexing.Graph;
 using HandyQuery.Language.Lexing.Tokens;
 
@@ -12,14 +12,14 @@ namespace HandyQuery.Language.Lexing
     {
         internal readonly LexerExecutionGraph ExecutionGraph;
 
-        private readonly Stack<Stack<IGrammaBodyItem>> _state = new Stack<Stack<IGrammaBodyItem>>(); // TODO: move it inner class to make Execute thread safe
+        private readonly Stack<Stack<IGrammarBodyItem>> _state = new Stack<Stack<IGrammarBodyItem>>(); // TODO: move it inner class to make Execute thread safe
 
         private Lexer(LexerExecutionGraph executionGraph)
         {
             ExecutionGraph = executionGraph;
         }
 
-        public static Lexer Build(GrammaPart root)
+        public static Lexer Build(GrammarPart root)
         {
             return new Lexer(LexerExecutionGraph.Build(root));
         }
@@ -43,7 +43,7 @@ namespace HandyQuery.Language.Lexing
             return finalResult;
         }
 
-        private static void Process(IGrammaElement current, LexerStringReader reader, LexerResult finalResult, LexerRuntimeInfo runtimeInfo)
+        private static void Process(IGrammarElement current, LexerStringReader reader, LexerResult finalResult, LexerRuntimeInfo runtimeInfo)
         {
             if (reader.IsEndOfQuery())
             {
@@ -57,9 +57,9 @@ namespace HandyQuery.Language.Lexing
                 finalResult.Tokens.Add(new WhitespaceToken(position, whitespace.Length));
             }
 
-            if (current.Type == GrammaElementType.PartUsage)
+            if (current.Type == GrammarElementType.PartUsage)
             {
-                var part = current.As<GrammaPartUsage>();
+                var part = current.As<GrammarPartUsage>();
                 // TODO: part.IsOptional
                 foreach (var element in part.Impl.Body)
                 {
@@ -68,9 +68,9 @@ namespace HandyQuery.Language.Lexing
                 }
             }
 
-            if (current.Type == GrammaElementType.TokenizerUsage)
+            if (current.Type == GrammarElementType.TokenizerUsage)
             {
-                var tokenizerUsage = (GrammaTokenizerUsage)current;
+                var tokenizerUsage = (GrammarTokenizerUsage)current;
                 // TODO: tokenizer.IsOptional
                 reader.CaptureCurrentPosition();
                 var result = tokenizerUsage.Impl.Tokenize(runtimeInfo);

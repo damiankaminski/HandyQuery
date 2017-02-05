@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using FluentAssertions;
 using HandyQuery.Language.Lexing;
-using HandyQuery.Language.Lexing.Gramma;
-using HandyQuery.Language.Lexing.Gramma.Structure;
+using HandyQuery.Language.Lexing.Grammar;
+using HandyQuery.Language.Lexing.Grammar.Structure;
 using HandyQuery.Language.Lexing.Graph;
 using NUnit.Framework;
 
@@ -22,7 +22,7 @@ namespace HandyQuery.Language.Tests
         {
             var expected = new LexerExecutionGraph(testCase.Root);
 
-            var graph = CreateGraph(testCase.Gramma);
+            var graph = CreateGraph(testCase.Grammar);
 
             graph.Equals(expected).Should().BeTrue();
         }
@@ -32,7 +32,7 @@ namespace HandyQuery.Language.Tests
             yield return new TestCase()
             {
                 Name = "Simple part",
-                Gramma = @"
+                Grammar = @"
                     $AllFilters = ColumnName Statement
                     return $AllFilters
                 ",
@@ -45,7 +45,7 @@ namespace HandyQuery.Language.Tests
         public sealed class TestCase
         {
             public string Name { get; set; }
-            public string Gramma { get; set; }
+            public string Grammar { get; set; }
             internal Node Root { get; set; }
 
             public override string ToString()
@@ -59,14 +59,14 @@ namespace HandyQuery.Language.Tests
             return new Node(CreateTokenizerUsage(name, isOptional));
         }
 
-        private static GrammaTokenizerUsage CreateTokenizerUsage(string name, bool isOptional = false)
+        private static GrammarTokenizerUsage CreateTokenizerUsage(string name, bool isOptional = false)
         {
-            return new GrammaTokenizerUsage(name, isOptional, TokenizersSource.GetTokenizer(name));
+            return new GrammarTokenizerUsage(name, isOptional, TokenizersSource.GetTokenizer(name));
         }
 
-        private static LexerExecutionGraph CreateGraph(string gramma)
+        private static LexerExecutionGraph CreateGraph(string grammar)
         {
-            var reader = new LexerStringReader(gramma, 0);
+            var reader = new LexerStringReader(grammar, 0);
             var parser = new LexerGenerator.ParserImpl(reader, TokenizersSource);
             var root = parser.Parse();
 
