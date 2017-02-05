@@ -26,7 +26,7 @@ namespace HandyQuery.Language.Lexing.Graph
             return Root.Equals(graph.Root);
         }
 
-        internal sealed class Builder
+        private sealed class Builder
         {
             public readonly Node Root = new Node(null);
 

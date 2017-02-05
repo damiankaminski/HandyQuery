@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using System.Collections.Generic;
+using FluentAssertions;
 using HandyQuery.Language.Lexing;
 using HandyQuery.Language.Lexing.Gramma;
 using HandyQuery.Language.Lexing.Gramma.Structure;
@@ -9,51 +10,64 @@ namespace HandyQuery.Language.Tests
 {
     public sealed class LexerExecutionGraphTests
     {
-        private static TokenizersSource _tokenizersSource;
+        private static readonly TokenizersSource TokenizersSource;
 
-        public LexerExecutionGraphTests()
+        static LexerExecutionGraphTests()
         {
-            _tokenizersSource = new TokenizersSource();
+            TokenizersSource = new TokenizersSource();
         }
 
-        [Test]
-        public void ShouldParsePartBody()
+        [TestCaseSource(nameof(GetTestCases))]
+        public void ShouldCreateProperGraph(TestCase testCase)
         {
-            var graph = CreateGraph(@"
-                $AllFilters = ColumnName Statement
-                return $AllFilters
-            ");
+            var expected = new LexerExecutionGraph(testCase.Root);
 
-            var root = new Node(null).AddChild(
-                new Node(CreateTokenizerUsage("ColumnName")).AddChild(
-                    new Node(CreateTokenizerUsage("Statement"))));
+            var graph = CreateGraph(testCase.Gramma);
 
-            var expected = new LexerExecutionGraph(root);
             graph.Equals(expected).Should().BeTrue();
         }
 
-        private GrammaTokenizerUsage CreateTokenizerUsage(string name, bool isOptional = false)
+        private static IEnumerable<TestCase> GetTestCases()
         {
-            return new GrammaTokenizerUsage(name, isOptional, _tokenizersSource.GetTokenizer(name));
+            yield return new TestCase()
+            {
+                Name = "Simple part",
+                Gramma = @"
+                    $AllFilters = ColumnName Statement
+                    return $AllFilters
+                ",
+                Root = new Node(null).AddChild(
+                    CreateNode("ColumnName").AddChild(
+                        CreateNode("Statement")))
+            };
         }
 
-        private GrammaPartUsage CreatePartUsage(GrammaPart part, bool isOptional = false)
+        public sealed class TestCase
         {
-            return new GrammaPartUsage(part.Name, isOptional, part);
+            public string Name { get; set; }
+            public string Gramma { get; set; }
+            internal Node Root { get; set; }
+
+            public override string ToString()
+            {
+                return Name.Replace(' ', '_');
+            }
         }
 
-        private GrammaPart CreatePart(string name, params IGrammaBodyItem[] bodyItems)
+        private static Node CreateNode(string name, bool isOptional = false)
         {
-            var body = new GrammaPartBody();
-            body.AddRange(bodyItems);
+            return new Node(CreateTokenizerUsage(name, isOptional));
+        }
 
-            return new GrammaPart(name) {Body = body};
+        private static GrammaTokenizerUsage CreateTokenizerUsage(string name, bool isOptional = false)
+        {
+            return new GrammaTokenizerUsage(name, isOptional, TokenizersSource.GetTokenizer(name));
         }
 
         private static LexerExecutionGraph CreateGraph(string gramma)
         {
             var reader = new LexerStringReader(gramma, 0);
-            var parser = new LexerGenerator.ParserImpl(reader, _tokenizersSource);
+            var parser = new LexerGenerator.ParserImpl(reader, TokenizersSource);
             var root = parser.Parse();
 
             return LexerExecutionGraph.Build(root);
