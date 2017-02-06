@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using HandyQuery.Language.Lexing.Grammar.Structure;
 
@@ -57,68 +58,57 @@ namespace HandyQuery.Language.Lexing.Graph
             return all;
         }
 
+        // ReSharper disable MemberCanBePrivate.Local
+        // ReSharper disable ParameterTypeCanBeEnumerable.Local
         private sealed class Builder
         {
             public readonly Node Root = new Node(null);
 
             private readonly Stack<PartContext> _partsUsageStack = new Stack<PartContext>();
 
-            private class PartContext
+            private sealed class PartContext
             {
                 public GrammarPartUsage Usage { get; set; }
                 public Node[] EntryNodes { get; set; }
             }
 
-            public void BuildGraph(GrammarPart grammarRoot)
+            public sealed class VisitResult
             {
-                // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
-                ProcessGraphPart(new GrammarPartUsage(grammarRoot.Name, false, grammarRoot), new[] {Root}).ToArray();
-            }
+                public readonly Node[] LeaveNodes;
 
-            // TODO: get rid of yield as it may mess up order of execution, return simply an array
-            private IEnumerable<Node> ProcessGraphPart(IGrammarBodyItem grammarElement, Node[] parents)
-            {
-                switch (grammarElement.Type)
+                public VisitResult(Node[] leaveNodes)
                 {
-                    case GrammarElementType.TokenizerUsage:
-                        var tokenizerUsage = grammarElement.As<GrammarTokenizerUsage>();
-                        // TODO: generate additional route if `tokenizerUsage.IsOptional`
-                        var node = new Node(tokenizerUsage);
-                        node.AddAsChildTo(parents);
-
-                        yield return node;
-                        break;
-
-                    case GrammarElementType.PartUsage:
-                        foreach (var n in ProcessPartUsage(grammarElement, parents).ToArray()) yield return n;
-                        break;
-
-                    case GrammarElementType.OrCondition:
-                        var orCondition = grammarElement.As<GrammarOrCondition>();
-
-                        foreach (var operand in orCondition.Operands)
-                        {
-                            foreach (var n in ProcessGraphPart(operand, parents).ToArray())
-                            {
-                                yield return n;
-                            }
-                        }
-                        break;
-
-                    default:
-                        throw new LexerExecutionGraphException("Cannot process grammar.");
+                    LeaveNodes = leaveNodes;
                 }
             }
 
-            // TODO: get rid of yield as it may mess up order of execution, return simply an array
-            /// <summary>
-            /// Processes a single part (which may invoke other parts) and returns result of last item in the body.
-            /// </summary>
-            private IEnumerable<Node> ProcessPartUsage(IGrammarBodyItem grammarElement, Node[] parents)
+            public void BuildGraph(GrammarPart grammarRoot)
             {
-                // TODO: generate additional route if `partUsage.IsOptional`
+                Visit(new GrammarPartUsage(grammarRoot.Name, false, grammarRoot), new[] {Root});
+            }
+            
+            public VisitResult Visit(GrammarTokenizerUsage tokenizerUsage, Node[] parents)
+            {
+                // TODO: generate additional edge if `tokenizerUsage.IsOptional`
+                var node = new Node(tokenizerUsage);
+                node.AddAsChildTo(parents);
+                return new VisitResult(new[] {node});
+            }
 
-                var partUsage = grammarElement.As<GrammarPartUsage>();
+            public VisitResult Visit(GrammarOrCondition orCondition, Node[] parents)
+            {
+                var leaveNodes = new List<Node>();
+                foreach (var operand in orCondition.Operands)
+                {
+                    leaveNodes.AddRange(Visit(operand, parents).LeaveNodes);
+                }
+
+                return new VisitResult(leaveNodes.ToArray());
+            }
+
+            public VisitResult Visit(GrammarPartUsage partUsage, Node[] parents)
+            {
+                // TODO: generate additional edge if `partUsage.IsOptional`
 
                 if (_partsUsageStack.Count > 1)
                 {
@@ -131,11 +121,10 @@ namespace HandyQuery.Language.Lexing.Graph
                         // TODO: $FunctionInvokation usage in $FunctionInvokation seems to be bad
                         foreach (var entryNode in cycleCandidate.EntryNodes)
                         {
-                            yield return entryNode;
                             entryNode.AddAsChildTo(parents);
                         }
 
-                        yield break;
+                        return new VisitResult(cycleCandidate.EntryNodes);
                     }
                 }
 
@@ -148,23 +137,28 @@ namespace HandyQuery.Language.Lexing.Graph
                 var newParents = parents;
                 for (var i = 0; i < partUsage.Impl.Body.Count; i++)
                 {
-                    var isLast = i == partUsage.Impl.Body.Count - 1;
                     var item = partUsage.Impl.Body[i];
-                    newParents = ProcessGraphPart(item, newParents).ToArray();
+                    newParents = Visit(item, newParents).LeaveNodes;
 
                     if (i == 0) context.EntryNodes = newParents;
-
-                    if (isLast)
-                    {
-                        foreach (var n in newParents)
-                        {
-                            yield return n;
-                        }
-                    }
                 }
 
                 _partsUsageStack.Pop();
+                return new VisitResult(newParents);
+            }
+
+            private VisitResult Visit(IGrammarElement any, Node[] parents)
+            {
+                var method = GetType().GetMethod(nameof(Visit), new[] {any.GetType(), parents.GetType()});
+                if (method == null || method.ReturnType != typeof(VisitResult))
+                {
+                    throw new ArgumentOutOfRangeException($"Grammar element of type {any.GetType().FullName} is not supported by graph builder.");
+                }
+
+                return (VisitResult) method.Invoke(this, new object[] {any, parents});
             }
         }
+        // ReSharper restore MemberCanBePrivate.Local
+        // ReSharper restore ParameterTypeCanBeEnumerable.Local
     }
 }
