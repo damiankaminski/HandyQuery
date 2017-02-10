@@ -89,7 +89,6 @@ namespace HandyQuery.Language.Lexing.Graph
             
             public VisitResult Visit(GrammarTokenizerUsage tokenizerUsage, Node[] parents)
             {
-                // TODO: generate additional edge if `tokenizerUsage.IsOptional`
                 var node = new Node(tokenizerUsage);
                 node.AddAsChildTo(parents);
                 return new VisitResult(new[] {node});
@@ -108,8 +107,6 @@ namespace HandyQuery.Language.Lexing.Graph
 
             public VisitResult Visit(GrammarPartUsage partUsage, Node[] parents)
             {
-                // TODO: generate additional edge if `partUsage.IsOptional`
-
                 if (_partsUsageStack.Count > 1)
                 {
                     var cycleCandidate = _partsUsageStack.ToArray()
@@ -134,17 +131,38 @@ namespace HandyQuery.Language.Lexing.Graph
                 };
                 _partsUsageStack.Push(context);
 
-                var newParents = parents;
-                for (var i = 0; i < partUsage.Impl.Body.Count; i++)
+                var nodes = parents;
+                var body = partUsage.Impl.Body;
+                Node[] lastNotOptional = null;
+                for (var i = 0; i < body.Count; i++)
                 {
-                    var item = partUsage.Impl.Body[i];
-                    newParents = Visit(item, newParents).LeaveNodes;
+                    var item = body[i];
+                    var prev = i == 0 ? null : body[i-1];
+                    if (item.IsOptional && (prev == null || prev.IsOptional == false))
+                    {
+                        // If current item is optional and previous item was not optional (if there is
+                        // no previous then it couldn't be optional) then save previous nodes to create a new edge.
+                        // It skip all optional nodes and land in not optional.
+                        lastNotOptional = nodes;
+                    }
 
-                    if (i == 0) context.EntryNodes = newParents;
+                    nodes = Visit(item, nodes).LeaveNodes;
+
+                    if (lastNotOptional != null && item.IsOptional == false)
+                    {
+                        // Create an edge which will skip the optional elements
+                        foreach (var node in lastNotOptional)
+                        {
+                            node.AddChildren(nodes);
+                        }
+                        lastNotOptional = null;
+                    }
+
+                    if (i == 0) context.EntryNodes = nodes;
                 }
 
                 _partsUsageStack.Pop();
-                return new VisitResult(newParents);
+                return new VisitResult(nodes);
             }
 
             private VisitResult Visit(IGrammarElement any, Node[] parents)

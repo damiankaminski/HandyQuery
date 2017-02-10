@@ -10,6 +10,7 @@ namespace HandyQuery.Language.Lexing.Grammar.Structure
         public string Name => null;
         public List<IGrammarBodyItem> Operands { get; }
 
+        public bool IsOptional { get; } = false;
         public GrammarElementType Type => GrammarElementType.OrCondition;
 
         public GrammarOrCondition(List<IGrammarBodyItem> operands)

@@ -20,7 +20,7 @@ namespace HandyQuery.Language.Lexing.Graph
             {
                 foreach (var parent in parents)
                 {
-                    parent?.AddChildNode(this);
+                    parent?.AddChild(this);
                 }
             }
         }
@@ -31,9 +31,10 @@ namespace HandyQuery.Language.Lexing.Graph
             return this;
         }
 
-        private void AddChildNode(Node child)
+        public Node AddChildren(Node[] children)
         {
-            Children.Add(child);
+            Children.AddRange(children);
+            return this;
         }
 
         public bool Equals(Node node, HashSet<Node> visitedNodes = null)

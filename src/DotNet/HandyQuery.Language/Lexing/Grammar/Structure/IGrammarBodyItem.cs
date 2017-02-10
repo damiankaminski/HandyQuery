@@ -2,6 +2,6 @@
 {
     internal interface IGrammarBodyItem : IGrammarElement
     {
-        
+        bool IsOptional { get; }
     }
 }
