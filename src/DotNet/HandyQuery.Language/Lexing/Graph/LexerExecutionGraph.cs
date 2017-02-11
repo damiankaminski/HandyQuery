@@ -131,12 +131,20 @@ namespace HandyQuery.Language.Lexing.Graph
                 };
                 _partsUsageStack.Push(context);
 
+                Node[] lastNotOptional = null;
+
+                var optionalParents = parents.Where(x => x.Item.IsOptional).ToArray();
+                if (optionalParents.Any())
+                {
+                    // TODO: find lastNotOptional and create edge to first not optional
+                }
+
                 var nodes = parents;
                 var body = partUsage.Impl.Body;
-                Node[] lastNotOptional = null;
                 for (var i = 0; i < body.Count; i++)
                 {
                     var item = body[i];
+
                     var prev = i == 0 ? null : body[i-1];
                     if (item.IsOptional && (prev == null || prev.IsOptional == false))
                     {

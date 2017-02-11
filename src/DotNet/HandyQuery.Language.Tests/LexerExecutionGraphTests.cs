@@ -188,14 +188,38 @@ namespace HandyQuery.Language.Tests
                 root.AddChild(columnName);
                 groupOpen.AddChild(columnName);
 
-                // TODO: optional at the end of part
-                // TODO: optional after or condition
-                // TODO: or condition after optional
-                // TODO: optional part
                 yield return new TestCase("Optional at the beginning of part")
                 {
                     Grammar = @"
                         $AllFilters = ?GroupOpen ColumnName CompareOperator Literal
+                        return $AllFilters
+                    ",
+                    ExpectedRoot = root
+                };
+            }
+
+            {
+                var root = new Node(null);
+
+                var groupClose = CreateNode("GroupClose");
+
+                var literal = CreateNode("Literal", true)
+                    .AddChild(groupClose);
+                var columnName = CreateNode("ColumnName")
+                    .AddChild(CreateNode("CompareOperator")
+                        .AddChild(literal)
+                        .AddChild(groupClose));
+                root.AddChild(columnName);
+
+                // TODO: optional at the end of grammar
+                // TODO: optional after or condition
+                // TODO: or condition after optional
+                // TODO: optional part
+                yield return new TestCase("Optional at the end of part")
+                {
+                    Grammar = @"
+                        $Compare = ColumnName CompareOperator ?Literal
+                        $AllFilters = $Compare GroupClose
                         return $AllFilters
                     ",
                     ExpectedRoot = root
