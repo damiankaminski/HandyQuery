@@ -51,6 +51,7 @@
     <Compile Include="Configuration\SyntaxInfo.cs" />
     <Compile Include="Error.cs" />
     <Compile Include="ErrorList.cs" />
+    <Compile Include="Extensions\EnumerableExtensions.cs" />
     <Compile Include="Extensions\ExpressionExtensions.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
     <Compile Include="HandyType.cs" />

@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using HandyQuery.Language.Extensions;
+using System.Linq;
 using HandyQuery.Language.Lexing.Grammar.Structure;
 
 namespace HandyQuery.Language.Lexing.Graph
@@ -7,7 +7,8 @@ namespace HandyQuery.Language.Lexing.Graph
     internal sealed class Node
     {
         public readonly GrammarTokenizerUsage Item;
-        public readonly List<Node> Children = new List<Node>(10);
+        public readonly List<Node> Children = new List<Node>(3);
+        public readonly List<Node> Parents = new List<Node>(1);
 
         public Node(GrammarTokenizerUsage item)
         {
@@ -28,13 +29,65 @@ namespace HandyQuery.Language.Lexing.Graph
         public Node AddChild(Node child)
         {
             Children.Add(child);
+            child.AddParent(this);
             return this;
         }
 
         public Node AddChildren(Node[] children)
         {
             Children.AddRange(children);
+            foreach (var child in children)
+            {
+                child.AddParent(this);
+            }
             return this;
+        }
+
+        private void AddParent(Node parent)
+        {
+            Parents.Add(parent);
+        }
+
+        /// <summary>
+        /// Finds first non optional parent in all parent branches (single node may have multiple parents).
+        /// </summary>
+        public IEnumerable<Node> FindFirstNonOptionalParentInAllParentBranches()
+        {
+            foreach (var parent in Parents)
+            {
+                // if root or not optional
+                if (parent.Item == null || parent.Item.IsOptional == false)
+                {
+                    yield return parent;
+                    continue;
+                }
+
+                foreach (var nonOptionalParent in parent.FindFirstNonOptionalParentInAllParentBranches().ToArray())
+                {
+                    yield return nonOptionalParent;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Finds first non optional child in all child branches (single node may have multiple children).
+        /// </summary>
+        public IEnumerable<Node> FindFirstNonOptionalChildInAllChildBranches()
+        {
+            foreach (var child in Children)
+            {
+                // if root or not optional
+                if (child.Item == null || child.Item.IsOptional == false)
+                {
+                    yield return child;
+                    continue;
+                }
+
+                foreach (var nonOptionalChild in child.FindFirstNonOptionalChildInAllChildBranches().ToArray())
+                {
+                    yield return nonOptionalChild;
+                }
+            }
         }
 
         public bool Equals(Node node, HashSet<Node> visitedNodes = null)

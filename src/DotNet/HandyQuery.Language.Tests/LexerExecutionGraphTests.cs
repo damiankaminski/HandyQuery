@@ -188,10 +188,39 @@ namespace HandyQuery.Language.Tests
                 root.AddChild(columnName);
                 groupOpen.AddChild(columnName);
 
-                yield return new TestCase("Optional at the beginning of part")
+                yield return new TestCase("Optional at the beginning of grammar")
                 {
                     Grammar = @"
                         $AllFilters = ?GroupOpen ColumnName CompareOperator Literal
+                        return $AllFilters
+                    ",
+                    ExpectedRoot = root
+                };
+            }
+
+            // TODO: optional at the end of grammar (items at the end of graph needs to point at Root children!)
+
+            {
+                var root = new Node(null);
+
+                var groupOpen = CreateNode("GroupOpen");
+                var groupClose = CreateNode("GroupClose");
+
+                var literal = CreateNode("Literal")
+                    .AddChild(groupClose);
+                var compareOperator = CreateNode("CompareOperator").AddChild(literal);
+                var columnName = CreateNode("ColumnName", true)
+                    .AddChild(compareOperator);
+
+                groupOpen.AddChild(columnName).AddChild(compareOperator);
+
+                root.AddChild(groupOpen);
+
+                yield return new TestCase("Optional at the beginning of part")
+                {
+                    Grammar = @"
+                        $Compare = ?ColumnName CompareOperator Literal
+                        $AllFilters = GroupOpen $Compare GroupClose
                         return $AllFilters
                     ",
                     ExpectedRoot = root
@@ -210,11 +239,7 @@ namespace HandyQuery.Language.Tests
                         .AddChild(literal)
                         .AddChild(groupClose));
                 root.AddChild(columnName);
-
-                // TODO: optional at the end of grammar
-                // TODO: optional after or condition
-                // TODO: or condition after optional
-                // TODO: optional part
+                
                 yield return new TestCase("Optional at the end of part")
                 {
                     Grammar = @"
@@ -225,6 +250,13 @@ namespace HandyQuery.Language.Tests
                     ExpectedRoot = root
                 };
             }
+
+            // TODO: Optional at the end of part and then more optionals in upper part
+
+            // TODO: optional before part usage: ?optional $part something
+            // TODO: optional after or condition
+            // TODO: or condition after optional
+            // TODO: optional part
 
             {
                 var literal = CreateNode("Literal");

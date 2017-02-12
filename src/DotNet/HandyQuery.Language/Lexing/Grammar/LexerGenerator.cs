@@ -158,6 +158,11 @@ namespace HandyQuery.Language.Lexing.Grammar
                     body.Add(ParsePartBodyItem(blockItem));
                 }
 
+                if (body.All(x => x.IsOptional))
+                {
+                    throw new GrammarLexerGeneratorException($"Body cannot contain only optional items ('{bodyString}')");
+                }
+
                 return body;
             }
 

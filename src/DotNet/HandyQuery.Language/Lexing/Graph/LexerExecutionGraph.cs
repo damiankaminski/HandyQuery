@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using HandyQuery.Language.Extensions;
 using HandyQuery.Language.Lexing.Grammar.Structure;
 
 namespace HandyQuery.Language.Lexing.Graph
@@ -69,7 +70,9 @@ namespace HandyQuery.Language.Lexing.Graph
             private sealed class PartContext
             {
                 public GrammarPartUsage Usage { get; set; }
-                public Node[] EntryNodes { get; set; }
+                public Node[] EntryNodes => BodyItemsNodes.Count > 0 ? BodyItemsNodes[0] : null;
+                public Node[] LeaveNodes => BodyItemsNodes.Count > 0 ? BodyItemsNodes[BodyItemsNodes.Count - 1] : null;
+                public List<Node[]> BodyItemsNodes { get; set; } = new List<Node[]>();
             }
 
             public sealed class VisitResult
@@ -125,20 +128,14 @@ namespace HandyQuery.Language.Lexing.Graph
                     }
                 }
 
-                var context = new PartContext()
+                var currentPartContext = new PartContext()
                 {
                     Usage = partUsage
                 };
-                _partsUsageStack.Push(context);
+                _partsUsageStack.Push(currentPartContext);
 
-                Node[] lastNotOptional = null;
-
-                var optionalParents = parents.Where(x => x.Item.IsOptional).ToArray();
-                if (optionalParents.Any())
-                {
-                    // TODO: find lastNotOptional and create edge to first not optional
-                }
-
+                Node[] lastNonOptional = null;
+                var optionalBodyItemsLeaveNodes = new List<Node>();
                 var nodes = parents;
                 var body = partUsage.Impl.Body;
                 for (var i = 0; i < body.Count; i++)
@@ -151,25 +148,77 @@ namespace HandyQuery.Language.Lexing.Graph
                         // If current item is optional and previous item was not optional (if there is
                         // no previous then it couldn't be optional) then save previous nodes to create a new edge.
                         // It skip all optional nodes and land in not optional.
-                        lastNotOptional = nodes;
+                        lastNonOptional = nodes;
                     }
 
-                    nodes = Visit(item, nodes).LeaveNodes;
+                    var visitResult = Visit(item, nodes);
+                    nodes = visitResult.LeaveNodes;
 
-                    if (lastNotOptional != null && item.IsOptional == false)
+                    if (item.Type == GrammarElementType.PartUsage && item.IsOptional)
+                    {
+                        // if item is a part usage and it is optional then all nodes of this part are considered to be optional as well
+                        // TODO: optionalBodyItemsLeaveNodes.AddRange(visitResult.AllNodes);
+                    }
+                    else
+                    {
+                        optionalBodyItemsLeaveNodes.AddRange(nodes.Where(x => x.Item != null && x.Item.IsOptional));
+                    }
+
+                    if (nodes.Any(x => x.Item == null || x.Item.IsOptional) == false && optionalBodyItemsLeaveNodes.Any())
+                    {
+                        // if visited nodes are not optional and there are some optional elements left
+                        // to be processed
+
+                        var nonOptionalParents = optionalBodyItemsLeaveNodes
+                            .Select(x => x.FindFirstNonOptionalParentInAllParentBranches())
+                            .SelectMany(x => x)
+                            .WithoutDuplicates()
+                            .ToArray();
+
+                        foreach (var nonOptionalParent in nonOptionalParents)
+                        {
+                            nonOptionalParent.AddChildren(nodes);
+                        }
+
+                        optionalBodyItemsLeaveNodes = new List<Node>();
+                    }
+
+                    /*if (lastNonOptional != null && item.IsOptional == false)
                     {
                         // Create an edge which will skip the optional elements
-                        foreach (var node in lastNotOptional)
+                        foreach (var node in lastNonOptional)
                         {
                             node.AddChildren(nodes);
                         }
-                        lastNotOptional = null;
-                    }
+                        lastNonOptional = null;
+                    }*/
 
-                    if (i == 0) context.EntryNodes = nodes;
+                    currentPartContext.BodyItemsNodes.Add(nodes);
                 }
 
                 _partsUsageStack.Pop();
+
+                var prevPartContext = _partsUsageStack.Any() ? _partsUsageStack.Peek() : null;
+                if (prevPartContext?.LeaveNodes != null)
+                {
+                    // TODO: not sure if it is needed, describe if it is
+                   
+                    var prevPartOptionalLeaveNodes = prevPartContext.LeaveNodes.Where(x => x.Item != null && x.Item.IsOptional).ToArray();
+                    var nonOptionalEntryNodes =
+                        currentPartContext.EntryNodes
+                            .Select(x => x.FindFirstNonOptionalChildInAllChildBranches())
+                            .SelectMany(x => x)
+                            .ToArray();
+
+                    foreach (var prevPartOptionalLeaveNode in prevPartOptionalLeaveNodes)
+                    {
+                        foreach (var firstNonOptionalInPrevPart in prevPartOptionalLeaveNode.FindFirstNonOptionalParentInAllParentBranches())
+                        {
+                            firstNonOptionalInPrevPart.AddChildren(nonOptionalEntryNodes);
+                        }
+                    }
+                }
+
                 return new VisitResult(nodes);
             }
 
