@@ -157,7 +157,7 @@ namespace HandyQuery.Language.Lexing.Graph
                     if (item.Type == GrammarElementType.PartUsage && item.IsOptional)
                     {
                         // if item is a part usage and it is optional then all nodes of this part are considered to be optional as well
-                        // TODO: optionalBodyItemsLeaveNodes.AddRange(visitResult.AllNodes);
+                        // TODO: optionalBodyItemsLeaveNodes.AddRange(visitResult.EntryNodes);
                     }
                     else
                     {
