@@ -87,10 +87,9 @@ namespace HandyQuery.Language.Tests
 
             _visitedNodes.Add(node);
 
-            for (var index = 0; index < node.Children.Count; index++)
+            foreach (var child in node.Children)
             {
-                var nodeChild = node.Children[index];
-                Process(nodeChild, jsonNode);
+                Process(child, jsonNode);
             }
         }
 
