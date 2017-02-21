@@ -1,19 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using HandyQuery.Language.Lexing.Grammar.Structure;
+using HandyQuery.Language.Lexing.Graph.Builder.Node;
 
 namespace HandyQuery.Language.Lexing.Graph.Builder
 {
     internal sealed class LexerExecutionGraphBuilder
     {
-        public readonly BuilderNode Root = new BuilderNode(null);
+        public readonly RootNode Root = new RootNode();
 
         public sealed class VisitResult
         {
-            public readonly List<BuilderNode> LeaveNodes;
+            public readonly List<BuilderNodeBase> LeaveNodes;
             public bool CycleDetected { get; set; }
 
-            public VisitResult(List<BuilderNode> leaveNodes)
+            public VisitResult(List<BuilderNodeBase> leaveNodes)
             {
                 LeaveNodes = leaveNodes;
             }
@@ -21,19 +22,19 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
 
         public void BuildGraph(GrammarPart grammarRoot)
         {
-            Visit(new GrammarPartUsage(grammarRoot.Name, false, grammarRoot), new List<BuilderNode> { Root });
+            Visit(new GrammarPartUsage(grammarRoot.Name, false, grammarRoot), new List<BuilderNodeBase> { Root });
         }
 
-        public VisitResult Visit(GrammarTokenizerUsage tokenizerUsage, List<BuilderNode> parents)
+        public VisitResult Visit(GrammarTokenizerUsage tokenizerUsage, List<BuilderNodeBase> parents)
         {
-            var node = new BuilderNode(tokenizerUsage);
+            var node = new TokenizerNode(tokenizerUsage);
             node.AddParents(parents);
-            return new VisitResult(new List<BuilderNode> { node });
+            return new VisitResult(new List<BuilderNodeBase> { node });
         }
 
-        public VisitResult Visit(GrammarOrCondition orCondition, List<BuilderNode> parents)
+        public VisitResult Visit(GrammarOrCondition orCondition, List<BuilderNodeBase> parents)
         {
-            var leaveNodes = new List<BuilderNode>();
+            var leaveNodes = new List<BuilderNodeBase>();
             foreach (var operand in orCondition.Operands)
             {
                 leaveNodes.AddRange(Visit(operand, parents).LeaveNodes);
@@ -42,7 +43,7 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
             return new VisitResult(leaveNodes);
         }
 
-        public VisitResult Visit(GrammarPartUsage partUsage, List<BuilderNode> parents)
+        public VisitResult Visit(GrammarPartUsage partUsage, List<BuilderNodeBase> parents)
         {
             var nodes = parents;
             var body = partUsage.Impl.Body;
@@ -57,7 +58,7 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
             return new VisitResult(nodes);
         }
 
-        private VisitResult Visit(IGrammarElement any, List<BuilderNode> parents)
+        private VisitResult Visit(IGrammarElement any, List<BuilderNodeBase> parents)
         {
             switch (any.Type)
             {

@@ -60,8 +60,12 @@
     <Compile Include="Configuration\LanguageConfig.cs" />
     <Compile Include="Configuration\TokenType.cs" />
     <Compile Include="HandyQueryInitializationException.cs" />
-    <Compile Include="Lexing\Graph\Builder\BuilderNode.cs" />
+    <Compile Include="Lexing\Graph\Builder\Node\BuilderNodeBase.cs" />
     <Compile Include="Lexing\Graph\Builder\LexerExecutionGraphBuilder.cs" />
+    <Compile Include="Lexing\Graph\Builder\Node\BuilderNodeType.cs" />
+    <Compile Include="Lexing\Graph\Builder\Node\PartNode.cs" />
+    <Compile Include="Lexing\Graph\Builder\Node\RootNode.cs" />
+    <Compile Include="Lexing\Graph\Builder\Node\TokenizerNode.cs" />
     <Compile Include="Lexing\Graph\LexerExecutionGraph.cs" />
     <Compile Include="Lexing\Graph\LexerExecutionGraphException.cs" />
     <Compile Include="Lexing\Graph\Node.cs" />

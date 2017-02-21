@@ -2,17 +2,18 @@
 using FluentAssertions;
 using HandyQuery.Language.Lexing;
 using HandyQuery.Language.Lexing.Grammar;
-using HandyQuery.Language.Lexing.Grammar.Structure;
-using HandyQuery.Language.Lexing.Graph.Builder;
+using HandyQuery.Language.Lexing.Graph;
 using NUnit.Framework;
 
 namespace HandyQuery.Language.Tests
 {
-    public sealed class LexerExecutionGraphBuilderTests
+    // TODO: get rid of a lot of Equals methods, they are not needed anymore since Node is using ITokenizer instead of TokenizerUsage
+
+    public sealed class LexerExecutionGraphTests
     {
         private static readonly TokenizersSource _tokenizersSource;
 
-        static LexerExecutionGraphBuilderTests()
+        static LexerExecutionGraphTests()
         {
             _tokenizersSource = new TokenizersSource();
         }
@@ -20,9 +21,11 @@ namespace HandyQuery.Language.Tests
         [TestCaseSource(nameof(GetTestCases))]
         public void ShouldCreateProperGraph(TestCase testCase)
         {
-            var root = CreateRootBuilderNode(testCase.Grammar);
+            var expected = new LexerExecutionGraph(testCase.ExpectedRoot);
 
-            root.Equals(testCase.ExpectedRoot).Should().BeTrue();
+            var graph = CreateGraph(testCase.Grammar);
+
+            graph.Equals(expected).Should().BeTrue();
         }
 
         private static IEnumerable<TestCase> GetTestCases()
@@ -34,7 +37,7 @@ namespace HandyQuery.Language.Tests
                         $AllFilters = ColumnName Statement
                         return $AllFilters
                     ",
-                    ExpectedRoot = new BuilderNode(null).AddChild(
+                    ExpectedRoot = new Node().AddChild(
                         CreateNode("ColumnName").AddChild(
                             CreateNode("Statement")))
                 };
@@ -48,7 +51,7 @@ namespace HandyQuery.Language.Tests
                         $AllFilters = ColumnName CompareOperator $Value
                         return $AllFilters
                     ",
-                    ExpectedRoot = new BuilderNode(null).AddChild(
+                    ExpectedRoot = new Node().AddChild(
                         CreateNode("ColumnName").AddChild(
                             CreateNode("CompareOperator").AddChild(
                                 CreateNode("Literal"))))
@@ -68,7 +71,7 @@ namespace HandyQuery.Language.Tests
 
                         return $Filter
                     ",
-                    ExpectedRoot = new BuilderNode(null).AddChild(
+                    ExpectedRoot = new Node().AddChild(
                         CreateNode("GroupOpen").AddChild(
                             CreateNode("ColumnName").AddChild(
                                 CreateNode("CompareOperator").AddChild(
@@ -88,7 +91,7 @@ namespace HandyQuery.Language.Tests
                         $Filter = GroupOpen ColumnName|Statement GroupClose
                         return $Filter
                     ",
-                    ExpectedRoot = new BuilderNode(null).AddChild(
+                    ExpectedRoot = new Node().AddChild(
                         CreateNode("GroupOpen").AddChild(
                             CreateNode("ColumnName").AddChild(
                                 groupClose)).AddChild(
@@ -109,7 +112,7 @@ namespace HandyQuery.Language.Tests
 
                         return $Filter
                     ",
-                    ExpectedRoot = new BuilderNode(null).AddChild(
+                    ExpectedRoot = new Node().AddChild(
                         CreateNode("GroupOpen").AddChild(
                             CreateNode("ColumnName").AddChild(
                                 CreateNode("CompareOperator").AddChild(
@@ -132,7 +135,7 @@ namespace HandyQuery.Language.Tests
                         $AllFilters = ColumnName ?CompareOperator Literal
                         return $AllFilters
                     ",
-                    ExpectedRoot = new BuilderNode(null).AddChild(columnName)
+                    ExpectedRoot = new Node().AddChild(columnName)
                 };
             }
 
@@ -153,7 +156,7 @@ namespace HandyQuery.Language.Tests
                         $AllFilters = ColumnName ?$Something Literal
                         return $AllFilters
                     ",
-                    ExpectedRoot = new BuilderNode(null).AddChild(columnName)
+                    ExpectedRoot = new Node().AddChild(columnName)
                 };
             }
 
@@ -171,12 +174,12 @@ namespace HandyQuery.Language.Tests
                         $AllFilters = ColumnName ?CompareOperator ?Statement Literal
                         return $AllFilters
                     ",
-                    ExpectedRoot = new BuilderNode(null).AddChild(columnName)
+                    ExpectedRoot = new Node().AddChild(columnName)
                 };
             }
 
             {
-                var root = new BuilderNode(null);
+                var root = new Node();
 
                 var groupOpen = CreateNode("GroupOpen", true);
                 root.AddChild(groupOpen);
@@ -199,7 +202,7 @@ namespace HandyQuery.Language.Tests
             // TODO: optional at the end of grammar (items at the end of graph needs to point at Root children!)
 
             {
-                var root = new BuilderNode(null);
+                var root = new Node();
 
                 var groupOpen = CreateNode("GroupOpen");
                 var groupClose = CreateNode("GroupClose");
@@ -226,7 +229,7 @@ namespace HandyQuery.Language.Tests
             }
 
             {
-                var root = new BuilderNode(null);
+                var root = new Node();
 
                 var groupClose = CreateNode("GroupClose");
 
@@ -237,7 +240,7 @@ namespace HandyQuery.Language.Tests
                         .AddChild(literal)
                         .AddChild(groupClose));
                 root.AddChild(columnName);
-                
+
                 yield return new TestCase("Optional at the end of part")
                 {
                     Grammar = @"
@@ -254,6 +257,7 @@ namespace HandyQuery.Language.Tests
             // TODO: optional before part usage: ?optional $part something
             // TODO: optional after or condition
             // TODO: or condition after optional
+            // TODO: optional part
 
             /*{
                 var literal = CreateNode("Literal");
@@ -271,7 +275,7 @@ namespace HandyQuery.Language.Tests
 
                         return $FunctionInvokation
                     ",
-                    ExpectedRoot = new BuilderNode(null).AddChild(
+                    ExpectedRoot = new Node().AddChild(
                         CreateNode("FunctionName").AddChild(
                             CreateNode("ParamsOpen").AddChild(
                                 @params.AddChild(
@@ -297,7 +301,7 @@ namespace HandyQuery.Language.Tests
 
                         return $FunctionInvokation
                     ",
-                    ExpectedRoot = new Node(null).AddChild(functionName)
+                    ExpectedRoot = new Node().AddChild(functionName)
                 };
             }*/
         }
@@ -306,7 +310,7 @@ namespace HandyQuery.Language.Tests
         {
             private string Name { get; }
             public string Grammar { get; set; }
-            internal BuilderNode ExpectedRoot { get; set; }
+            internal Node ExpectedRoot { get; set; }
 
             public TestCase(string name)
             {
@@ -319,25 +323,18 @@ namespace HandyQuery.Language.Tests
             }
         }
 
-        private static BuilderNode CreateNode(string name, bool isOptional = false)
+        private static Node CreateNode(string name, bool isOptional = false)
         {
-            return new BuilderNode(CreateTokenizerUsage(name, isOptional));
+            return new Node(_tokenizersSource.GetTokenizer(name), isOptional, new HashSet<Node>(), new HashSet<Node>());
         }
 
-        private static GrammarTokenizerUsage CreateTokenizerUsage(string name, bool isOptional = false)
-        {
-            return new GrammarTokenizerUsage(name, isOptional, _tokenizersSource.GetTokenizer(name));
-        }
-
-        private static BuilderNode CreateRootBuilderNode(string grammar)
+        private static LexerExecutionGraph CreateGraph(string grammar)
         {
             var reader = new LexerStringReader(grammar, 0);
             var parser = new LexerGenerator.ParserImpl(reader, _tokenizersSource);
             var root = parser.Parse();
-            var builder = new LexerExecutionGraphBuilder();
-            builder.BuildGraph(root);
 
-            return builder.Root;
+            return LexerExecutionGraph.Build(root);
         }
     }
 }

@@ -1,27 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using HandyQuery.Language.Lexing.Grammar.Structure;
-using HandyQuery.Language.Lexing.Tokenizers.Abstract;
 
-namespace HandyQuery.Language.Lexing.Graph.Builder
+namespace HandyQuery.Language.Lexing.Graph.Builder.Node
 {
     // TODO: get rid of not used methods
 
-    internal sealed class BuilderNode
+    internal abstract class BuilderNodeBase
     {
-        public readonly ITokenizer Tokenizer;
         public readonly bool IsOptional;
-        public readonly HashSet<BuilderNode> Children = new HashSet<BuilderNode>();
-        public readonly HashSet<BuilderNode> Parents = new HashSet<BuilderNode>();
+        public readonly HashSet<BuilderNodeBase> Children = new HashSet<BuilderNodeBase>();
+        public readonly HashSet<BuilderNodeBase> Parents = new HashSet<BuilderNodeBase>();
+        public abstract BuilderNodeType NodeType { get; }
 
-        public BuilderNode(GrammarTokenizerUsage tokenizerUsage)
+        protected BuilderNodeBase(bool isOptional)
         {
-            Tokenizer = tokenizerUsage?.Impl;
-            IsOptional = tokenizerUsage?.IsOptional ?? false;
+            IsOptional = isOptional;
         }
 
-        public void AddParents(IEnumerable<BuilderNode> parents)
+        public void AddParents(IEnumerable<BuilderNodeBase> parents)
         {
             if (parents != null)
             {
@@ -32,14 +28,14 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
             }
         }
 
-        public BuilderNode AddChild(BuilderNode child)
+        public BuilderNodeBase AddChild(BuilderNodeBase child)
         {
             Children.Add(child);
             child.AddParent(this);
             return this;
         }
 
-        private BuilderNode AddChildren(BuilderNode[] children)
+        private BuilderNodeBase AddChildren(BuilderNodeBase[] children)
         {
             foreach (var child in children)
             {
@@ -49,7 +45,7 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
             return this;
         }
 
-        private void AddParent(BuilderNode parent)
+        private void AddParent(BuilderNodeBase parent)
         {
             Parents.Add(parent);
         }
@@ -57,7 +53,7 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
         /// <summary>
         /// Finds first non optional parent in all parent branches (single node may have multiple parents).
         /// </summary>
-        public IEnumerable<BuilderNode> FindFirstNonOptionalParentInAllParentBranches()
+        public IEnumerable<BuilderNodeBase> FindFirstNonOptionalParentInAllParentBranches()
         {
             foreach (var parent in Parents.ToArray())
             {
@@ -77,7 +73,7 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
         /// <summary>
         /// Finds first non optional child in all child branches (single node may have multiple children).
         /// </summary>
-        public IEnumerable<BuilderNode> FindFirstNonOptionalChildInAllChildBranches()
+        public IEnumerable<BuilderNodeBase> FindFirstNonOptionalChildInAllChildBranches()
         {
             foreach (var child in Children.ToArray())
             {
@@ -94,19 +90,14 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
             }
         }
 
-        public bool Equals(BuilderNode node, HashSet<BuilderNode> visitedNodes = null)
+        public virtual bool Equals(BuilderNodeBase node, HashSet<BuilderNodeBase> visitedNodes = null)
         {
-            if (node.Tokenizer?.GetType() != Tokenizer?.GetType())
-            {
-                return false;
-            }
-
             if (node.IsOptional != IsOptional)
             {
                 return false;
             }
 
-            visitedNodes = visitedNodes ?? new HashSet<BuilderNode>();
+            visitedNodes = visitedNodes ?? new HashSet<BuilderNodeBase>();
             if (visitedNodes.Contains(node)) return true;
             visitedNodes.Add(node);
 
@@ -118,7 +109,7 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
             return true;
         }
 
-        private static bool AreSame(IEnumerable<BuilderNode> items, IEnumerable<BuilderNode> items2, HashSet<BuilderNode> visitedNodes)
+        private static bool AreSame(IEnumerable<BuilderNodeBase> items, IEnumerable<BuilderNodeBase> items2, HashSet<BuilderNodeBase> visitedNodes)
         {
             var i1 = items.ToList();
             var i2 = items2.ToList();
@@ -137,21 +128,6 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
             }
 
             return true;
-        }
-
-        public override string ToString()
-        {
-            var optional = IsOptional ? "?" : "";
-            var name = Tokenizer?.GetType().Name;
-            if (name != null)
-            {
-                name = name.Substring(0, name.LastIndexOf("Tokenizer", StringComparison.Ordinal));
-            }
-            else
-            {
-                name = "ROOT";
-            }
-            return $"{optional}{name}";
         }
     }
 }

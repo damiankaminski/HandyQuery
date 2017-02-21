@@ -19,10 +19,8 @@ namespace HandyQuery.Language.Lexing.Graph
         {
             var builder = new LexerExecutionGraphBuilder();
             builder.BuildGraph(grammarRoot);
-            
-            // TODO: conver to proper Node
-            //return new LexerExecutionGraph(builder.Root);
-            return null;
+
+            return new LexerExecutionGraph(builder.Root.ConvertToNode());
         }
 
         public bool Equals(LexerExecutionGraph expected)
