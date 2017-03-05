@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using HandyQuery.Language.Lexing.Grammar.Structure;
 using HandyQuery.Language.Lexing.Graph.Builder.Node;
 
@@ -7,32 +8,23 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
 {
     internal sealed class LexerExecutionGraphBuilder
     {
-        public readonly RootNode Root = new RootNode();
-
-        public sealed class VisitResult
+        public RootNode BuildGraph(GrammarPart grammarRoot)
         {
-            public readonly List<BuilderNodeBase> LeaveNodes;
-            public bool CycleDetected { get; set; }
+            var root = new RootNode();
+            Visit(new GrammarPartUsage(grammarRoot.Name, false, grammarRoot), new List<BuilderNodeBase> { root });
+            // TODO: create optional edges
 
-            public VisitResult(List<BuilderNodeBase> leaveNodes)
-            {
-                LeaveNodes = leaveNodes;
-            }
+            return root;
         }
 
-        public void BuildGraph(GrammarPart grammarRoot)
-        {
-            Visit(new GrammarPartUsage(grammarRoot.Name, false, grammarRoot), new List<BuilderNodeBase> { Root });
-        }
-
-        public VisitResult Visit(GrammarTokenizerUsage tokenizerUsage, List<BuilderNodeBase> parents)
+        private VisitResult Visit(GrammarTokenizerUsage tokenizerUsage, List<BuilderNodeBase> parents)
         {
             var node = new TokenizerNode(tokenizerUsage);
             node.AddParents(parents);
             return new VisitResult(new List<BuilderNodeBase> { node });
         }
 
-        public VisitResult Visit(GrammarOrCondition orCondition, List<BuilderNodeBase> parents)
+        private VisitResult Visit(GrammarOrCondition orCondition, List<BuilderNodeBase> parents)
         {
             var leaveNodes = new List<BuilderNodeBase>();
             foreach (var operand in orCondition.Operands)
@@ -43,19 +35,26 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
             return new VisitResult(leaveNodes);
         }
 
-        public VisitResult Visit(GrammarPartUsage partUsage, List<BuilderNodeBase> parents)
+        private VisitResult Visit(GrammarPartUsage partUsage, List<BuilderNodeBase> parents)
         {
-            var nodes = parents;
-            var body = partUsage.Impl.Body;
+            var partNode = new PartUsageNode(partUsage.IsOptional);
+            partNode.AddParents(parents);
+            var partNodes = new List<BuilderNodeBase> { partNode };
 
-            for (var i = 0; i < body.Count; i++)
+            if (partUsage.Impl.Body.Any())
             {
-                var item = body[i];
-                var visitResult = Visit(item, nodes);
-                nodes = visitResult.LeaveNodes;
+                var visitResult = Visit(partUsage.Impl.Body[0], new List<BuilderNodeBase>());
+                parents = visitResult.LeaveNodes;
+                partNode.EntryNodes = visitResult.LeaveNodes;
+
+                foreach (var item in partUsage.Impl.Body.Skip(1))
+                {
+                    visitResult = Visit(item, parents);
+                    parents = visitResult.LeaveNodes;
+                }
             }
 
-            return new VisitResult(nodes);
+            return new VisitResult(partNodes);
         }
 
         private VisitResult Visit(IGrammarElement any, List<BuilderNodeBase> parents)
@@ -70,6 +69,16 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
                     return Visit((GrammarPartUsage)any, parents);
                 default:
                     throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        private sealed class VisitResult
+        {
+            public readonly List<BuilderNodeBase> LeaveNodes;
+
+            public VisitResult(List<BuilderNodeBase> leaveNodes)
+            {
+                LeaveNodes = leaveNodes;
             }
         }
     }

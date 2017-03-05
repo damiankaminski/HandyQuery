@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace HandyQuery.Language.Lexing.Graph.Builder.Node
 {
     // TODO: get rid of not used methods
+    // TODO: order of elements matters so HashSet is not really an option
 
     internal abstract class BuilderNodeBase
     {
@@ -43,6 +45,19 @@ namespace HandyQuery.Language.Lexing.Graph.Builder.Node
                 child.AddParent(this);
             }
             return this;
+        }
+
+        public IEnumerable<BuilderNodeBase> GetDeepChildren()
+        {
+            foreach (var child in Children)
+            {
+                yield return child;
+
+                foreach (var node in child.GetDeepChildren())
+                {
+                    yield return node;
+                }
+            }
         }
 
         private void AddParent(BuilderNodeBase parent)

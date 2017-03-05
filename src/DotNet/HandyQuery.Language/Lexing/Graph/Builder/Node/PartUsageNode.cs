@@ -2,12 +2,12 @@
 
 namespace HandyQuery.Language.Lexing.Graph.Builder.Node
 {
-    internal sealed class PartNode : BuilderNodeBase
+    internal sealed class PartUsageNode : BuilderNodeBase
     {
         public override BuilderNodeType NodeType { get; } = BuilderNodeType.Part;
-        public readonly HashSet<BuilderNodeBase> EntryNodes = new HashSet<BuilderNodeBase>();
+        public List<BuilderNodeBase> EntryNodes = new List<BuilderNodeBase>();
 
-        public PartNode(bool isOptional) : base(isOptional)
+        public PartUsageNode(bool isOptional) : base(isOptional)
         {
         }
     }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace HandyQuery.Language.Lexing.Graph.Builder.Node
 {
@@ -13,8 +14,7 @@ namespace HandyQuery.Language.Lexing.Graph.Builder.Node
 
         public Graph.Node ConvertToNode()
         {
-            Graph.Node empty = null;
-            return new FinalNodeBuilder().Build(this, ref empty);
+            return new FinalNodeBuilder().Build(this);
         }
 
         private sealed class FinalNodeBuilder
@@ -22,12 +22,41 @@ namespace HandyQuery.Language.Lexing.Graph.Builder.Node
             private readonly Dictionary<BuilderNodeBase, Graph.Node> _createdNodes 
                 = new Dictionary<BuilderNodeBase, Graph.Node>();
 
-            public Graph.Node Build(BuilderNodeBase builderNode, ref Graph.Node parent)
+            public Graph.Node Build(RootNode builderNode)
+            {
+                var root = new Graph.Node();
+                foreach (var child in builderNode.Children)
+                {
+                    Process(child, ref root);
+                }
+                return root;
+            }
+
+            private Graph.Node Process(BuilderNodeBase builderNode, ref Graph.Node parent)
             {
                 switch (builderNode.NodeType)
                 {
                     case BuilderNodeType.Part:
-                        throw new NotImplementedException();
+                        var partNode = (PartUsageNode)builderNode;
+                        foreach (var entryNode in partNode.EntryNodes)
+                        {
+                            // build nodes inside part
+                            var leaveNode = Process(entryNode, ref parent);
+
+                            foreach (var x in entryNode.GetDeepChildren())
+                            {
+                                leaveNode = Process(x, ref leaveNode);
+                            }
+
+                            foreach (var child in partNode.Children)
+                            {
+                                // build outside of part
+                                Process(child, ref leaveNode);
+                            }
+                        }
+
+                        return null;
+
                     case BuilderNodeType.Tokenizer:
                         var tokenizerNode = (TokenizerNode)builderNode;
 
@@ -43,20 +72,10 @@ namespace HandyQuery.Language.Lexing.Graph.Builder.Node
                             _createdNodes[tokenizerNode] = node;
                         }
 
-                        foreach (var child in tokenizerNode.Children)
-                        {
-                            Build(child, ref node);
-                        }
+                        parent = parent.WithChild(node);
 
-                        parent = parent.AddChild(node);
                         return node;
-                    case BuilderNodeType.Root:
-                        var root = new Graph.Node();
-                        foreach (var child in builderNode.Children)
-                        {
-                            Build(child, ref root);
-                        }
-                        return root;
+
                     default:
                         throw new ArgumentOutOfRangeException();
                 }

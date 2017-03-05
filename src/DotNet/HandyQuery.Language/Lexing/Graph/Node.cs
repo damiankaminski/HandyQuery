@@ -20,12 +20,14 @@ namespace HandyQuery.Language.Lexing.Graph
         }
 
         public Node()
-        {   
+        {
+            Children = new List<Node>();
+            Parents = new List<Node>();
         }
 
-        public Node AddChild(Node child)
+        public Node WithChild(Node child)
         {
-            var newChildren = new HashSet<Node>(Children ?? new Node[] {}) { child };
+            var newChildren = new HashSet<Node>(new Node[] {}) { child };
             return new Node(Tokenizer, IsOptional, newChildren, Parents);
         }
 

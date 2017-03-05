@@ -63,7 +63,7 @@
     <Compile Include="Lexing\Graph\Builder\Node\BuilderNodeBase.cs" />
     <Compile Include="Lexing\Graph\Builder\LexerExecutionGraphBuilder.cs" />
     <Compile Include="Lexing\Graph\Builder\Node\BuilderNodeType.cs" />
-    <Compile Include="Lexing\Graph\Builder\Node\PartNode.cs" />
+    <Compile Include="Lexing\Graph\Builder\Node\PartUsageNode.cs" />
     <Compile Include="Lexing\Graph\Builder\Node\RootNode.cs" />
     <Compile Include="Lexing\Graph\Builder\Node\TokenizerNode.cs" />
     <Compile Include="Lexing\Graph\LexerExecutionGraph.cs" />
