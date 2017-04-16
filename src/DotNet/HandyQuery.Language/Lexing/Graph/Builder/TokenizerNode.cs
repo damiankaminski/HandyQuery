@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using HandyQuery.Language.Lexing.Grammar.Structure;
 using HandyQuery.Language.Lexing.Tokenizers.Abstract;
 
-namespace HandyQuery.Language.Lexing.Graph.Builder.Node
+namespace HandyQuery.Language.Lexing.Graph.Builder
 {
-    internal sealed class TokenizerNode : BuilderNodeBase
+    internal sealed class TokenizerNode : Node
     {
         public readonly ITokenizer Tokenizer;
         public override BuilderNodeType NodeType { get; } = BuilderNodeType.Tokenizer;
@@ -15,7 +15,13 @@ namespace HandyQuery.Language.Lexing.Graph.Builder.Node
             Tokenizer = tokenizerUsage?.Impl;
         }
 
-        public override bool Equals(BuilderNodeBase nodeBase, HashSet<BuilderNodeBase> visitedNodes = null)
+        public TokenizerNode AddChild(Node child)
+        {
+            AddChildImpl(child);
+            return this;
+        }
+
+        public override bool Equals(Node nodeBase, HashSet<Node> visitedNodes = null)
         {
             if (nodeBase.NodeType != BuilderNodeType.Tokenizer)
             {

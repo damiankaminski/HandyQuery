@@ -32,6 +32,9 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.ValueTuple, Version=4.0.1.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.ValueTuple.4.3.0\lib\netstandard1.0\System.ValueTuple.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -61,15 +64,14 @@
     <Compile Include="Configuration\TokenType.cs" />
     <Compile Include="HandyQueryInitializationException.cs" />
     <Compile Include="Lexing\Grammar\Structure\GrammarReturn.cs" />
-    <Compile Include="Lexing\Graph\Builder\Node\BuilderNodeBase.cs" />
+    <Compile Include="Lexing\Graph\Node.cs" />
     <Compile Include="Lexing\Graph\Builder\LexerExecutionGraphBuilder.cs" />
-    <Compile Include="Lexing\Graph\Builder\Node\BuilderNodeType.cs" />
-    <Compile Include="Lexing\Graph\Builder\Node\PartUsageNode.cs" />
-    <Compile Include="Lexing\Graph\Builder\Node\RootNode.cs" />
-    <Compile Include="Lexing\Graph\Builder\Node\TokenizerNode.cs" />
+    <Compile Include="Lexing\Graph\Builder\BuilderNodeType.cs" />
+    <Compile Include="Lexing\Graph\Builder\PartUsageNode.cs" />
+    <Compile Include="Lexing\Graph\Builder\RootNode.cs" />
+    <Compile Include="Lexing\Graph\Builder\TokenizerNode.cs" />
     <Compile Include="Lexing\Graph\LexerExecutionGraph.cs" />
     <Compile Include="Lexing\Graph\LexerExecutionGraphException.cs" />
-    <Compile Include="Lexing\Graph\Node.cs" />
     <Compile Include="Lexing\Lexer.cs" />
     <Compile Include="Lexing\LexerConfig.cs" />
     <Compile Include="Lexing\Grammar\Structure\GrammarPartBody.cs" />
@@ -113,6 +115,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Lexing\Grammar\Language.grammar" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="TODO.txt" />

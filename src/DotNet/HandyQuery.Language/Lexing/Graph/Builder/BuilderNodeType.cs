@@ -1,4 +1,4 @@
-﻿namespace HandyQuery.Language.Lexing.Graph.Builder.Node
+﻿namespace HandyQuery.Language.Lexing.Graph.Builder
 {
     internal enum BuilderNodeType
     {

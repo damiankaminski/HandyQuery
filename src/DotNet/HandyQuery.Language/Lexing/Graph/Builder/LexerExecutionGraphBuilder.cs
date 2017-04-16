@@ -2,83 +2,133 @@
 using System.Collections.Generic;
 using System.Linq;
 using HandyQuery.Language.Lexing.Grammar.Structure;
-using HandyQuery.Language.Lexing.Graph.Builder.Node;
 
 namespace HandyQuery.Language.Lexing.Graph.Builder
 {
     internal sealed class LexerExecutionGraphBuilder
     {
-        public RootNode BuildGraph(GrammarReturn grammarRoot)
+        public static RootNode BuildGraph(GrammarReturn grammarRoot)
         {
             var root = new RootNode();
-            Visit(grammarRoot.PartUsage, new List<BuilderNodeBase> { root });
-            // TODO: create optional edges
+
+            var currentNodes = new Nodes(root);
+            var part = grammarRoot.PartUsage.Impl;
+
+            ProcessPart(part, currentNodes, out var _);
 
             return root;
         }
 
-        private VisitResult Visit(GrammarTokenizerUsage tokenizerUsage, List<BuilderNodeBase> parents)
+        private static void ProcessPart(GrammarPart part, Nodes currentNodes, out Nodes leaveNodes)
         {
-            var node = new TokenizerNode(tokenizerUsage);
-            node.AddParents(parents);
-            return new VisitResult(new List<BuilderNodeBase> { node });
+            leaveNodes = new Nodes();
+            var context = new Context(part);
+            var contextStack = new Stack<Context>();
+
+            while (true)
+            {
+                if (context.MoveNext() == false)
+                {
+                    if (contextStack.Any() == false) break;
+
+                    context = contextStack.Pop();
+                    continue;
+                }
+
+                switch (context.CurrentBodyItem)
+                {
+                    case GrammarTokenizerUsage tokenizerUsage:
+                    {
+                        var node = new TokenizerNode(tokenizerUsage);
+                        currentNodes.AddChild(node);
+                        currentNodes = node;
+                        leaveNodes = node;
+                        break;
+                    }
+
+                    case GrammarPartUsage partUsage:
+                    {
+                        contextStack.Push(context);
+                        context = new Context(partUsage.Impl);
+                        continue;
+                    }
+
+                    case GrammarOrCondition orCondition:
+                    {
+                        leaveNodes = new Nodes();
+                        foreach (var operand in orCondition.Operands)
+                        {
+                            switch (operand)
+                            {
+                                case GrammarTokenizerUsage tokenizerUsage:
+                                    var node = new TokenizerNode(tokenizerUsage);
+                                    currentNodes.AddChild(node);
+                                    leaveNodes.Add(node);
+                                    break;
+                                case GrammarPartUsage partUsage:
+                                    ProcessPart(partUsage.Impl, currentNodes, out var partLeaveNodes);
+                                    leaveNodes.AddRange(partLeaveNodes);
+                                    break;
+                                default:
+                                    throw new ArgumentOutOfRangeException();
+                            }
+                        }
+                        currentNodes = leaveNodes;
+                        break;
+                    }
+
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
         }
 
-        private VisitResult Visit(GrammarOrCondition orCondition, List<BuilderNodeBase> parents)
+        private sealed class Nodes : List<Node>
         {
-            var leaveNodes = new List<BuilderNodeBase>();
-            foreach (var operand in orCondition.Operands)
+            public Nodes()
             {
-                leaveNodes.AddRange(Visit(operand, parents).LeaveNodes);
             }
 
-            return new VisitResult(leaveNodes);
-        }
-
-        private VisitResult Visit(GrammarPartUsage partUsage, List<BuilderNodeBase> parents)
-        {
-            var partNode = new PartUsageNode(partUsage.IsOptional);
-            partNode.AddParents(parents);
-            var partNodes = new List<BuilderNodeBase> { partNode };
-
-            if (partUsage.Impl.Body.Any())
+            /// <summary>
+            /// Creates a new Nodes list with single value added.
+            /// </summary>
+            public Nodes(Node node)
             {
-                var visitResult = Visit(partUsage.Impl.Body[0], new List<BuilderNodeBase>());
-                parents = visitResult.LeaveNodes;
-                partNode.EntryNodes = visitResult.LeaveNodes;
+                Add(node);
+            }
 
-                foreach (var item in partUsage.Impl.Body.Skip(1))
+            public void AddChild(Node node)
+            {
+                foreach (var item in this)
                 {
-                    visitResult = Visit(item, parents);
-                    parents = visitResult.LeaveNodes;
+                    item.AddChildImpl(node);
                 }
             }
 
-            return new VisitResult(partNodes);
-        }
-
-        private VisitResult Visit(IGrammarElement any, List<BuilderNodeBase> parents)
-        {
-            switch (any.Type)
+            public static implicit operator Nodes(Node node)
             {
-                case GrammarElementType.TokenizerUsage:
-                    return Visit((GrammarTokenizerUsage)any, parents);
-                case GrammarElementType.OrCondition:
-                    return Visit((GrammarOrCondition)any, parents);
-                case GrammarElementType.PartUsage:
-                    return Visit((GrammarPartUsage)any, parents);
-                default:
-                    throw new ArgumentOutOfRangeException();
+                return new Nodes(node);
             }
         }
 
-        private sealed class VisitResult
+        private sealed class Context
         {
-            public readonly List<BuilderNodeBase> LeaveNodes;
-
-            public VisitResult(List<BuilderNodeBase> leaveNodes)
+            public Context(GrammarPart part)
             {
-                LeaveNodes = leaveNodes;
+                Part = part;
+            }
+
+            public IGrammarBodyItem CurrentBodyItem => Part.Body[CurrentBodyItemIndex];
+
+            private GrammarPart Part { get; }
+            private int CurrentBodyItemIndex { get; set; } = -1;
+
+            public bool MoveNext()
+            {
+                if (CurrentBodyItemIndex + 1 >= Part.Body.Count) return false;
+
+                CurrentBodyItemIndex++;
+                return true;
             }
         }
     }

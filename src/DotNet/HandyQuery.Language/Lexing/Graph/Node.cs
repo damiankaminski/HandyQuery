@@ -1,39 +1,113 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using HandyQuery.Language.Lexing.Tokenizers.Abstract;
+using HandyQuery.Language.Lexing.Graph.Builder;
 
 namespace HandyQuery.Language.Lexing.Graph
 {
-    internal sealed class Node
+    // TODO: move to somewhere else (along with node implementations)
+    // TODO: get rid of not used methods
+    // TODO: order of elements matters so HashSet is not really an option
+
+    internal abstract class Node
     {
-        public readonly ITokenizer Tokenizer;
         public readonly bool IsOptional;
-        public readonly IEnumerable<Node> Children;
-        public readonly IEnumerable<Node> Parents;
+        public readonly HashSet<Node> Children = new HashSet<Node>();
+        public readonly HashSet<Node> Parents = new HashSet<Node>();
+        public abstract BuilderNodeType NodeType { get; }
 
-        public Node(ITokenizer tokenizer, bool isOptional, IEnumerable<Node> children, IEnumerable<Node> parents)
+        protected Node(bool isOptional)
         {
-            Tokenizer = tokenizer;
             IsOptional = isOptional;
-            Children = children;
-            Parents = parents;
         }
 
-        public Node()
+        public void AddParents(IEnumerable<Node> parents)
         {
-            Children = new List<Node>();
-            Parents = new List<Node>();
+            if (parents != null)
+            {
+                foreach (var parent in parents)
+                {
+                    parent?.AddChildImpl(this);
+                }
+            }
         }
 
-        public Node WithChild(Node child)
+        internal void AddChildImpl(Node child)
         {
-            var newChildren = new HashSet<Node>(new Node[] {}) { child };
-            return new Node(Tokenizer, IsOptional, newChildren, Parents);
+            Children.Add(child);
+            child.AddParent(this);
         }
 
-        public bool Equals(Node node, HashSet<Node> visitedNodes = null)
+        private Node AddChildren(Node[] children)
         {
-            if (node.Tokenizer?.GetType() != Tokenizer?.GetType())
+            foreach (var child in children)
+            {
+                Children.Add(child);
+                child.AddParent(this);
+            }
+            return this;
+        }
+
+        public IEnumerable<Node> GetDeepChildren()
+        {
+            foreach (var child in Children)
+            {
+                yield return child;
+
+                foreach (var node in child.GetDeepChildren())
+                {
+                    yield return node;
+                }
+            }
+        }
+
+        private void AddParent(Node parent)
+        {
+            Parents.Add(parent);
+        }
+
+        /// <summary>
+        /// Finds first non optional parent in all parent branches (single node may have multiple parents).
+        /// </summary>
+        public IEnumerable<Node> FindFirstNonOptionalParentInAllParentBranches()
+        {
+            foreach (var parent in Parents.ToArray())
+            {
+                if (parent.IsOptional == false)
+                {
+                    yield return parent;
+                    continue;
+                }
+
+                foreach (var nonOptionalParent in parent.FindFirstNonOptionalParentInAllParentBranches().ToArray())
+                {
+                    yield return nonOptionalParent;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Finds first non optional child in all child branches (single node may have multiple children).
+        /// </summary>
+        public IEnumerable<Node> FindFirstNonOptionalChildInAllChildBranches()
+        {
+            foreach (var child in Children.ToArray())
+            {
+                if (child.IsOptional == false)
+                {
+                    yield return child;
+                    continue;
+                }
+
+                foreach (var nonOptionalChild in child.FindFirstNonOptionalChildInAllChildBranches().ToArray())
+                {
+                    yield return nonOptionalChild;
+                }
+            }
+        }
+
+        public virtual bool Equals(Node node, HashSet<Node> visitedNodes = null)
+        {
+            if (node.IsOptional != IsOptional)
             {
                 return false;
             }
@@ -42,7 +116,7 @@ namespace HandyQuery.Language.Lexing.Graph
             if (visitedNodes.Contains(node)) return true;
             visitedNodes.Add(node);
 
-            if (AreSame(node.Children.ToList(), Children.ToList(), visitedNodes) == false)
+            if (AreSame(node.Children, Children, visitedNodes) == false)
             {
                 return false;
             }
@@ -50,27 +124,25 @@ namespace HandyQuery.Language.Lexing.Graph
             return true;
         }
 
-        private static bool AreSame(IReadOnlyList<Node> items, IReadOnlyList<Node> items2, HashSet<Node> visitedNodes)
+        private static bool AreSame(IEnumerable<Node> items, IEnumerable<Node> items2, HashSet<Node> visitedNodes)
         {
-            if (items.Count != items2.Count)
+            var i1 = items.ToList();
+            var i2 = items2.ToList();
+
+            if (i1.Count != i2.Count)
             {
                 return false;
             }
 
-            for (var i = 0; i < items2.Count; i++)
+            for (var i = 0; i < i2.Count; i++)
             {
-                if (items2[i].Equals(items[i], visitedNodes) == false)
+                if (i2[i].Equals(i1[i], visitedNodes) == false)
                 {
                     return false;
                 }
             }
 
             return true;
-        }
-
-        public override string ToString()
-        {
-            return Tokenizer?.GetType().Name ?? "Root";
         }
     }
 }

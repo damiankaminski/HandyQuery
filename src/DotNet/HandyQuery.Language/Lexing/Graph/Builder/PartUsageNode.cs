@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 
-namespace HandyQuery.Language.Lexing.Graph.Builder.Node
+namespace HandyQuery.Language.Lexing.Graph.Builder
 {
-    internal sealed class PartUsageNode : BuilderNodeBase
+    internal sealed class PartUsageNode : Node
     {
         public override BuilderNodeType NodeType { get; } = BuilderNodeType.Part;
-        public List<BuilderNodeBase> EntryNodes = new List<BuilderNodeBase>();
+        public List<Node> EntryNodes = new List<Node>();
 
         public PartUsageNode(bool isOptional) : base(isOptional)
         {

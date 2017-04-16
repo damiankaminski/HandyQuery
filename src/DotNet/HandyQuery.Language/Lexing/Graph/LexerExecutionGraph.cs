@@ -6,21 +6,19 @@ namespace HandyQuery.Language.Lexing.Graph
 {
     internal sealed class LexerExecutionGraph
     {
-        internal readonly Node Root;
+        internal readonly RootNode Root;
 
         private HashSet<Node> _getAllChildrenVisitedNodes;
 
-        internal LexerExecutionGraph(Node root)
+        internal LexerExecutionGraph(RootNode root)
         {
             Root = root;
         }
 
         public static LexerExecutionGraph Build(GrammarReturn grammarRoot)
         {
-            var builder = new LexerExecutionGraphBuilder();
-            var root = builder.BuildGraph(grammarRoot);
-
-            return new LexerExecutionGraph(root.ConvertToNode());
+            var root = LexerExecutionGraphBuilder.BuildGraph(grammarRoot);
+            return new LexerExecutionGraph(root);
         }
 
         public bool Equals(LexerExecutionGraph expected)
