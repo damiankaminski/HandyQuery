@@ -51,9 +51,9 @@ namespace HandyQuery.Language.Lexing.Grammar
                 _tokenizersSource = tokenizersSource;
             }
 
-            public GrammarPart Parse()
+            public GrammarReturn Parse()
             {
-                GrammarPart final = null;
+                GrammarReturn final = null;
 
                 while (_reader.IsInRange())
                 {
@@ -204,7 +204,7 @@ namespace HandyQuery.Language.Lexing.Grammar
             /// _____________
             /// return $Value
             /// </remarks>
-            private GrammarPart ParseReturn()
+            private GrammarReturn ParseReturn()
             {
                 _reader.MoveBy(Return.Length);
                 var partName = _reader.ReadTillEndOfWord();
@@ -214,7 +214,7 @@ namespace HandyQuery.Language.Lexing.Grammar
                     throw new GrammarLexerGeneratorException($"Part '{partName}' does not exist.");
                 }
 
-                return grammarElement;
+                return new GrammarReturn(new GrammarPartUsage(grammarElement.Name, false, grammarElement));
             }
         }
     }

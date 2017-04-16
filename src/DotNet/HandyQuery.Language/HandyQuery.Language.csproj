@@ -60,6 +60,7 @@
     <Compile Include="Configuration\LanguageConfig.cs" />
     <Compile Include="Configuration\TokenType.cs" />
     <Compile Include="HandyQueryInitializationException.cs" />
+    <Compile Include="Lexing\Grammar\Structure\GrammarReturn.cs" />
     <Compile Include="Lexing\Graph\Builder\Node\BuilderNodeBase.cs" />
     <Compile Include="Lexing\Graph\Builder\LexerExecutionGraphBuilder.cs" />
     <Compile Include="Lexing\Graph\Builder\Node\BuilderNodeType.cs" />

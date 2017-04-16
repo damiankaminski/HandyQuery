@@ -19,7 +19,7 @@ namespace HandyQuery.Language.Lexing
             ExecutionGraph = executionGraph;
         }
 
-        public static Lexer Build(GrammarPart root)
+        public static Lexer Build(GrammarReturn root)
         {
             return new Lexer(LexerExecutionGraph.Build(root));
         }

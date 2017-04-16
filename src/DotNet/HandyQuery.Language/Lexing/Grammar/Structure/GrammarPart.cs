@@ -1,16 +1,18 @@
 ﻿namespace HandyQuery.Language.Lexing.Grammar.Structure
 {
-    internal sealed class GrammarPart : IGrammarElement
+    internal sealed class GrammarPart
     {
         public string Name { get; }
 
         private GrammarPartBody _body;
+
         public GrammarPartBody Body
         {
-            get { return _body; }
+            get => _body;
             set
             {
-                if(_body != null) throw new GrammarLexerGeneratorException("Part's body cannot be assigned more than once.");
+                if (_body != null)
+                    throw new GrammarLexerGeneratorException("Part's body cannot be assigned more than once.");
                 _body = value;
             }
         }
@@ -22,8 +24,6 @@
         /// </summary>
         public bool FullyParsed => Body != null;
 
-        public GrammarElementType Type => GrammarElementType.Part;
-
         public GrammarPart(string name)
         {
             Name = name;
@@ -33,12 +33,17 @@
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            return obj is GrammarPart && Equals((GrammarPart)obj);
+            return obj is GrammarPart && Equals((GrammarPart) obj);
         }
 
         public bool Equals(GrammarPart part)
         {
             return part.Name == Name && part.Body.Equals(Body);
+        }
+
+        public override int GetHashCode()
+        {
+            return Name.GetHashCode();
         }
 
         public override string ToString()

@@ -8,10 +8,10 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
 {
     internal sealed class LexerExecutionGraphBuilder
     {
-        public RootNode BuildGraph(GrammarPart grammarRoot)
+        public RootNode BuildGraph(GrammarReturn grammarRoot)
         {
             var root = new RootNode();
-            Visit(new GrammarPartUsage(grammarRoot.Name, false, grammarRoot), new List<BuilderNodeBase> { root });
+            Visit(grammarRoot.PartUsage, new List<BuilderNodeBase> { root });
             // TODO: create optional edges
 
             return root;

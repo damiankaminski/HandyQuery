@@ -15,7 +15,7 @@ namespace HandyQuery.Language.Lexing.Graph
             Root = root;
         }
 
-        public static LexerExecutionGraph Build(GrammarPart grammarRoot)
+        public static LexerExecutionGraph Build(GrammarReturn grammarRoot)
         {
             var builder = new LexerExecutionGraphBuilder();
             var root = builder.BuildGraph(grammarRoot);

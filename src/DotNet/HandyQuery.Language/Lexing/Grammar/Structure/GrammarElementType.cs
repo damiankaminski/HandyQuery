@@ -2,7 +2,6 @@
 {
     internal enum GrammarElementType
     {
-        Part,
         TokenizerUsage,
         OrCondition,
         PartUsage
