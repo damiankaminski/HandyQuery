@@ -219,7 +219,22 @@ namespace HandyQuery.Language.Tests
                 };
             }
 
-            // TODO: optional at the end of grammar
+            {
+                var root = new RootNode();
+
+                var columnName = CreateNode("ColumnName")
+                    .AddChild(CreateNode("CompareOperator").AddChild(CreateNode("Literal", true)));
+                root.AddChild(columnName);
+
+                yield return new TestCase("Optional at the end of grammar")
+                {
+                    Grammar = @"
+                        $AllFilters = ColumnName CompareOperator ?Literal
+                        return $AllFilters
+                    ",
+                    ExpectedRoot = root
+                };
+            }
 
             {
                 var root = new RootNode();
@@ -272,13 +287,69 @@ namespace HandyQuery.Language.Tests
                 };
             }
 
+            {
+                var root = new RootNode();
+
+                var groupOpen = CreateNode("GroupOpen");
+                var columnName = CreateNode("ColumnName", true);
+                var compOp = CreateNode("CompareOperator");
+                var statement = CreateNode("Statement");
+                var groupClose = CreateNode("GroupClose");
+
+                groupOpen.AddChild(columnName);
+                groupOpen.AddChild(compOp);
+                columnName.AddChild(compOp);
+                compOp.AddChild(statement);
+                statement.AddChild(groupClose);
+
+                root.AddChild(groupOpen);
+
+                yield return new TestCase("Optional before part usage")
+                {
+                    Grammar = @"
+                        $Compare = CompareOperator Statement
+                        $AllFilters = GroupOpen ?ColumnName $Compare GroupClose
+                        return $AllFilters
+                    ",
+                    ExpectedRoot = root
+                };
+            }
+
+            {
+                var root = new RootNode();
+
+                var groupOpen = CreateNode("GroupOpen");
+                var columnName = CreateNode("ColumnName", true);
+                var compOp = CreateNode("CompareOperator");
+                var statement = CreateNode("Statement");
+                var groupClose = CreateNode("GroupClose");
+
+                groupOpen.AddChild(compOp);
+                compOp.AddChild(statement);
+                statement.AddChild(columnName);
+                statement.AddChild(groupClose);
+                columnName.AddChild(groupClose);
+
+                root.AddChild(groupOpen);
+
+                yield return new TestCase("Optional after part usage")
+                {
+                    Grammar = @"
+                        $Compare = CompareOperator Statement
+                        $AllFilters = GroupOpen $Compare ?ColumnName GroupClose
+                        return $AllFilters
+                    ",
+                    ExpectedRoot = root
+                };
+            }
+
             // TODO: Optional at the end of part and then more optionals in upper part
 
-            // TODO: optional before part usage: ?optional $part something
             // TODO: optional after or condition
             // TODO: or condition after optional
             // TODO: optional in the end / at the beggining of or condition operand
-            // TODO: optional before / after part usage
+            // TODO: multiple optional elements (parts/tokenizers)
+
 
             /*{
                 var literal = CreateNode("Literal");

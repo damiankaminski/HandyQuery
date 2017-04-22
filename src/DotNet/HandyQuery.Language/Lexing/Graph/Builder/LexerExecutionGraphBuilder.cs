@@ -27,8 +27,7 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
 
             var context = new PartContext(part)
             {
-                IsInOptionalScope = false,
-                LastNonOptionalNodes = null
+                IsInOptionalScope = false
             };
 
             while (true)
@@ -76,14 +75,25 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
                         currentNodes.AddChild(node);
                         currentNodes = node;
 
-                        context.IsInOptionalScope = tokenizerUsage.IsOptional;
                         leaveNodes = node;
 
-                        if (tokenizerUsage.IsOptional == false)
+                        if (tokenizerUsage.IsOptional)
                         {
+                            if (context.IsInOptionalScope == false)
+                            {
+                                var savedFromNodes = context.LastNonOptionalNodes;
+                                _listeners.OnFirstNonOptionalNode += nodes =>
+                                {
+                                    MakeOptionalEdge(savedFromNodes, nodes);
+                                };
+                            }
+                        }
+                        else
+                        {    
                             _listeners.HandleNonOptionalNodes(node);
                         }
 
+                        context.IsInOptionalScope = tokenizerUsage.IsOptional;
                         break;
                     }
 
@@ -123,16 +133,6 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
 
                     default:
                         throw new ArgumentOutOfRangeException();
-                }
-
-                MakeOptionalEdgeIfNeeded();
-            }
-
-            void MakeOptionalEdgeIfNeeded()
-            {
-                if (context.WasInOptionalScope && !context.IsInOptionalScope)
-                {
-                    MakeOptionalEdge(context.LastNonOptionalNodes, currentNodes);
                 }
             }
 
