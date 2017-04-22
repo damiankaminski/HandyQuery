@@ -343,10 +343,73 @@ namespace HandyQuery.Language.Tests
                 };
             }
 
+            {
+                var root = new RootNode();
+
+                var groupClose = CreateNode("GroupClose");
+                var literal = CreateNode("Literal", true).AddChild(groupClose);
+                var compOp = CreateNode("CompareOperator").AddChild(literal).AddChild(groupClose);
+                var statement = CreateNode("Statement").AddChild(literal).AddChild(groupClose);
+
+                root.AddChild(compOp);
+                root.AddChild(statement);
+
+                yield return new TestCase("Optional after or condition")
+                {
+                    Grammar = @"
+                        $AllFilters = CompareOperator|Statement ?Literal GroupClose
+                        return $AllFilters
+                    ",
+                    ExpectedRoot = root
+                };
+            }
+
+            {
+                var root = new RootNode();
+
+                var compOp = CreateNode("CompareOperator");
+                var statement = CreateNode("Statement");
+                var literal = CreateNode("Literal", true).AddChild(compOp).AddChild(statement);
+                var groupOpen = CreateNode("GroupOpen").AddChild(literal).AddChild(compOp).AddChild(statement);
+
+                root.AddChild(groupOpen);
+
+                yield return new TestCase("Or condition after optional")
+                {
+                    Grammar = @"
+                        $AllFilters = GroupOpen ?Literal CompareOperator|Statement
+                        return $AllFilters
+                    ",
+                    ExpectedRoot = root
+                };
+            }
+
+            {
+                var root = new RootNode();
+
+                var groupClose = CreateNode("GroupClose");
+                var @in = CreateNode("In").AddChild(groupClose);
+                var compOp = CreateNode("CompareOperator").AddChild(groupClose);
+                var columnName = CreateNode("ColumnName").AddChild(@in);
+                var statement = CreateNode("Statement").AddChild(@in);
+                var literal = CreateNode("Literal", true).AddChild(compOp).AddChild(columnName).AddChild(statement);
+                var groupOpen = CreateNode("GroupOpen").AddChild(literal).AddChild(compOp).AddChild(columnName).AddChild(statement);
+
+                root.AddChild(groupOpen);
+
+                yield return new TestCase("Or condition with nested or after optional")
+                {
+                    Grammar = @"
+                        $NestedOr = ColumnName|Statement In
+                        $AllFilters = GroupOpen ?Literal CompareOperator|$NestedOr GroupClose
+                        return $AllFilters
+                    ",
+                    ExpectedRoot = root
+                };
+            }
+
             // TODO: Optional at the end of part and then more optionals in upper part
 
-            // TODO: optional after or condition
-            // TODO: or condition after optional
             // TODO: optional in the end / at the beggining of or condition operand
             // TODO: multiple optional elements (parts/tokenizers)
 

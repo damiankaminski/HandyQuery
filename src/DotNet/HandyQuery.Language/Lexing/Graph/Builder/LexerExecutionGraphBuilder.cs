@@ -115,7 +115,6 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
                                     var node = new TokenizerNode(tokenizerUsage);
                                     currentNodes.AddChild(node);
                                     leaveNodes.Add(node);
-                                    if (tokenizerUsage.IsOptional == false) _listeners.HandleNonOptionalNodes(node);
                                     break;
                                 case GrammarPartUsage partUsage:
                                     ProcessPart(partUsage, currentNodes, out var partLeaveNodes);
