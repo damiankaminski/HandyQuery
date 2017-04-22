@@ -5,9 +5,11 @@ using HandyQuery.Language.Lexing.Grammar.Structure;
 
 namespace HandyQuery.Language.Lexing.Graph.Builder
 {
-    internal sealed class LexerExecutionGraphBuilder
+    internal sealed class LexerExecutionGraphBuilder : IDisposable
     {
-        public static RootNode BuildGraph(GrammarReturn grammarRoot)
+        private readonly ProcessListeners _listeners = new ProcessListeners();
+
+        public RootNode BuildGraph(GrammarReturn grammarRoot)
         {
             var root = new RootNode();
 
@@ -17,11 +19,9 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
             return root;
         }
 
-        private static void ProcessPart(GrammarPartUsage part, Nodes currentNodes, out Nodes leaveNodes)
+        private void ProcessPart(GrammarPartUsage part, Nodes currentNodes, out Nodes leaveNodes)
         {
             leaveNodes = new Nodes();
-
-            var listeners = new ProcessListeners();
 
             var contextStack = new Stack<PartContext>();
 
@@ -48,7 +48,7 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
                         // ended with optional tokenizer
 
                         var savedContext = context;
-                        listeners.OnFirstNonOptionalNode += nodes =>
+                        _listeners.OnFirstNonOptionalNode += nodes =>
                         {
                             MakeOptionalEdge(savedContext.LastNonOptionalNodes, nodes);
                         };
@@ -58,7 +58,7 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
                     {
                         // part is optional
                         var savedFromNodes = contextStack.Peek().LastNonOptionalNodes;
-                        listeners.OnFirstNonOptionalNode += nodes =>
+                        _listeners.OnFirstNonOptionalNode += nodes =>
                         {
                             MakeOptionalEdge(savedFromNodes, nodes);
                         };
@@ -81,7 +81,7 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
 
                         if (tokenizerUsage.IsOptional == false)
                         {
-                            listeners.ProcessNonOptionalNodes(node);
+                            _listeners.HandleNonOptionalNodes(node);
                         }
 
                         break;
@@ -89,7 +89,6 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
 
                     case GrammarPartUsage partUsage:
                     {
-                        // TODO: listeners.ProcessNonOptionalNodes(...);
                         contextStack.Push(context);
                         context = new PartContext(partUsage);
                         break;
@@ -97,7 +96,6 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
 
                     case GrammarOrCondition orCondition:
                     {
-                        // TODO: listeners.ProcessNonOptionalNodes(node);
                         leaveNodes = new Nodes();
                         foreach (var operand in orCondition.Operands)
                         {
@@ -107,6 +105,7 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
                                     var node = new TokenizerNode(tokenizerUsage);
                                     currentNodes.AddChild(node);
                                     leaveNodes.Add(node);
+                                    if (tokenizerUsage.IsOptional == false) _listeners.HandleNonOptionalNodes(node);
                                     break;
                                 case GrammarPartUsage partUsage:
                                     ProcessPart(partUsage, currentNodes, out var partLeaveNodes);
@@ -149,6 +148,11 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
                     }
                 }
             }
+        }
+
+        public void Dispose()
+        {
+            _listeners?.Dispose();
         }
 
         private sealed class Nodes : List<Node>
@@ -204,13 +208,18 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
             }
         }
 
-        private class ProcessListeners
+        private class ProcessListeners : IDisposable
         {
             public event Action<Nodes> OnFirstNonOptionalNode;
 
-            public void ProcessNonOptionalNodes(Nodes nodes)
+            public void HandleNonOptionalNodes(Nodes nodes)
             {
                 OnFirstNonOptionalNode?.Invoke(nodes);
+                OnFirstNonOptionalNode = delegate { };
+            }
+
+            public void Dispose()
+            {
                 OnFirstNonOptionalNode = null;
             }
         }

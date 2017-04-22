@@ -219,7 +219,7 @@ namespace HandyQuery.Language.Tests
                 };
             }
 
-            // TODO: optional at the end of grammar (items at the end of graph needs to point at Root children!)
+            // TODO: optional at the end of grammar
 
             {
                 var root = new RootNode();

@@ -17,8 +17,11 @@ namespace HandyQuery.Language.Lexing.Graph
 
         public static LexerExecutionGraph Build(GrammarReturn grammarRoot)
         {
-            var root = LexerExecutionGraphBuilder.BuildGraph(grammarRoot);
-            return new LexerExecutionGraph(root);
+            using (var builder = new LexerExecutionGraphBuilder())
+            {
+                var root = builder.BuildGraph(grammarRoot);
+                return new LexerExecutionGraph(root);
+            }
         }
 
         public bool Equals(LexerExecutionGraph expected)
