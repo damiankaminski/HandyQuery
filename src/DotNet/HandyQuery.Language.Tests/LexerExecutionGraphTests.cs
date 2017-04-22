@@ -249,7 +249,7 @@ namespace HandyQuery.Language.Tests
             }
 
             {
-                RootNode root = new RootNode();
+                var root = new RootNode();
 
                 var groupClose = CreateNode("GroupClose");
 
@@ -277,7 +277,8 @@ namespace HandyQuery.Language.Tests
             // TODO: optional before part usage: ?optional $part something
             // TODO: optional after or condition
             // TODO: or condition after optional
-            // TODO: optional part
+            // TODO: optional in the end / at the beggining of or condition operand
+            // TODO: optional before / after part usage
 
             /*{
                 var literal = CreateNode("Literal");

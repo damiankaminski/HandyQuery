@@ -12,24 +12,48 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
             var root = new RootNode();
 
             var currentNodes = new Nodes(root);
-            var part = grammarRoot.PartUsage.Impl;
-
-            ProcessPart(part, currentNodes, out var _);
+            ProcessPart(grammarRoot.PartUsage, currentNodes, out var _);
 
             return root;
         }
 
-        private static void ProcessPart(GrammarPart part, Nodes currentNodes, out Nodes leaveNodes)
+        private static void ProcessPart(GrammarPartUsage part, Nodes currentNodes, out Nodes leaveNodes)
         {
             leaveNodes = new Nodes();
-            var context = new Context(part);
-            var contextStack = new Stack<Context>();
+
+            var listeners = new ProcessListeners();
+
+            var contextStack = new Stack<PartContext>();
+
+            var context = new PartContext(part)
+            {
+                IsInOptionalScope = false,
+                LastNonOptionalNodes = null
+            };
 
             while (true)
             {
+                context.WasInOptionalScope = context.IsInOptionalScope;
+                context.LastNonOptionalNodes = context.IsInOptionalScope ? context.LastNonOptionalNodes : currentNodes;
+
                 if (context.MoveNext() == false)
                 {
-                    if (contextStack.Any() == false) break;
+                    if (contextStack.Any() == false)
+                    {
+                        //MakeOptionalEdgeIfNeeded();
+                        break;
+                    }
+
+                    if (context.IsInOptionalScope)
+                    {
+                        // ended with optional tokenizer
+
+                        var c = context;
+                        listeners.OnFirstNonOptionalNode += nodes =>
+                        {
+                            MakeOptionalEdge(c.LastNonOptionalNodes, nodes);
+                        };
+                    }
 
                     context = contextStack.Pop();
                     continue;
@@ -42,19 +66,29 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
                         var node = new TokenizerNode(tokenizerUsage);
                         currentNodes.AddChild(node);
                         currentNodes = node;
+
+                        context.IsInOptionalScope = tokenizerUsage.IsOptional;
                         leaveNodes = node;
+
+                        if (tokenizerUsage.IsOptional == false)
+                        {
+                            listeners.ProcessNonOptionalNodes(node);
+                        }
+
                         break;
                     }
 
                     case GrammarPartUsage partUsage:
                     {
+                        // TODO: listeners.ProcessNonOptionalNodes(...);
                         contextStack.Push(context);
-                        context = new Context(partUsage.Impl);
-                        continue;
+                        context = new PartContext(partUsage);
+                        break;
                     }
 
                     case GrammarOrCondition orCondition:
                     {
+                        // TODO: listeners.ProcessNonOptionalNodes(node);
                         leaveNodes = new Nodes();
                         foreach (var operand in orCondition.Operands)
                         {
@@ -66,19 +100,44 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
                                     leaveNodes.Add(node);
                                     break;
                                 case GrammarPartUsage partUsage:
-                                    ProcessPart(partUsage.Impl, currentNodes, out var partLeaveNodes);
+                                    ProcessPart(partUsage, currentNodes, out var partLeaveNodes);
                                     leaveNodes.AddRange(partLeaveNodes);
                                     break;
                                 default:
                                     throw new ArgumentOutOfRangeException();
                             }
                         }
+
+                        context.IsInOptionalScope = false;
                         currentNodes = leaveNodes;
                         break;
                     }
 
                     default:
                         throw new ArgumentOutOfRangeException();
+                }
+
+                MakeOptionalEdgeIfNeeded();
+            }
+
+            void MakeOptionalEdgeIfNeeded()
+            {
+                if (context.WasInOptionalScope && !context.IsInOptionalScope)
+                {
+                    MakeOptionalEdge(context.LastNonOptionalNodes, currentNodes);
+                }
+            }
+
+            void MakeOptionalEdge(Nodes from, Nodes to)
+            {
+                if (from == null || to == null) return;
+
+                foreach (var toNode in to)
+                {
+                    foreach (var fromNode in from)
+                    {
+                        fromNode.AddChildImpl(toNode);
+                    }
                 }
             }
         }
@@ -111,24 +170,39 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
             }
         }
 
-        private sealed class Context
+        private sealed class PartContext
         {
-            public Context(GrammarPart part)
+            public PartContext(GrammarPartUsage partUsage)
             {
-                Part = part;
+                PartUsage = partUsage;
             }
 
-            public IGrammarBodyItem CurrentBodyItem => Part.Body[CurrentBodyItemIndex];
+            public IGrammarBodyItem CurrentBodyItem => PartUsage.Impl.Body[CurrentBodyItemIndex];
 
-            private GrammarPart Part { get; }
+            public bool IsInOptionalScope { get; set; }
+            public bool WasInOptionalScope { get; set; }
+            public Nodes LastNonOptionalNodes { get; set; }
+
+            private GrammarPartUsage PartUsage { get; }
             private int CurrentBodyItemIndex { get; set; } = -1;
 
             public bool MoveNext()
             {
-                if (CurrentBodyItemIndex + 1 >= Part.Body.Count) return false;
+                if (CurrentBodyItemIndex + 1 >= PartUsage.Impl.Body.Count) return false;
 
                 CurrentBodyItemIndex++;
                 return true;
+            }
+        }
+
+        private class ProcessListeners
+        {
+            public event Action<Nodes> OnFirstNonOptionalNode;
+
+            public void ProcessNonOptionalNodes(Nodes nodes)
+            {
+                OnFirstNonOptionalNode?.Invoke(nodes);
+                OnFirstNonOptionalNode = null;
             }
         }
     }
