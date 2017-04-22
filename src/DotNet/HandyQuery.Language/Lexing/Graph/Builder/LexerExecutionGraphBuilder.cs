@@ -40,7 +40,6 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
                 {
                     if (contextStack.Any() == false)
                     {
-                        //MakeOptionalEdgeIfNeeded();
                         break;
                     }
 
@@ -48,10 +47,20 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
                     {
                         // ended with optional tokenizer
 
-                        var c = context;
+                        var savedContext = context;
                         listeners.OnFirstNonOptionalNode += nodes =>
                         {
-                            MakeOptionalEdge(c.LastNonOptionalNodes, nodes);
+                            MakeOptionalEdge(savedContext.LastNonOptionalNodes, nodes);
+                        };
+                    }
+
+                    if (context.PartUsage.IsOptional)
+                    {
+                        // part is optional
+                        var savedFromNodes = contextStack.Peek().LastNonOptionalNodes;
+                        listeners.OnFirstNonOptionalNode += nodes =>
+                        {
+                            MakeOptionalEdge(savedFromNodes, nodes);
                         };
                     }
 
@@ -182,8 +191,8 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
             public bool IsInOptionalScope { get; set; }
             public bool WasInOptionalScope { get; set; }
             public Nodes LastNonOptionalNodes { get; set; }
+            public GrammarPartUsage PartUsage { get; }
 
-            private GrammarPartUsage PartUsage { get; }
             private int CurrentBodyItemIndex { get; set; } = -1;
 
             public bool MoveNext()
