@@ -8,21 +8,75 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
     internal sealed class LexerExecutionGraphBuilder : IDisposable
     {
         private readonly ProcessListeners _listeners = new ProcessListeners();
+        private Nodes _currentTail;
 
         public RootNode BuildGraph(GrammarReturn grammarRoot)
         {
             var root = new RootNode();
 
-            var currentNodes = new Nodes(root);
-            ProcessPart(grammarRoot.PartUsage, currentNodes, out var _);
+            _currentTail = new Nodes(root);
+            ProcessPart(grammarRoot.PartUsage).ToList();
 
             return root;
         }
 
-        private void ProcessPart(GrammarPartUsage part, Nodes currentNodes, out Nodes leaveNodes)
+        private Nodes ProcessPartAndGetLeaveNodes(GrammarPartUsage part)
         {
-            leaveNodes = new Nodes();
+            using (var enumerator = ProcessPart(part).GetEnumerator())
+            {
+                Nodes leaveNodes = null;
+                while (enumerator.MoveNext())
+                {
+                    leaveNodes = enumerator.Current;
+                }
 
+                return leaveNodes;
+            }
+        }
+
+        private Nodes ProcessPartAndGetEntryNodes(GrammarPartUsage part)
+        {
+            using (var enumerator = ProcessPart(part).GetEnumerator())
+            {
+                enumerator.MoveNext();
+                var entryNodes = enumerator.Current;
+
+                while (enumerator.MoveNext())
+                {
+                }
+
+                return entryNodes;
+            }
+        }
+
+        private (Nodes Head, IEnumerable<Nodes> Body, Nodes Tail) ProcessPartAndGetNodesInfo(GrammarPartUsage part, Action<Nodes> forEachAction)
+        {
+            using (var enumerator = ProcessPart(part).GetEnumerator())
+            {
+                Nodes tail = null;
+                var body = new List<Nodes>();
+                enumerator.MoveNext();
+                var head = enumerator.Current;
+
+                while (enumerator.MoveNext())
+                {
+                    body.Add(enumerator.Current);
+                    tail = enumerator.Current;
+                    forEachAction(enumerator.Current);
+                }
+
+                if (body.Any())
+                {
+                    // remove tail from body
+                    body.RemoveAt(body.Count - 1);
+                }
+
+                return (head, body, tail);
+            }
+        }
+
+        private IEnumerable<Nodes> ProcessPart(GrammarPartUsage part)
+        {
             var contextStack = new Stack<PartContext>();
 
             var context = new PartContext(part)
@@ -33,7 +87,7 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
             while (true)
             {
                 context.WasInOptionalScope = context.IsInOptionalScope;
-                context.LastNonOptionalNodes = context.IsInOptionalScope ? context.LastNonOptionalNodes : currentNodes;
+                context.LastNonOptionalNodes = context.IsInOptionalScope ? context.LastNonOptionalNodes : _currentTail;
 
                 if (context.MoveNext() == false)
                 {
@@ -72,10 +126,9 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
                     case GrammarTokenizerUsage tokenizerUsage:
                     {
                         var node = new TokenizerNode(tokenizerUsage);
-                        currentNodes.AddChild(node);
-                        currentNodes = node;
-
-                        leaveNodes = node;
+                        _currentTail.AddChild(node);
+                        _currentTail = node;
+                        yield return node;
 
                         if (tokenizerUsage.IsOptional)
                         {
@@ -106,27 +159,78 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
 
                     case GrammarOrCondition orCondition:
                     {
-                        leaveNodes = new Nodes();
+                        var initialTail = new Nodes(_currentTail);
+
+                        var headNodes = new Nodes();
+                        var bodyNodes = new List<Nodes>();
+                        var tailNodes = new Nodes();
+
+                        var nonOptionalHeadNodes = new Nodes();
+                        var nonOptionalInPartFound = false;
+
                         foreach (var operand in orCondition.Operands)
                         {
+                            _currentTail = initialTail;
                             switch (operand)
                             {
                                 case GrammarTokenizerUsage tokenizerUsage:
                                     var node = new TokenizerNode(tokenizerUsage);
-                                    currentNodes.AddChild(node);
-                                    leaveNodes.Add(node);
+                                    _currentTail.AddChild(node);
+                                    tailNodes.Add(node);
+                                    headNodes.Add(node);
+                                    if (tokenizerUsage.IsOptional == false) nonOptionalHeadNodes.Add(node);
                                     break;
+
                                 case GrammarPartUsage partUsage:
-                                    ProcessPart(partUsage, currentNodes, out var partLeaveNodes);
-                                    leaveNodes.AddRange(partLeaveNodes);
+                                    var info = ProcessPartAndGetNodesInfo(partUsage, currentNodes =>
+                                    {
+                                        if (nonOptionalInPartFound == false && currentNodes.Any(x => x.IsOptional == false))
+                                        {
+                                            nonOptionalHeadNodes.AddRange(currentNodes);
+                                            nonOptionalInPartFound = true;
+
+                                            // BUG: here's a problem:
+                                            _listeners.HandleNonOptionalNodes(nonOptionalHeadNodes);
+                                            // Execution of part processing should stop for a while here and
+                                            // `_listeners.HandleNonOptionalNodes(nonOptionalHeadNodes);` should be executed.
+                                            // Otherwise `HandleNonOptionalNodes` might (and will be in some cases) called
+                                            // from other places.
+                                            // Unfortunately `HandleNonOptionalNodes` cannot be simply called here because
+                                            // it needs to know all first non optional heads in `or` operands 
+                                            // (juts imagine `$SomeOperand|$OtherOperand|$DamnOperand`, each part may have non
+                                            // optional at different index, it simply needs to be stoped once found).
+                                        }
+                                    });
+
+                                    headNodes.AddRange(info.Head);
+                                    bodyNodes.AddRange(info.Body);
+                                    tailNodes.AddRange(info.Tail);
                                     break;
+
                                 default:
                                     throw new ArgumentOutOfRangeException();
                             }
                         }
 
+                        // TODO: not sure if it will be still needed once part operand handling will be fixed
+                        if (part.IsOrConditionOperand == false)
+                        {
+                            // if it is an or condition operand then non optional nodes stuff will be handled by the caller
+                            _listeners.HandleNonOptionalNodes(nonOptionalHeadNodes);
+                        }
+
                         context.IsInOptionalScope = false;
-                        currentNodes = leaveNodes;
+
+                        // if part has only 1 element then is in the headNodes and tailNodes are empty
+                        _currentTail = tailNodes.Any() ? tailNodes : headNodes;
+
+                        yield return headNodes;
+                        foreach (var bodyNode in bodyNodes)
+                        {
+                            yield return bodyNode;
+                        }
+                        yield return tailNodes;
+
                         break;
                     }
 
@@ -166,6 +270,14 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
             public Nodes(Node node)
             {
                 Add(node);
+            }
+
+            /// <summary>
+            /// Creates a new Nodes list with multiple values added.
+            /// </summary>
+            public Nodes(IEnumerable<Node> nodes)
+            {
+                AddRange(nodes);
             }
 
             public void AddChild(Node node)

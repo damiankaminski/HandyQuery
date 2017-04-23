@@ -148,14 +148,14 @@ namespace HandyQuery.Language.Lexing.Grammar
                                                                          "Cannot use optional character '?' in OR conditions.");
                             }
 
-                            operands.Add(ParsePartBodyItem(operand));
+                            operands.Add(ParsePartBodyItem(operand, true));
                         }
 
                         body.Add(new GrammarOrCondition(operands));
                         continue;
                     }
 
-                    body.Add(ParsePartBodyItem(blockItem));
+                    body.Add(ParsePartBodyItem(blockItem, false));
                 }
 
                 if (body.All(x => x.IsOptional))
@@ -174,7 +174,7 @@ namespace HandyQuery.Language.Lexing.Grammar
             ///                  ___________________
             /// $Value = Literal|$FunctionInvokation
             /// </remarks>
-            private IGrammarBodyItem ParsePartBodyItem(string blockItem)
+            private IGrammarBodyItem ParsePartBodyItem(string blockItem, bool isOrConditionOperand)
             {
                 var isOptional = blockItem.StartsWith(Optional);
                 var name = blockItem;
@@ -184,7 +184,7 @@ namespace HandyQuery.Language.Lexing.Grammar
 
                 if (name.StartsWith(GrammarPart))
                 {
-                    result = new GrammarPartUsage(name, isOptional, GetPartByName(name));
+                    result = new GrammarPartUsage(name, isOptional, isOrConditionOperand, GetPartByName(name));
                 }
                 else
                 {
@@ -214,7 +214,7 @@ namespace HandyQuery.Language.Lexing.Grammar
                     throw new GrammarLexerGeneratorException($"Part '{partName}' does not exist.");
                 }
 
-                return new GrammarReturn(new GrammarPartUsage(grammarElement.Name, false, grammarElement));
+                return new GrammarReturn(new GrammarPartUsage(grammarElement.Name, false, false, grammarElement));
             }
         }
     }

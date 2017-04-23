@@ -4,14 +4,16 @@
     {
         public string Name { get; }
         public bool IsOptional { get; }
+        public bool IsOrConditionOperand { get; }
         public GrammarPart Impl { get; }
         public GrammarElementType Type => GrammarElementType.PartUsage;
 
-        public GrammarPartUsage(string name, bool isOptional, GrammarPart impl)
+        public GrammarPartUsage(string name, bool isOptional, bool isOrConditionOperand, GrammarPart impl)
         {
             Name = name;
             IsOptional = isOptional;
             Impl = impl;
+            IsOrConditionOperand = isOrConditionOperand;
         }
 
         public override bool Equals(object obj)

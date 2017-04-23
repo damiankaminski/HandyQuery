@@ -408,6 +408,36 @@ namespace HandyQuery.Language.Tests
                 };
             }
 
+            {
+                var root = new RootNode();
+
+                var groupClose = CreateNode("GroupClose");
+
+                var @in = CreateNode("In").AddChild(groupClose);
+                var columnName = CreateNode("ColumnName").AddChild(@in);
+                var statement = CreateNode("Statement").AddChild(@in);
+
+                var @params = CreateNode("ParamsSeparator").AddChild(groupClose);
+                var compareOperator = CreateNode("CompareOperator").AddChild(@params);
+                var functionName = CreateNode("FunctionName").AddChild(@params);
+
+                var literal = CreateNode("Literal", true).AddChild(columnName).AddChild(statement).AddChild(compareOperator).AddChild(functionName);
+                var groupOpen = CreateNode("GroupOpen").AddChild(literal).AddChild(columnName).AddChild(statement).AddChild(compareOperator).AddChild(functionName);
+
+                root.AddChild(groupOpen);
+
+                yield return new TestCase("Or condition with multiple parts nested or after optional")
+                {
+                    Grammar = @"
+                        $NestedOr = ColumnName|Statement In
+                        $NestedOr2 = CompareOperator|FunctionName ParamsSeparator
+                        $AllFilters = GroupOpen ?Literal $NestedOr|$NestedOr2 GroupClose
+                        return $AllFilters
+                    ",
+                    ExpectedRoot = root
+                };
+            }
+
             // TODO: Optional at the end of part and then more optionals in upper part
 
             // TODO: optional in the end / at the beggining of or condition operand
