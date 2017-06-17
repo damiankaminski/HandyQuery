@@ -100,6 +100,8 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
                     {
                         // ended with optional tokenizer
 
+                        // TODO: I think that in case of multiple optional nodes this should be invoked only for first one (not sure though)
+
                         var savedContext = context;
                         _listeners.OnFirstNonOptionalNode += nodes =>
                         {
@@ -166,11 +168,11 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
                         var tailNodes = new Nodes();
 
                         var nonOptionalHeadNodes = new Nodes();
-                        var nonOptionalInPartFound = false;
 
                         foreach (var operand in orCondition.Operands)
                         {
                             _currentTail = initialTail;
+
                             switch (operand)
                             {
                                 case GrammarTokenizerUsage tokenizerUsage:
@@ -182,24 +184,24 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
                                     break;
 
                                 case GrammarPartUsage partUsage:
+                                    var nonOptionalInPartFound = false;
                                     var info = ProcessPartAndGetNodesInfo(partUsage, currentNodes =>
                                     {
-                                        if (nonOptionalInPartFound == false && currentNodes.Any(x => x.IsOptional == false))
-                                        {
-                                            nonOptionalHeadNodes.AddRange(currentNodes);
-                                            nonOptionalInPartFound = true;
+                                        if (nonOptionalInPartFound || currentNodes.All(x => x.IsOptional)) return;
 
-                                            // BUG: here's a problem:
-                                            _listeners.HandleNonOptionalNodes(nonOptionalHeadNodes);
-                                            // Execution of part processing should stop for a while here and
-                                            // `_listeners.HandleNonOptionalNodes(nonOptionalHeadNodes);` should be executed.
-                                            // Otherwise `HandleNonOptionalNodes` might (and will be in some cases) called
-                                            // from other places.
-                                            // Unfortunately `HandleNonOptionalNodes` cannot be simply called here because
-                                            // it needs to know all first non optional heads in `or` operands 
-                                            // (juts imagine `$SomeOperand|$OtherOperand|$DamnOperand`, each part may have non
-                                            // optional at different index, it simply needs to be stoped once found).
-                                        }
+                                        nonOptionalHeadNodes.AddRange(currentNodes);
+                                        nonOptionalInPartFound = true;
+
+                                        // BUG: here's a problem:
+                                        _listeners.HandleNonOptionalNodes(nonOptionalHeadNodes);
+                                        // Execution of part processing should stop for a while here and
+                                        // `_listeners.HandleNonOptionalNodes(nonOptionalHeadNodes);` should be executed.
+                                        // Otherwise `HandleNonOptionalNodes` might (and will in some cases) be called
+                                        // from other places.
+                                        // Unfortunately `HandleNonOptionalNodes` cannot be simply called here because
+                                        // it needs to know all first non optional heads in `or` operands 
+                                        // (juts imagine `$SomeOperand|$OtherOperand|$DamnOperand`, each part may have non
+                                        // optional at different index, it simply needs to be stoped once found).
                                     });
 
                                     headNodes.AddRange(info.Head);
