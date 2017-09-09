@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using HandyQuery.Language.Lexing.Graph.Builder;
 
@@ -18,6 +19,17 @@ namespace HandyQuery.Language.Lexing.Graph
         protected Node(bool isOptional)
         {
             IsOptional = isOptional;
+        }
+
+        public void Walk(Func<Node, bool> forEachNode)
+        {
+            var moveOn = forEachNode(this);
+            if (moveOn == false) return;
+
+            foreach (var child in Children)
+            {
+                child.Walk(forEachNode);
+            }
         }
 
         public void AddParents(IEnumerable<Node> parents)
@@ -101,6 +113,23 @@ namespace HandyQuery.Language.Lexing.Graph
                 foreach (var nonOptionalChild in child.FindFirstNonOptionalChildInAllChildBranches().ToArray())
                 {
                     yield return nonOptionalChild;
+                }
+            }
+        }
+
+        public IEnumerable<Node> FindFirstOptionalChildInAllChildBranches()
+        {
+            foreach (var child in Children.ToArray())
+            {
+                if (child.IsOptional)
+                {
+                    yield return child;
+                    continue;
+                }
+
+                foreach (var optionalChild in child.FindFirstOptionalChildInAllChildBranches().ToArray())
+                {
+                    yield return optionalChild;
                 }
             }
         }

@@ -1,4 +1,6 @@
-﻿namespace HandyQuery.Language.Lexing.Graph.Builder
+﻿using System;
+
+namespace HandyQuery.Language.Lexing.Graph.Builder
 {
     internal sealed class RootNode : Node
     {

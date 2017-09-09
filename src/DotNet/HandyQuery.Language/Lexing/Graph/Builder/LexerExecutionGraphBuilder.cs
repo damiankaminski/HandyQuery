@@ -5,9 +5,8 @@ using HandyQuery.Language.Lexing.Grammar.Structure;
 
 namespace HandyQuery.Language.Lexing.Graph.Builder
 {
-    internal sealed class LexerExecutionGraphBuilder : IDisposable
+    internal sealed class LexerExecutionGraphBuilder
     {
-        private readonly ProcessListeners _listeners = new ProcessListeners();
         private Nodes _currentTail;
 
         public RootNode BuildGraph(GrammarReturn grammarRoot)
@@ -15,37 +14,39 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
             var root = new RootNode();
 
             _currentTail = new Nodes(root);
-            ProcessPart(grammarRoot.PartUsage).ToList();
+            using (var enumerator = ProcessPart(grammarRoot.PartUsage).GetEnumerator())
+            while (enumerator.MoveNext()) { }
+
+            CreateOptionalEdges(root);
 
             return root;
         }
 
-        private Nodes ProcessPartAndGetLeaveNodes(GrammarPartUsage part)
+        private static void CreateOptionalEdges(RootNode root)
         {
-            using (var enumerator = ProcessPart(part).GetEnumerator())
+            var optionalNodes = new Stack<Node>(root.FindFirstOptionalChildInAllChildBranches());
+            if (optionalNodes.Any() == false)
             {
-                Nodes leaveNodes = null;
-                while (enumerator.MoveNext())
-                {
-                    leaveNodes = enumerator.Current;
-                }
-
-                return leaveNodes;
+                return;
             }
-        }
 
-        private Nodes ProcessPartAndGetEntryNodes(GrammarPartUsage part)
-        {
-            using (var enumerator = ProcessPart(part).GetEnumerator())
+            var optionalNode = optionalNodes.Pop();
+            while (optionalNode != null)
             {
-                enumerator.MoveNext();
-                var entryNodes = enumerator.Current;
+                var from = optionalNode.FindFirstNonOptionalParentInAllParentBranches().ToList();
+                var to = optionalNode.FindFirstNonOptionalChildInAllChildBranches().ToList();
+                MakeOptionalEdge(new Nodes(from), new Nodes(to));
 
-                while (enumerator.MoveNext())
+                foreach (var node in to)
                 {
+                    var nextOptionalNodes = node.FindFirstOptionalChildInAllChildBranches();
+                    foreach (var nextOptionalNode in nextOptionalNodes)
+                    {
+                        optionalNodes.Push(nextOptionalNode);
+                    }
                 }
 
-                return entryNodes;
+                optionalNode = optionalNodes.Any() ? optionalNodes.Pop() : null;
             }
         }
 
@@ -79,44 +80,15 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
         {
             var contextStack = new Stack<PartContext>();
 
-            var context = new PartContext(part)
-            {
-                IsInOptionalScope = false
-            };
+            var context = new PartContext(part);
 
             while (true)
             {
-                context.WasInOptionalScope = context.IsInOptionalScope;
-                context.LastNonOptionalNodes = context.IsInOptionalScope ? context.LastNonOptionalNodes : _currentTail;
-
                 if (context.MoveNext() == false)
                 {
                     if (contextStack.Any() == false)
                     {
                         break;
-                    }
-
-                    if (context.IsInOptionalScope)
-                    {
-                        // ended with optional tokenizer
-
-                        // TODO: I think that in case of multiple optional nodes this should be invoked only for first one (not sure though)
-
-                        var savedContext = context;
-                        _listeners.OnFirstNonOptionalNode += nodes =>
-                        {
-                            MakeOptionalEdge(savedContext.LastNonOptionalNodes, nodes);
-                        };
-                    }
-
-                    if (context.PartUsage.IsOptional)
-                    {
-                        // part is optional
-                        var savedFromNodes = contextStack.Peek().LastNonOptionalNodes;
-                        _listeners.OnFirstNonOptionalNode += nodes =>
-                        {
-                            MakeOptionalEdge(savedFromNodes, nodes);
-                        };
                     }
 
                     context = contextStack.Pop();
@@ -131,24 +103,6 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
                         _currentTail.AddChild(node);
                         _currentTail = node;
                         yield return node;
-
-                        if (tokenizerUsage.IsOptional)
-                        {
-                            if (context.IsInOptionalScope == false)
-                            {
-                                var savedFromNodes = context.LastNonOptionalNodes;
-                                _listeners.OnFirstNonOptionalNode += nodes =>
-                                {
-                                    MakeOptionalEdge(savedFromNodes, nodes);
-                                };
-                            }
-                        }
-                        else
-                        {    
-                            _listeners.HandleNonOptionalNodes(node);
-                        }
-
-                        context.IsInOptionalScope = tokenizerUsage.IsOptional;
                         break;
                     }
 
@@ -167,8 +121,6 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
                         var bodyNodes = new List<Nodes>();
                         var tailNodes = new Nodes();
 
-                        var nonOptionalHeadNodes = new Nodes();
-
                         foreach (var operand in orCondition.Operands)
                         {
                             _currentTail = initialTail;
@@ -180,28 +132,12 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
                                     _currentTail.AddChild(node);
                                     tailNodes.Add(node);
                                     headNodes.Add(node);
-                                    if (tokenizerUsage.IsOptional == false) nonOptionalHeadNodes.Add(node);
                                     break;
 
                                 case GrammarPartUsage partUsage:
-                                    var nonOptionalInPartFound = false;
+                                    // TODO: use without lambda
                                     var info = ProcessPartAndGetNodesInfo(partUsage, currentNodes =>
                                     {
-                                        if (nonOptionalInPartFound || currentNodes.All(x => x.IsOptional)) return;
-
-                                        nonOptionalHeadNodes.AddRange(currentNodes);
-                                        nonOptionalInPartFound = true;
-
-                                        // BUG: here's a problem:
-                                        _listeners.HandleNonOptionalNodes(nonOptionalHeadNodes);
-                                        // Execution of part processing should stop for a while here and
-                                        // `_listeners.HandleNonOptionalNodes(nonOptionalHeadNodes);` should be executed.
-                                        // Otherwise `HandleNonOptionalNodes` might (and will in some cases) be called
-                                        // from other places.
-                                        // Unfortunately `HandleNonOptionalNodes` cannot be simply called here because
-                                        // it needs to know all first non optional heads in `or` operands 
-                                        // (juts imagine `$SomeOperand|$OtherOperand|$DamnOperand`, each part may have non
-                                        // optional at different index, it simply needs to be stoped once found).
                                     });
 
                                     headNodes.AddRange(info.Head);
@@ -213,15 +149,6 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
                                     throw new ArgumentOutOfRangeException();
                             }
                         }
-
-                        // TODO: not sure if it will be still needed once part operand handling will be fixed
-                        if (part.IsOrConditionOperand == false)
-                        {
-                            // if it is an or condition operand then non optional nodes stuff will be handled by the caller
-                            _listeners.HandleNonOptionalNodes(nonOptionalHeadNodes);
-                        }
-
-                        context.IsInOptionalScope = false;
 
                         // if part has only 1 element then is in the headNodes and tailNodes are empty
                         _currentTail = tailNodes.Any() ? tailNodes : headNodes;
@@ -240,24 +167,19 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
                         throw new ArgumentOutOfRangeException();
                 }
             }
-
-            void MakeOptionalEdge(Nodes from, Nodes to)
-            {
-                if (from == null || to == null) return;
-
-                foreach (var toNode in to)
-                {
-                    foreach (var fromNode in from)
-                    {
-                        fromNode.AddChildImpl(toNode);
-                    }
-                }
-            }
         }
 
-        public void Dispose()
+        private static void MakeOptionalEdge(Nodes from, Nodes to)
         {
-            _listeners?.Dispose();
+            if (from == null || to == null) return;
+
+            foreach (var toNode in to)
+            {
+                foreach (var fromNode in from)
+                {
+                    fromNode.AddChildImpl(toNode);
+                }
+            }
         }
 
         private sealed class Nodes : List<Node>
@@ -305,9 +227,6 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
 
             public IGrammarBodyItem CurrentBodyItem => PartUsage.Impl.Body[CurrentBodyItemIndex];
 
-            public bool IsInOptionalScope { get; set; }
-            public bool WasInOptionalScope { get; set; }
-            public Nodes LastNonOptionalNodes { get; set; }
             public GrammarPartUsage PartUsage { get; }
 
             private int CurrentBodyItemIndex { get; set; } = -1;
@@ -318,22 +237,6 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
 
                 CurrentBodyItemIndex++;
                 return true;
-            }
-        }
-
-        private class ProcessListeners : IDisposable
-        {
-            public event Action<Nodes> OnFirstNonOptionalNode;
-
-            public void HandleNonOptionalNodes(Nodes nodes)
-            {
-                OnFirstNonOptionalNode?.Invoke(nodes);
-                OnFirstNonOptionalNode = delegate { };
-            }
-
-            public void Dispose()
-            {
-                OnFirstNonOptionalNode = null;
             }
         }
     }
