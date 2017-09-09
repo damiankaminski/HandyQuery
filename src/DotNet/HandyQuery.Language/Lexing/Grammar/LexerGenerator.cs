@@ -8,6 +8,8 @@ using HandyQuery.Language.Lexing.Tokenizers.Abstract;
 
 namespace HandyQuery.Language.Lexing.Grammar
 {
+    // TODO: change syntax to Backus–Naur form? see https://en.wikipedia.org/wiki/Backus–Naur_form
+    
     internal sealed class LexerGenerator
     {
         /// <summary>

@@ -91,10 +91,14 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
                         break;
                     }
 
-                    context = contextStack.Pop();
+                    var parentContext = contextStack.Pop();
+                    context.OnSwitchToParent(parentContext);
+                    context = parentContext;
                     continue;
                 }
 
+                var entryContext = context;
+                
                 switch (context.CurrentBodyItem)
                 {
                     case GrammarTokenizerUsage tokenizerUsage:
@@ -108,6 +112,26 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
 
                     case GrammarPartUsage partUsage:
                     {
+                        if (partUsage.IsOptional)
+                        {
+                            var latestNonOptional = new List<Node>();
+                            foreach (var tailNode in _currentTail)
+                            {
+                                if (tailNode.IsOptional == false)
+                                {
+                                    latestNonOptional.Add(tailNode);
+                                    continue;
+                                }
+
+                                latestNonOptional.AddRange(tailNode.FindFirstNonOptionalParentInAllParentBranches());
+                            }
+                            
+                            context.OnNextNonOptionalInThisOrAnyParentPart += nonOptional =>
+                            {
+                                MakeOptionalEdge(new Nodes(latestNonOptional), nonOptional);
+                            };                            
+                        }
+                            
                         contextStack.Push(context);
                         context = new PartContext(partUsage);
                         break;
@@ -166,6 +190,8 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
+
+                entryContext.AfterCurrentBodyItemProcessing(_currentTail);
             }
         }
 
@@ -225,10 +251,10 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
                 PartUsage = partUsage;
             }
 
+            public event Action<Nodes> OnNextNonOptionalInThisOrAnyParentPart;
             public IGrammarBodyItem CurrentBodyItem => PartUsage.Impl.Body[CurrentBodyItemIndex];
-
-            public GrammarPartUsage PartUsage { get; }
-
+            
+            private GrammarPartUsage PartUsage { get; }
             private int CurrentBodyItemIndex { get; set; } = -1;
 
             public bool MoveNext()
@@ -237,6 +263,22 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
 
                 CurrentBodyItemIndex++;
                 return true;
+            }
+
+            public void AfterCurrentBodyItemProcessing(Nodes currentTail)
+            {
+                if (CurrentBodyItem.IsOptional) return;
+                OnNextNonOptionalInThisOrAnyParentPart?.Invoke(currentTail);
+                OnNextNonOptionalInThisOrAnyParentPart = null;
+            }
+
+            public void OnSwitchToParent(PartContext parent)
+            {
+                if (OnNextNonOptionalInThisOrAnyParentPart != null)
+                {
+                    parent.OnNextNonOptionalInThisOrAnyParentPart += OnNextNonOptionalInThisOrAnyParentPart;
+                    OnNextNonOptionalInThisOrAnyParentPart = null;
+                }
             }
         }
     }

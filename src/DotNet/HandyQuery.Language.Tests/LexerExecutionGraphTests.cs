@@ -161,9 +161,8 @@ namespace HandyQuery.Language.Tests
 
             {
                 var literal = CreateNode("Literal");
-                var somethingLeaveNode = CreateNode("CompareOperator");
-                var something = CreateNode("Statement").AddChild(somethingLeaveNode);
-                somethingLeaveNode.AddChild(literal);
+                var something = CreateNode("Statement").AddChild(
+                    CreateNode("CompareOperator").AddChild(literal));
 
                 var columnName = CreateNode("ColumnName")
                     .AddChild(something)
@@ -179,6 +178,59 @@ namespace HandyQuery.Language.Tests
                     ExpectedRoot = new RootNode().AddChild(columnName)
                 };
             }
+
+//            {
+//                var literal = CreateNode("Literal");
+//                
+//                var something = CreateNode("Statement").AddChild(
+//                    CreateNode("CompareOperator").AddChild(literal));
+//
+//                var something2 = CreateNode("GroupOpen").AddChild(
+//                    CreateNode("GroupClose").AddChild(literal));
+//                
+//                var columnName = CreateNode("ColumnName")
+//                    .AddChild(something)
+//                    .AddChild(something2)
+//                    .AddChild(literal);
+//
+//                yield return new TestCase("Optional or condition")
+//                {
+//                    Grammar = @"
+//                        $Something = Statement CompareOperator
+//                        $Something2 = GroupOpen GroupClose
+//                        $AllFilters = ColumnName ?$Something|?$Something2 Literal
+//                        return $AllFilters
+//                    ",
+//                    ExpectedRoot = new RootNode().AddChild(columnName)
+//                };
+//            }
+
+            {
+                var literal = CreateNode("Literal");
+                var groupOpen = CreateNode("GroupOpen").AddChild(CreateNode("GroupClose").AddChild(literal));
+                var statement = CreateNode("Statement").AddChild(CreateNode("CompareOperator")
+                    .AddChild(groupOpen).AddChild(literal));
+
+                var columnName = CreateNode("ColumnName")
+                    .AddChild(statement)
+                    .AddChild(literal);
+
+                yield return new TestCase("Multiple optional parts")
+                {
+                    Grammar = @"
+                        $Something = Statement CompareOperator
+                        $Something2 = GroupOpen GroupClose
+                        $AllFilters = ColumnName ?$Something ?$Something2 Literal
+                        return $AllFilters
+                    ",
+                    ExpectedRoot = new RootNode().AddChild(columnName)
+                };
+            }
+
+            // TODO: optional element before optional part
+            // TODO: optional element as first in the part before optional part (e.g. $AllFilters = ?ColumnName ?$Something Literal)
+            // TODO: optional element after optional part
+            // TODO: optional element as last in the part after optional part (e.g. $AllFilters = ColumnName ?$Something ?Literal)
 
             {
                 var literal = CreateNode("Literal");
@@ -393,7 +445,8 @@ namespace HandyQuery.Language.Tests
                 var columnName = CreateNode("ColumnName").AddChild(@in);
                 var statement = CreateNode("Statement").AddChild(@in);
                 var literal = CreateNode("Literal", true).AddChild(compOp).AddChild(columnName).AddChild(statement);
-                var groupOpen = CreateNode("GroupOpen").AddChild(literal).AddChild(compOp).AddChild(columnName).AddChild(statement);
+                var groupOpen = CreateNode("GroupOpen").AddChild(literal).AddChild(compOp).AddChild(columnName)
+                    .AddChild(statement);
 
                 root.AddChild(groupOpen);
 
@@ -421,8 +474,10 @@ namespace HandyQuery.Language.Tests
                 var compareOperator = CreateNode("CompareOperator").AddChild(@params);
                 var functionName = CreateNode("FunctionName").AddChild(@params);
 
-                var literal = CreateNode("Literal", true).AddChild(columnName).AddChild(statement).AddChild(compareOperator).AddChild(functionName);
-                var groupOpen = CreateNode("GroupOpen").AddChild(literal).AddChild(columnName).AddChild(statement).AddChild(compareOperator).AddChild(functionName);
+                var literal = CreateNode("Literal", true).AddChild(columnName).AddChild(statement)
+                    .AddChild(compareOperator).AddChild(functionName);
+                var groupOpen = CreateNode("GroupOpen").AddChild(literal).AddChild(columnName).AddChild(statement)
+                    .AddChild(compareOperator).AddChild(functionName);
 
                 root.AddChild(groupOpen);
 
