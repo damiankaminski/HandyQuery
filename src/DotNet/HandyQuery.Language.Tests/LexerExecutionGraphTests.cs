@@ -499,31 +499,31 @@ namespace HandyQuery.Language.Tests
             // TODO: multiple optional elements (parts/tokenizers)
 
 
-//            {
-//                var paramsClose = CreateNode("ParamsClose");
-//                
-//                var literal = CreateNode("Literal");
-//                var paramsSeparator = CreateNode("ParamsSeparator").AddChild(literal);
-//                var @params = literal.AddChild(paramsSeparator).AddChild(paramsClose);
-//
-//                yield return new TestCase("Simple cycles")
-//                {
-//                    Grammar = @"
-//                        $Value = Literal
-//
-//                        $FunctionInvokation = FunctionName ParamsOpen $Params ParamsClose
-//                        $Params = $Value ?$MoreParams
-//                        $MoreParams = ParamsSeparator $Params
-//
-//                        return $FunctionInvokation
-//                    ",
-//                    ExpectedRoot = new RootNode().AddChild(
-//                        CreateNode("FunctionName").AddChild(
-//                            CreateNode("ParamsOpen").AddChild(
-//                                @params.AddChild(
-//                                    paramsClose))))
-//                };
-//            }
+            {
+                var paramsClose = CreateNode("ParamsClose");
+                
+                var literal = CreateNode("Literal");
+                var paramsSeparator = CreateNode("ParamsSeparator").AddChild(literal);
+                var @params = literal.AddChild(paramsSeparator).AddChild(paramsClose);
+
+                yield return new TestCase("Simple cycles")
+                {
+                    Grammar = @"
+                        $Value = Literal
+
+                        $FunctionInvokation = FunctionName ParamsOpen $Params ParamsClose
+                        $Params = $Value ?$MoreParams
+                        $MoreParams = ParamsSeparator $Params
+
+                        return $FunctionInvokation
+                    ",
+                    ExpectedRoot = new RootNode().AddChild(
+                        CreateNode("FunctionName").AddChild(
+                            CreateNode("ParamsOpen").AddChild(
+                                @params.AddChild(
+                                    paramsClose))))
+                };
+            }
 
             /*{
                 var paramsClose = CreateNode("ParamsClose");

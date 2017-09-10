@@ -23,6 +23,17 @@
             return obj is GrammarPartUsage && Equals((GrammarPartUsage)obj);
         }
 
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                var hashCode = (Name != null ? Name.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ IsOptional.GetHashCode();
+                hashCode = (hashCode * 397) ^ (Impl != null ? Impl.GetHashCode() : 0);
+                return hashCode;
+            }
+        }
+
         public bool Equals(GrammarPartUsage usage)
         {
             return usage.Name == Name && usage.IsOptional == IsOptional && usage.Impl.Equals(Impl);

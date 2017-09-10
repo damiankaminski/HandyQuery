@@ -40,10 +40,13 @@
         {
             return part.Name == Name && part.Body.Equals(Body);
         }
-
+        
         public override int GetHashCode()
         {
-            return Name.GetHashCode();
+            unchecked
+            {
+                return ((_body != null ? _body.GetHashCode() : 0) * 397) ^ (Name != null ? Name.GetHashCode() : 0);
+            }
         }
 
         public override string ToString()

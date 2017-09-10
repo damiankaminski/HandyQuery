@@ -80,8 +80,15 @@ namespace HandyQuery.Language.Lexing.Graph
         /// <summary>
         /// Finds first non optional parent in all parent branches (single node may have multiple parents).
         /// </summary>
-        public IEnumerable<Node> FindFirstNonOptionalParentInAllParentBranches()
+        public IEnumerable<Node> FindFirstNonOptionalParentInAllParentBranches(HashSet<Node> visited = null)
         {
+            if (visited?.Contains(this) ?? false)
+            {
+                yield break;
+            }
+            visited = visited ?? new HashSet<Node>();
+            visited.Add(this);
+            
             foreach (var parent in Parents.ToArray())
             {
                 if (parent.IsOptional == false)
@@ -90,7 +97,7 @@ namespace HandyQuery.Language.Lexing.Graph
                     continue;
                 }
 
-                foreach (var nonOptionalParent in parent.FindFirstNonOptionalParentInAllParentBranches().ToArray())
+                foreach (var nonOptionalParent in parent.FindFirstNonOptionalParentInAllParentBranches(visited).ToArray())
                 {
                     yield return nonOptionalParent;
                 }
@@ -100,8 +107,15 @@ namespace HandyQuery.Language.Lexing.Graph
         /// <summary>
         /// Finds first non optional child in all child branches (single node may have multiple children).
         /// </summary>
-        public IEnumerable<Node> FindFirstNonOptionalChildInAllChildBranches()
+        public IEnumerable<Node> FindFirstNonOptionalChildInAllChildBranches(HashSet<Node> visited = null)
         {
+            if (visited?.Contains(this) ?? false)
+            {
+                yield break;
+            }
+            visited = visited ?? new HashSet<Node>();
+            visited.Add(this);
+            
             foreach (var child in Children.ToArray())
             {
                 if (child.IsOptional == false)
@@ -110,15 +124,22 @@ namespace HandyQuery.Language.Lexing.Graph
                     continue;
                 }
 
-                foreach (var nonOptionalChild in child.FindFirstNonOptionalChildInAllChildBranches().ToArray())
+                foreach (var nonOptionalChild in child.FindFirstNonOptionalChildInAllChildBranches(visited).ToArray())
                 {
                     yield return nonOptionalChild;
                 }
             }
         }
 
-        public IEnumerable<Node> FindFirstOptionalChildInAllChildBranches()
+        public IEnumerable<Node> FindFirstOptionalChildInAllChildBranches(HashSet<Node> visited = null)
         {
+            if (visited?.Contains(this) ?? false)
+            {
+                yield break;
+            }
+            visited = visited ?? new HashSet<Node>();
+            visited.Add(this);
+
             foreach (var child in Children.ToArray())
             {
                 if (child.IsOptional)
@@ -127,7 +148,7 @@ namespace HandyQuery.Language.Lexing.Graph
                     continue;
                 }
 
-                foreach (var optionalChild in child.FindFirstOptionalChildInAllChildBranches().ToArray())
+                foreach (var optionalChild in child.FindFirstOptionalChildInAllChildBranches(visited).ToArray())
                 {
                     yield return optionalChild;
                 }

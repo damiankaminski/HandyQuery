@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using HandyQuery.Language.Lexing.Grammar.Structure;
 
@@ -7,15 +8,19 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
 {
     internal sealed class LexerExecutionGraphBuilder
     {
-        private Nodes _currentTail;
-
         public RootNode BuildGraph(GrammarReturn grammarRoot)
         {
             var root = new RootNode();
 
-            _currentTail = new Nodes(root);
-            using (var enumerator = ProcessPart(grammarRoot.PartUsage).GetEnumerator())
-            while (enumerator.MoveNext()) { }
+            var context = new PartContext(grammarRoot.PartUsage, null)
+            {
+                CurrentTail = root
+            };
+            
+            using (var enumerator = ProcessPart(context).GetEnumerator())
+                while (enumerator.MoveNext())
+                {
+                }
 
             CreateOptionalEdges(root);
 
@@ -50,11 +55,12 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
             }
         }
 
-        private (Nodes Head, IEnumerable<Nodes> Body, Nodes Tail) ProcessPartAndGetNodesInfo(GrammarPartUsage part, Action<Nodes> forEachAction)
+        private (Nodes Head, IEnumerable<Nodes> Body, Nodes Tail) ProcessPartAndGetNodesInfo(GrammarPartUsage part, 
+            PartContext parentContext, Action<Nodes> forEachAction)
         {
-            using (var enumerator = ProcessPart(part).GetEnumerator())
+            using (var enumerator = ProcessPart(new PartContext(part, parentContext)).GetEnumerator())
             {
-                Nodes tail = null;
+                var tail = new Nodes();
                 var body = new List<Nodes>();
                 enumerator.MoveNext();
                 var head = enumerator.Current;
@@ -76,11 +82,9 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
             }
         }
 
-        private IEnumerable<Nodes> ProcessPart(GrammarPartUsage part)
+        private IEnumerable<Nodes> ProcessPart(PartContext context)
         {
             var contextStack = new Stack<PartContext>();
-
-            var context = new PartContext(part);
 
             while (true)
             {
@@ -92,30 +96,44 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
                     }
 
                     var parentContext = contextStack.Pop();
+                    
+                    // on part processing finish current tail gets changed in parent context
+                    // after all part created new items 
+                    parentContext.CurrentTail = context.CurrentTail;
+                    
                     context.OnSwitchToParent(parentContext);
                     context = parentContext;
                     continue;
                 }
 
                 var entryContext = context;
-                
+
                 switch (context.CurrentBodyItem)
                 {
                     case GrammarTokenizerUsage tokenizerUsage:
                     {
                         var node = new TokenizerNode(tokenizerUsage);
-                        _currentTail.AddChild(node);
-                        _currentTail = node;
+                        context.CurrentTail.AddChild(node);
+                        context.CurrentTail = node;
                         yield return node;
                         break;
                     }
 
                     case GrammarPartUsage partUsage:
                     {
+                        var contextCandidate = new PartContext(partUsage, context);
+                        if (contextCandidate.IsCyclic)
+                        {
+                            var parentTail = contextStack.Peek().CurrentTail;
+                            context.CurrentTail.AddChild(parentTail);
+                            context.CurrentTail = parentTail;
+                            break;
+                        }
+                        
                         if (partUsage.IsOptional)
                         {
                             var latestNonOptional = new List<Node>();
-                            foreach (var tailNode in _currentTail)
+                            foreach (var tailNode in context.CurrentTail)
                             {
                                 if (tailNode.IsOptional == false)
                                 {
@@ -125,21 +143,21 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
 
                                 latestNonOptional.AddRange(tailNode.FindFirstNonOptionalParentInAllParentBranches());
                             }
-                            
+
                             context.OnNextNonOptionalInThisOrAnyParentPart += nonOptional =>
                             {
                                 MakeOptionalEdge(new Nodes(latestNonOptional), nonOptional);
-                            };                            
+                            };
                         }
-                            
+                        
                         contextStack.Push(context);
-                        context = new PartContext(partUsage);
+                        context = contextCandidate;
                         break;
                     }
 
                     case GrammarOrCondition orCondition:
                     {
-                        var initialTail = new Nodes(_currentTail);
+                        var initialTail = new Nodes(context.CurrentTail);
 
                         var headNodes = new Nodes();
                         var bodyNodes = new List<Nodes>();
@@ -147,22 +165,20 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
 
                         foreach (var operand in orCondition.Operands)
                         {
-                            _currentTail = initialTail;
+                            context.CurrentTail = initialTail;
 
                             switch (operand)
                             {
                                 case GrammarTokenizerUsage tokenizerUsage:
                                     var node = new TokenizerNode(tokenizerUsage);
-                                    _currentTail.AddChild(node);
+                                    context.CurrentTail.AddChild(node);
                                     tailNodes.Add(node);
                                     headNodes.Add(node);
                                     break;
 
                                 case GrammarPartUsage partUsage:
                                     // TODO: use without lambda
-                                    var info = ProcessPartAndGetNodesInfo(partUsage, currentNodes =>
-                                    {
-                                    });
+                                    var info = ProcessPartAndGetNodesInfo(partUsage, context, currentNodes => { });
 
                                     headNodes.AddRange(info.Head);
                                     bodyNodes.AddRange(info.Body);
@@ -175,7 +191,7 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
                         }
 
                         // if part has only 1 element then is in the headNodes and tailNodes are empty
-                        _currentTail = tailNodes.Any() ? tailNodes : headNodes;
+                        context.CurrentTail = tailNodes.Any() ? tailNodes : headNodes;
 
                         yield return headNodes;
                         foreach (var bodyNode in bodyNodes)
@@ -191,7 +207,101 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
                         throw new ArgumentOutOfRangeException();
                 }
 
-                entryContext.AfterCurrentBodyItemProcessing(_currentTail);
+                entryContext.AfterCurrentBodyItemProcessing(context.CurrentTail);
+            }
+        }
+
+        private sealed class PartContext
+        {
+            public event Action<Nodes> OnNextNonOptionalInThisOrAnyParentPart;
+            public IGrammarBodyItem CurrentBodyItem => PartUsage.Impl.Body[CurrentBodyItemIndex];
+
+            private GrammarPartUsage PartUsage { get; }
+            private int CurrentBodyItemIndex { get; set; } = -1;
+
+            private readonly PartContext _parentContext;
+            
+            private Nodes _currentTail;
+            public Nodes CurrentTail
+            {
+                get
+                {
+                    var current = this;
+                    while (current != null)
+                    {
+                        if (current._currentTail != null)
+                        {
+                            return current._currentTail;
+                        }
+                        current = current._parentContext;
+                    }
+
+                    throw new InvalidOperationException();
+                }
+
+                set => _currentTail = value;
+            }
+
+            public bool IsCyclic
+            {
+                get
+                {
+                    // this is very dummy implementation, could be easily broken
+                    // when one part is used multiple times in different parts
+
+                    if (_parentContext == null)
+                    {
+                        return false;
+                    }
+
+                    var parts = new HashSet<GrammarPartUsage>();
+                    var current = this;
+                    while (current != null)
+                    {
+                        if (parts.Add(current.PartUsage) == false)
+                        {
+                            return true;
+                        }
+                        current = current._parentContext;
+                    }
+
+                    return false;
+                }
+            }
+
+            public PartContext(GrammarPartUsage partUsage, PartContext parentContext)
+            {
+                _parentContext = parentContext;
+                PartUsage = partUsage;
+            }
+
+            public bool MoveNext()
+            {
+                if (CurrentBodyItemIndex + 1 >= PartUsage.Impl.Body.Count) return false;
+
+                CurrentBodyItemIndex++;
+                return true;
+            }
+
+            public void AfterCurrentBodyItemProcessing(Nodes currentTail)
+            {
+                if (CurrentBodyItem.IsOptional) return;
+                OnNextNonOptionalInThisOrAnyParentPart?.Invoke(currentTail);
+                OnNextNonOptionalInThisOrAnyParentPart = null;
+            }
+
+            public void OnSwitchToParent(PartContext parent)
+            {
+                if (OnNextNonOptionalInThisOrAnyParentPart != null)
+                {
+                    parent.OnNextNonOptionalInThisOrAnyParentPart += OnNextNonOptionalInThisOrAnyParentPart;
+                    OnNextNonOptionalInThisOrAnyParentPart = null;
+                }
+            }
+
+            public override string ToString()
+            {
+                return PartUsage.ToString();
             }
         }
 
@@ -238,47 +348,17 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
                 }
             }
 
+            public void AddChild(Nodes nodes)
+            {
+                foreach (var node in nodes)
+                {
+                    AddChild(node);
+                }
+            }
+
             public static implicit operator Nodes(Node node)
             {
                 return new Nodes(node);
-            }
-        }
-
-        private sealed class PartContext
-        {
-            public PartContext(GrammarPartUsage partUsage)
-            {
-                PartUsage = partUsage;
-            }
-
-            public event Action<Nodes> OnNextNonOptionalInThisOrAnyParentPart;
-            public IGrammarBodyItem CurrentBodyItem => PartUsage.Impl.Body[CurrentBodyItemIndex];
-            
-            private GrammarPartUsage PartUsage { get; }
-            private int CurrentBodyItemIndex { get; set; } = -1;
-
-            public bool MoveNext()
-            {
-                if (CurrentBodyItemIndex + 1 >= PartUsage.Impl.Body.Count) return false;
-
-                CurrentBodyItemIndex++;
-                return true;
-            }
-
-            public void AfterCurrentBodyItemProcessing(Nodes currentTail)
-            {
-                if (CurrentBodyItem.IsOptional) return;
-                OnNextNonOptionalInThisOrAnyParentPart?.Invoke(currentTail);
-                OnNextNonOptionalInThisOrAnyParentPart = null;
-            }
-
-            public void OnSwitchToParent(PartContext parent)
-            {
-                if (OnNextNonOptionalInThisOrAnyParentPart != null)
-                {
-                    parent.OnNextNonOptionalInThisOrAnyParentPart += OnNextNonOptionalInThisOrAnyParentPart;
-                    OnNextNonOptionalInThisOrAnyParentPart = null;
-                }
             }
         }
     }
