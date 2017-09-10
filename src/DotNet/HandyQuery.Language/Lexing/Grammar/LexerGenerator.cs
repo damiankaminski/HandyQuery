@@ -9,6 +9,8 @@ using HandyQuery.Language.Lexing.Tokenizers.Abstract;
 namespace HandyQuery.Language.Lexing.Grammar
 {
     // TODO: change syntax to Backus–Naur form? see https://en.wikipedia.org/wiki/Backus–Naur_form
+    // TODO: change naming to terminal/non terminal (https://en.wikipedia.org/wiki/Terminal_and_nonterminal_symbols)? 
+    // TODO: e.g. Part -> NonTerminal, TokenizerNode -> Terminal
     
     internal sealed class LexerGenerator
     {
