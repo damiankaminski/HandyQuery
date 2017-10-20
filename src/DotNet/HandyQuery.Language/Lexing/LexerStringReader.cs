@@ -80,7 +80,7 @@ namespace HandyQuery.Language.Lexing
 
             return ReadWhile(c =>
             {
-                if (Char.IsWhiteSpace(c))
+                if (char.IsWhiteSpace(c))
                 {
                     counter++;
                 }

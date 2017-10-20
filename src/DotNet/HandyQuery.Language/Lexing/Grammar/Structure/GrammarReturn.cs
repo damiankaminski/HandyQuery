@@ -2,11 +2,11 @@
 {
     internal sealed class GrammarReturn
     {
-        public GrammarPartUsage PartUsage { get; }
+        public GrammarNonTerminalUsage NonTerminalUsage { get; }
 
-        public GrammarReturn(GrammarPartUsage partUsage)
+        public GrammarReturn(GrammarNonTerminalUsage nonTerminalUsage)
         {
-            PartUsage = partUsage;
+            NonTerminalUsage = nonTerminalUsage;
         }
     }
 }

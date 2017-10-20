@@ -5,17 +5,17 @@ using HandyQuery.Language.Lexing.Tokenizers.Abstract;
 
 namespace HandyQuery.Language.Lexing.Graph.Builder
 {
-    internal sealed class TokenizerNode : Node
+    internal sealed class TerminalNode : Node
     {
         public readonly ITokenizer Tokenizer;
-        public override BuilderNodeType NodeType { get; } = BuilderNodeType.Tokenizer;
+        public override BuilderNodeType NodeType { get; } = BuilderNodeType.Terminal;
 
-        public TokenizerNode(GrammarTokenizerUsage tokenizerUsage) : base(tokenizerUsage?.IsOptional ?? false)
+        public TerminalNode(GrammarTerminalUsage terminalUsage)
         {
-            Tokenizer = tokenizerUsage?.Impl;
+            Tokenizer = terminalUsage?.Impl;
         }
 
-        public TokenizerNode AddChild(Node child)
+        public TerminalNode AddChild(Node child)
         {
             AddChildImpl(child);
             return this;
@@ -23,12 +23,12 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
 
         public override bool Equals(Node nodeBase, HashSet<Node> visitedNodes = null)
         {
-            if (nodeBase.NodeType != BuilderNodeType.Tokenizer)
+            if (nodeBase.NodeType != BuilderNodeType.Terminal)
             {
                 return false;
             }
 
-            var node = (TokenizerNode)nodeBase;
+            var node = (TerminalNode)nodeBase;
 
             if (node.Tokenizer?.GetType() != Tokenizer?.GetType())
             {
@@ -40,10 +40,9 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
 
         public override string ToString()
         {
-            var optional = IsOptional ? "?" : "";
             var name = Tokenizer?.GetType().Name;
-            name = name?.Substring(0, name.LastIndexOf("Tokenizer", StringComparison.Ordinal)) ?? "ROOT";
-            return $"{optional}{name}";
+            name = name?.Substring(0, name.LastIndexOf("Terminal", StringComparison.Ordinal)) ?? "ROOT";
+            return name;
         }
     }
 }

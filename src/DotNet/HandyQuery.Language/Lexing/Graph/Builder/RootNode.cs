@@ -6,7 +6,7 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
     {
         public override BuilderNodeType NodeType { get; } = BuilderNodeType.Root;
 
-        public RootNode() : base(false)
+        public RootNode()
         {
         }
 
@@ -18,7 +18,7 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
 
         public override string ToString()
         {
-            return "Root";
+            return "ROOT";
         }
     }
 }

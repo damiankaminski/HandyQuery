@@ -4,27 +4,23 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using HandyQuery.Language.Lexing.Grammar.Structure;
-using HandyQuery.Language.Lexing.Tokenizers.Abstract;
 
 namespace HandyQuery.Language.Lexing.Grammar
 {
-    // TODO: change syntax to Backus–Naur form? see https://en.wikipedia.org/wiki/Backus–Naur_form
-    // TODO: change naming to terminal/non terminal (https://en.wikipedia.org/wiki/Terminal_and_nonterminal_symbols)? 
-    // TODO: e.g. Part -> NonTerminal, TokenizerNode -> Terminal
-    
     internal sealed class LexerGenerator
     {
         /// <summary>
-        /// Generates a new parser which can be then reused to parse user queries.
+        /// Generates a new lexer which can be then reused to tokenize user queries.
         /// </summary>
         /// <remarks>Lexer is generated only once, so there is no need to avoid allocations.</remarks>
         public Lexer GenerateLexer()
         {
             var tokenizersSource = new TokenizersSource();
-
+            var notFoundException = new GrammarLexerGeneratorException("Grammar not found.");
+            
             using (var stream = Assembly.GetExecutingAssembly()
                 .GetManifestResourceStream("HandyQuery.Language.Lexing.Grammar.Language.grammar"))
-            using (var textStream = new StreamReader(stream))
+            using (var textStream = new StreamReader(stream ?? throw notFoundException))
             {
                 var grammar = textStream.ReadToEnd();
                 var reader = new LexerStringReader(grammar, 0);
@@ -41,13 +37,13 @@ namespace HandyQuery.Language.Lexing.Grammar
         internal sealed class ParserImpl
         {
             private readonly LexerStringReader _reader;
-            private readonly Dictionary<string, GrammarPart> _parts = new Dictionary<string, GrammarPart>();
+            private readonly Dictionary<string, GrammarNonTerminal> _nonTerminals = new Dictionary<string, GrammarNonTerminal>();
             private readonly TokenizersSource _tokenizersSource;
 
             private const string Comment = "//";
             private const string Return = "return ";
-            private const string GrammarPart = "$";
-            private const string Optional = "?";
+            private const string GrammarNonTerminalStart = "<";
+            private const string GrammarNonTerminalEnd = ">";
 
             public ParserImpl(LexerStringReader reader, TokenizersSource tokenizersSource)
             {
@@ -75,23 +71,36 @@ namespace HandyQuery.Language.Lexing.Grammar
 
                     _reader.ReadTillEndOfWhitespace();
 
-                    if (_reader.StartsWith(GrammarPart))
+                    if (_reader.StartsWith(GrammarNonTerminalStart))
                     {
-                        // ____________________________________
-                        // $Value = Literal|$FunctionInvokation
+                        // _______________________________________
+                        // <value> ::= Literal|<function-invokation>
 
-                        var partName = _reader.ReadTillEndOfWord(); // $Value
-                        var part = GetPartByName(partName);
-
-                        if (part.FullyParsed)
+                        var nonTerminalName = _reader.ReadTillEndOfWord(); // <value>
+                        
+                        if (nonTerminalName.EndsWith(GrammarNonTerminalEnd) == false)
                         {
-                            throw new GrammarLexerGeneratorException($"Cannot declare '{partName}' more than once.");
+                            throw new GrammarLexerGeneratorException($"Non-terminal {nonTerminalName} name " +
+                                                                     $"should finish with {GrammarNonTerminalEnd}");
+                        }
+                        
+                        var nonTerminal = GetNonTerminalByName(nonTerminalName);
+
+                        if (nonTerminal.FullyParsed)
+                        {
+                            throw new GrammarLexerGeneratorException($"Cannot declare {nonTerminalName} more than once.");
                         }
 
-                        // skip '=' char
-                        _reader.MoveBy(3); 
+                        // skip '::='
+                        var equals = _reader.ReadTill(x => x == '=') + _reader.CurrentChar;
+                        if (equals.EndsWith("::=") == false)
+                        {
+                            throw new GrammarLexerGeneratorException($"Invalid syntax for {nonTerminalName}.");
+                        }
+                        _reader.MoveNext();
+                        _reader.ReadTillEndOfWhitespace();
 
-                        part.Body = ParsePartBody();
+                        nonTerminal.Body = ParseNonTerminalBody();
                         continue;
                     }
 
@@ -100,125 +109,100 @@ namespace HandyQuery.Language.Lexing.Grammar
                         final = ParseReturn();
                         break;
                     }
+                    
+                    throw new GrammarLexerGeneratorException($"Invalid grammar syntax. Line: {_reader.ReadTillNewLine()}");
                 }
 
                 if (final == null)
                 {
-                    throw new GrammarLexerGeneratorException("Unable to parse language gramma.");
+                    throw new GrammarLexerGeneratorException("Return statement not found.");
                 }
 
-                var notExistingPart = _parts.Select(x => x.Value).FirstOrDefault(x => x.FullyParsed == false);
-                if (notExistingPart != null)
+                var notExistingNonTerminal = _nonTerminals.Select(x => x.Value).FirstOrDefault(x => x.FullyParsed == false);
+                if (notExistingNonTerminal != null)
                 {
-                    throw new GrammarLexerGeneratorException($"Part '{notExistingPart.Name}' is not declared. Are you sure your gramma is fine?");
+                    throw new GrammarLexerGeneratorException($"Non-terminal '{notExistingNonTerminal.Name}' " +
+                                                              "is not declared. Are you sure your gramma is fine?");
                 }
 
                 return final;
             }
 
-            private GrammarPart GetPartByName(string partName)
+            private GrammarNonTerminal GetNonTerminalByName(string nonTerminalName)
             {
-                if (_parts.ContainsKey(partName) == false)
+                if (_nonTerminals.ContainsKey(nonTerminalName) == false)
                 {
-                    _parts.Add(partName, new GrammarPart(partName));
+                    _nonTerminals.Add(nonTerminalName, new GrammarNonTerminal(nonTerminalName));
                 }
 
-                return _parts[partName];
+                return _nonTerminals[nonTerminalName];
             }
 
-            /// <remarks>
-            ///          ___________________________
-            /// $Value = Literal|$FunctionInvokation
-            /// </remarks>
-            private GrammarPartBody ParsePartBody()
+            //           _____________________________
+            // <value> ::= Literal|<function-invokation>
+            private GrammarNonTerminalBody ParseNonTerminalBody()
             {
+                var body = new GrammarNonTerminalBody();
+                
                 var bodyString = _reader.ReadTillNewLine();
-                var blockItems = bodyString.Split(new[] {' '}, StringSplitOptions.RemoveEmptyEntries);
-
-                var body = new GrammarPartBody();
-
-                foreach (var blockItem in blockItems)
+                var orConditions = bodyString.Split(new[] {'|'}, StringSplitOptions.RemoveEmptyEntries);
+                foreach (var operandString in orConditions)
                 {
-                    var orConditions = blockItem.Split(new[] {'|'}, StringSplitOptions.RemoveEmptyEntries);
-                    if (orConditions.Length > 1)
+                    var operand = new GrammarNonTerminalBody.Operand();
+                    var blockItems = operandString.Trim().Split(new[] {' '}, StringSplitOptions.RemoveEmptyEntries);
+
+                    foreach (var blockItem in blockItems)
                     {
-                        var operands = new List<IGrammarBodyItem>();
-
-                        foreach (var operand in orConditions)
-                        {
-                            if (operand.StartsWith(Optional))
-                            {
-                                throw new GrammarLexerGeneratorException($"Error occurred while parsing '{blockItem}'. " +
-                                                                         "Cannot use optional character '?' in OR conditions.");
-                            }
-
-                            operands.Add(ParsePartBodyItem(operand, true));
-                        }
-
-                        body.Add(new GrammarOrCondition(operands));
-                        continue;
-                    }
-
-                    body.Add(ParsePartBodyItem(blockItem, false));
-                }
-
-                if (body.All(x => x.IsOptional))
-                {
-                    throw new GrammarLexerGeneratorException($"Body cannot contain only optional items ('{bodyString}')");
+                        operand.Add(ParseNonTerminalBodyItem(blockItem.Trim()));
+                    }                    
+                    
+                    body.Operands.Add(operand);
                 }
 
                 return body;
             }
 
-            /// <remarks>
-            ///          _______
-            /// $Value = Literal|$FunctionInvokation
-            /// 
-            /// OR
-            ///                  ___________________
-            /// $Value = Literal|$FunctionInvokation
-            /// </remarks>
-            private IGrammarBodyItem ParsePartBodyItem(string blockItem, bool isOrConditionOperand)
+            //           _______
+            // <value> ::= Literal|<function-invokation>
+            // 
+            // OR
+            //                   _____________________
+            // <value> ::= Literal|<function-invokation>
+            private IGrammarBodyItem ParseNonTerminalBodyItem(string blockItem)
             {
-                var isOptional = blockItem.StartsWith(Optional);
                 var name = blockItem;
-                if (isOptional) name = name.Substring(Optional.Length);
 
                 IGrammarBodyItem result;
 
-                if (name.StartsWith(GrammarPart))
+                if (name.StartsWith(GrammarNonTerminalStart))
                 {
-                    result = new GrammarPartUsage(name, isOptional, isOrConditionOperand, GetPartByName(name));
+                    result = new GrammarNonTerminalUsage(name, GetNonTerminalByName(name));
                 }
                 else
                 {
-                    ITokenizer tokenizer;
-                    if (_tokenizersSource.TryGetTokenizer(name, out tokenizer) == false)
+                    if (_tokenizersSource.TryGetTokenizer(name, out var tokenizer) == false)
                     {
-                        throw new GrammarLexerGeneratorException($"Tokenizer '{name}' does not exist.");
+                        throw new GrammarLexerGeneratorException($"Terminal '{name}' does not exist.");
                     }
-
-                    result = new GrammarTokenizerUsage(name, isOptional, tokenizer);
+                    
+                    result = new GrammarTerminalUsage(name, tokenizer);
                 }
 
                 return result;
             }
 
-            /// <remarks>
-            /// _____________
-            /// return $Value
-            /// </remarks>
+            // ______________
+            // return <value>
             private GrammarReturn ParseReturn()
             {
                 _reader.MoveBy(Return.Length);
-                var partName = _reader.ReadTillEndOfWord();
-                GrammarPart grammarElement;
-                if (_parts.TryGetValue(partName, out grammarElement) == false)
+                var nonTerminalName = _reader.ReadTillEndOfWord();
+                if (_nonTerminals.TryGetValue(nonTerminalName, out var grammarElement) == false)
                 {
-                    throw new GrammarLexerGeneratorException($"Part '{partName}' does not exist.");
+                    throw new GrammarLexerGeneratorException($"Non-terminal {nonTerminalName} does not exist.");
                 }
 
-                return new GrammarReturn(new GrammarPartUsage(grammarElement.Name, false, false, grammarElement));
+                return new GrammarReturn(new GrammarNonTerminalUsage(grammarElement.Name, grammarElement));
             }
         }
     }

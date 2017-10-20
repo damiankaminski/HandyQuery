@@ -3,7 +3,7 @@
     internal interface IGrammarElement
     {
         string Name { get; }
-        GrammarElementType Type { get; }
+        GrammarNonTerminalBodyItemType Type { get; }
     }
 
     internal static class GrammarElementExtensions

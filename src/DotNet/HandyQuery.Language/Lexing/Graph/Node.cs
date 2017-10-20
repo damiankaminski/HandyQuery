@@ -8,18 +8,13 @@ namespace HandyQuery.Language.Lexing.Graph
     // TODO: move to somewhere else (along with node implementations)
     // TODO: get rid of not used methods
     // TODO: order of elements matters so HashSet is not really an option
+    // TODO: use NodesCollection instead of List<Node> ?
 
     internal abstract class Node
     {
-        public readonly bool IsOptional;
-        public readonly HashSet<Node> Children = new HashSet<Node>();
-        public readonly HashSet<Node> Parents = new HashSet<Node>();
+        public readonly List<Node> Children = new List<Node>();
+        public readonly List<Node> Parents = new List<Node>();
         public abstract BuilderNodeType NodeType { get; }
-
-        protected Node(bool isOptional)
-        {
-            IsOptional = isOptional;
-        }
 
         public void Walk(Func<Node, bool> forEachNode)
         {
@@ -77,91 +72,8 @@ namespace HandyQuery.Language.Lexing.Graph
             Parents.Add(parent);
         }
 
-        /// <summary>
-        /// Finds first non optional parent in all parent branches (single node may have multiple parents).
-        /// </summary>
-        public IEnumerable<Node> FindFirstNonOptionalParentInAllParentBranches(HashSet<Node> visited = null)
-        {
-            if (visited?.Contains(this) ?? false)
-            {
-                yield break;
-            }
-            visited = visited ?? new HashSet<Node>();
-            visited.Add(this);
-            
-            foreach (var parent in Parents.ToArray())
-            {
-                if (parent.IsOptional == false)
-                {
-                    yield return parent;
-                    continue;
-                }
-
-                foreach (var nonOptionalParent in parent.FindFirstNonOptionalParentInAllParentBranches(visited).ToArray())
-                {
-                    yield return nonOptionalParent;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Finds first non optional child in all child branches (single node may have multiple children).
-        /// </summary>
-        public IEnumerable<Node> FindFirstNonOptionalChildInAllChildBranches(HashSet<Node> visited = null)
-        {
-            if (visited?.Contains(this) ?? false)
-            {
-                yield break;
-            }
-            visited = visited ?? new HashSet<Node>();
-            visited.Add(this);
-            
-            foreach (var child in Children.ToArray())
-            {
-                if (child.IsOptional == false)
-                {
-                    yield return child;
-                    continue;
-                }
-
-                foreach (var nonOptionalChild in child.FindFirstNonOptionalChildInAllChildBranches(visited).ToArray())
-                {
-                    yield return nonOptionalChild;
-                }
-            }
-        }
-
-        public IEnumerable<Node> FindFirstOptionalChildInAllChildBranches(HashSet<Node> visited = null)
-        {
-            if (visited?.Contains(this) ?? false)
-            {
-                yield break;
-            }
-            visited = visited ?? new HashSet<Node>();
-            visited.Add(this);
-
-            foreach (var child in Children.ToArray())
-            {
-                if (child.IsOptional)
-                {
-                    yield return child;
-                    continue;
-                }
-
-                foreach (var optionalChild in child.FindFirstOptionalChildInAllChildBranches(visited).ToArray())
-                {
-                    yield return optionalChild;
-                }
-            }
-        }
-
         public virtual bool Equals(Node node, HashSet<Node> visitedNodes = null)
         {
-            if (node.IsOptional != IsOptional)
-            {
-                return false;
-            }
-
             visitedNodes = visitedNodes ?? new HashSet<Node>();
             if (visitedNodes.Contains(node)) return true;
             visitedNodes.Add(node);

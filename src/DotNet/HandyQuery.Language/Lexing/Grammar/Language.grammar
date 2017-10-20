@@ -1,14 +1,13 @@
-﻿$Value = Literal|$FunctionInvokation
+﻿<value> ::= Literal | <function-invokation>
 
-$Filter = ?GroupOpen $FilterWithCompareOp|$FilterWithStatement ?GroupClose
-$FilterWithCompareOp = ColumnName CompareOperator $Value
-$FilterWithStatement = ColumnName Statement
+<filter>                 ::= GroupOpen <filter-body> GroupClose | <filter-body> 
+<filter-body>            ::= <filter-with-compare-op> | <filter-with-statement>
+<filter-with-compare-op> ::= ColumnName CompareOperator <value>
+<filter-with-statement>  ::= ColumnName Statement
 
-$FunctionInvokation = FunctionName ParamsOpen ?$Params ParamsClose
-$Params = $Value ?$MoreParams
-$MoreParams = ParamsSeparator $Params
+<function-invokation> ::= FunctionName ParamsOpen ParamsClose | FunctionName ParamsOpen <params> ParamsClose
+<params>              ::= <value> ParamsSeparator <params> | <value>
 
-$AllFilters = $Filter ?$MoreFilters
-$MoreFilters = BooleanOperator $AllFilters
+<all-filters> ::= <filter> BooleanOperator <all-filters> | <filter>
 
-return $AllFilters
+return <all-filters>

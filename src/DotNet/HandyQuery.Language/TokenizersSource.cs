@@ -45,7 +45,7 @@ namespace HandyQuery.Language
             ITokenizer tokenizer;
             if (TryGetTokenizer(name, out tokenizer) == false)
             {
-                throw new QueryLanguageException($"Tokenizer '{name}' not found.");
+                throw new QueryLanguageException($"Terminal '{name}' not found.");
             }
 
             return tokenizer;

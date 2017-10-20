@@ -45,47 +45,47 @@ namespace HandyQuery.Language.Lexing
 
         private static void Process(IGrammarElement current, LexerStringReader reader, LexerResult finalResult, LexerRuntimeInfo runtimeInfo)
         {
-            if (reader.IsEndOfQuery())
-            {
-                return;
-            }
-
-            var position = reader.CurrentPosition;
-            var whitespace = reader.ReadTillEndOfWhitespace();
-            if (whitespace.Length > 0)
-            {
-                finalResult.Tokens.Add(new WhitespaceToken(position, whitespace.Length));
-            }
-
-            if (current.Type == GrammarElementType.PartUsage)
-            {
-                var part = current.As<GrammarPartUsage>();
-                // TODO: part.IsOptional
-                foreach (var element in part.Impl.Body)
-                {
-                    // TODO: what if failed? restorable via stack
-                    Process(element, reader, finalResult, runtimeInfo);
-                }
-            }
-
-            if (current.Type == GrammarElementType.TokenizerUsage)
-            {
-                var tokenizerUsage = (GrammarTokenizerUsage)current;
-                // TODO: tokenizer.IsOptional
-                reader.CaptureCurrentPosition();
-                var result = tokenizerUsage.Impl.Tokenize(runtimeInfo);
-                reader.RestoreCurrentPosition();
-                if (result.Success)
-                {
-                    reader.MoveBy(result.Token.Length);
-                    finalResult.Tokens.Add(result.Token);
-                    // TODO: move to next gramma element
-                }
-
-                // TODO: save errors if all tokenizers fails
-            }
-
-            throw new InvalidOperationException(); // TODO: change
+//            if (reader.IsEndOfQuery())
+//            {
+//                return;
+//            }
+//
+//            var position = reader.CurrentPosition;
+//            var whitespace = reader.ReadTillEndOfWhitespace();
+//            if (whitespace.Length > 0)
+//            {
+//                finalResult.Tokens.Add(new WhitespaceToken(position, whitespace.Length));
+//            }
+//
+//            if (current.Type == GrammarNonTerminalBodyItemType.NonTerminalUsage)
+//            {
+//                var part = current.As<GrammarNonTerminalUsage>();
+//                // TODO: nonTerminal.IsOptional
+//                foreach (var element in part.Impl.Body)
+//                {
+//                    // TODO: what if failed? restorable via stack
+//                    Process(element, reader, finalResult, runtimeInfo);
+//                }
+//            }
+//
+//            if (current.Type == GrammarNonTerminalBodyItemType.TerminalUsage)
+//            {
+//                var tokenizerUsage = (GrammarTerminalUsage)current;
+//                // TODO: tokenizer.IsOptional
+//                reader.CaptureCurrentPosition();
+//                var result = tokenizerUsage.Impl.Tokenize(runtimeInfo);
+//                reader.RestoreCurrentPosition();
+//                if (result.Success)
+//                {
+//                    reader.MoveBy(result.Token.Length);
+//                    finalResult.Tokens.Add(result.Token);
+//                    // TODO: move to next gramma element
+//                }
+//
+//                // TODO: save errors if all tokenizers fails
+//            }
+//
+//            throw new InvalidOperationException(); // TODO: change
         }
     }
 }

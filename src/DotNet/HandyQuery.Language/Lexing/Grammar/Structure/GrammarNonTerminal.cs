@@ -1,30 +1,30 @@
 ﻿namespace HandyQuery.Language.Lexing.Grammar.Structure
 {
-    internal sealed class GrammarPart
+    internal sealed class GrammarNonTerminal
     {
         public string Name { get; }
 
-        private GrammarPartBody _body;
+        private GrammarNonTerminalBody _body;
 
-        public GrammarPartBody Body
+        public GrammarNonTerminalBody Body
         {
             get => _body;
             set
             {
                 if (_body != null)
-                    throw new GrammarLexerGeneratorException("Part's body cannot be assigned more than once.");
+                    throw new GrammarLexerGeneratorException("NonTerminal's body cannot be assigned more than once.");
                 _body = value;
             }
         }
 
         /// <summary>
-        /// Indicates whether part has been already parsed, or just used somewhere.
-        /// For instane if part A uses part B the latter one will be initialized, but not
+        /// Indicates whether nonTerminal has been already parsed, or just used somewhere.
+        /// For instane if nonTerminal A uses nonTerminal B the latter one will be initialized, but not
         /// fully parsed.
         /// </summary>
         public bool FullyParsed => Body != null;
 
-        public GrammarPart(string name)
+        public GrammarNonTerminal(string name)
         {
             Name = name;
         }
@@ -33,12 +33,12 @@
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            return obj is GrammarPart && Equals((GrammarPart) obj);
+            return obj is GrammarNonTerminal && Equals((GrammarNonTerminal) obj);
         }
 
-        public bool Equals(GrammarPart part)
+        public bool Equals(GrammarNonTerminal nonTerminal)
         {
-            return part.Name == Name && part.Body.Equals(Body);
+            return nonTerminal.Name == Name && nonTerminal.Body.Equals(Body);
         }
         
         public override int GetHashCode()
@@ -51,7 +51,7 @@
 
         public override string ToString()
         {
-            return $"{Name} = {Body}";
+            return $"{Name} ::= {Body}";
         }
     }
 }

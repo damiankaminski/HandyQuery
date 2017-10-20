@@ -2,8 +2,7 @@
 {
     internal enum BuilderNodeType
     {
-        Tokenizer,
-        Part,
+        Terminal,
         Root
     }
 }
