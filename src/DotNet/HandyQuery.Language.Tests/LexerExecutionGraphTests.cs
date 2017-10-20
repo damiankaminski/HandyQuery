@@ -25,6 +25,7 @@ namespace HandyQuery.Language.Tests
 
             var graph = CreateGraph(testCase.Grammar);
 
+            // TODO: make sure it valides reference equality
             graph.Equals(expected).Should().BeTrue();
         }
 
@@ -37,29 +38,29 @@ namespace HandyQuery.Language.Tests
                         <all-filters> ::= ColumnName Statement
                         return <all-filters>
                     ",
-                    ExpectedRoot = new RootNode().AddChild(
-                        CreateNode("ColumnName").AddChild(
+                    ExpectedRoot = new RootNode().WithChild(
+                        CreateNode("ColumnName").WithChild(
                             CreateNode("Statement")))
                 };
             }
 
             {
-                yield return new TestCase("Part usage")
+                yield return new TestCase("Non-terminal usage")
                 {
                     Grammar = @"
                         <value> ::= Literal
                         <all-filters> ::= ColumnName CompareOperator <value>
                         return <all-filters>
                     ",
-                    ExpectedRoot = new RootNode().AddChild(
-                        CreateNode("ColumnName").AddChild(
-                            CreateNode("CompareOperator").AddChild(
+                    ExpectedRoot = new RootNode().WithChild(
+                        CreateNode("ColumnName").WithChild(
+                            CreateNode("CompareOperator").WithChild(
                                 CreateNode("Literal"))))
                 };
             }
 
             {
-                yield return new TestCase("Nested nonTerminal usage")
+                yield return new TestCase("Nested non-terminal usage")
                 {
                     Grammar = @"
                         <test> ::= FunctionName
@@ -67,127 +68,72 @@ namespace HandyQuery.Language.Tests
                         <all-filters> ::= ColumnName CompareOperator <value> Statement
                         return <all-filters>
                     ",
-                    ExpectedRoot = new RootNode().AddChild(
-                        CreateNode("ColumnName").AddChild(
-                            CreateNode("CompareOperator").AddChild(
-                                CreateNode("FunctionName").AddChild(
-                                    CreateNode("Literal").AddChild(
+                    ExpectedRoot = new RootNode().WithChild(
+                        CreateNode("ColumnName").WithChild(
+                            CreateNode("CompareOperator").WithChild(
+                                CreateNode("FunctionName").WithChild(
+                                    CreateNode("Literal").WithChild(
                                         CreateNode("Statement"))))))
                 };
             }
 
             {
                 var groupClose = CreateNode("GroupClose");
-                yield return new TestCase("Or usage with nonTerminal")
+                yield return new TestCase("Or usage")
                 {
                     Grammar = @"
                         <value> ::= Literal
 
-                        <filter> ::= GroupOpen <filter-with-compare-op> |<filter-with-statement> GroupClose
-                        <filter-with-compare-op> ::= ColumnName CompareOperator <value>
-                        <filter-with-statement> ::= ColumnName Statement
+                        <filter> ::= GroupOpen <filter-body> GroupClose
+                        <filter-body> ::= ColumnName CompareOperator <value> | ColumnName Statement
 
                         return <filter>
                     ",
-                    ExpectedRoot = new RootNode().AddChild(
-                        CreateNode("GroupOpen").AddChild(
-                            CreateNode("ColumnName").AddChild(
-                                CreateNode("CompareOperator").AddChild(
-                                    CreateNode("Literal").AddChild(
-                                        groupClose)))).AddChild(
-                            CreateNode("ColumnName").AddChild(
-                                CreateNode("Statement").AddChild(
-                                    groupClose))))
+                    ExpectedRoot = new RootNode().WithChild(
+                        CreateNode("GroupOpen").WithChild(
+                            new BranchNode()
+                                .AddChild(
+                                    CreateNode("ColumnName").WithChild(
+                                        CreateNode("CompareOperator").WithChild(
+                                            CreateNode("Literal").WithChild(
+                                                groupClose))))
+                                .AddChild(
+                                    CreateNode("ColumnName").WithChild(
+                                        CreateNode("Statement").WithChild(
+                                            groupClose)))))    
                 };
             }
-
+            
             {
-                var groupClose = CreateNode("GroupClose");
-                yield return new TestCase("Or usage with tokenizers")
-                {
-                    Grammar = @"
-                        <filter> ::= GroupOpen ColumnName|Statement GroupClose
-                        return <filter>
-                    ",
-                    ExpectedRoot = new RootNode().AddChild(
-                        CreateNode("GroupOpen").AddChild(
-                            CreateNode("ColumnName").AddChild(
-                                groupClose)).AddChild(
-                            CreateNode("Statement").AddChild(
-                                groupClose)))
-                };
-            }
-
-            {
-                var groupClose = CreateNode("GroupClose");
-                yield return new TestCase("Or usage with nonTerminal and tokenizer")
-                {
-                    Grammar = @"
-                        <value> ::= Literal
-
-                        <filter> ::= GroupOpen <filter-with-compare-op> |Statement GroupClose
-                        <filter-with-compare-op> ::= ColumnName CompareOperator <value>
-
-                        return <filter>
-                    ",
-                    ExpectedRoot = new RootNode().AddChild(
-                        CreateNode("GroupOpen").AddChild(
-                            CreateNode("ColumnName").AddChild(
-                                CreateNode("CompareOperator").AddChild(
-                                    CreateNode("Literal").AddChild(
-                                        groupClose)))).AddChild(
-                            CreateNode("Statement").AddChild(
-                                groupClose)))
-                };
-            }
-
-//            {
-//                var paramsClose = CreateNode("ParamsClose");
-//                
-//                var literal = CreateNode("Literal");
-//                var paramsSeparator = CreateNode("ParamsSeparator").AddChild(literal);
-//                var @params = literal.AddChild(paramsSeparator).AddChild(paramsClose);
-//
-//                yield return new TestCase("Simple cycles")
-//                {
-//                    Grammar = @"
-//                        <value> ::= Literal
-//
-//                        <function-invokation> ::= FunctionName ParamsOpen <params> ParamsClose
-//                        <params> ::= <value> ?<more-params>
-//                        <more-params> ::= ParamsSeparator <params>
-//
-//                        return <function-invokation>
-//                    ",
-//                    ExpectedRoot = new RootNode().AddChild(
-//                        CreateNode("FunctionName").AddChild(
-//                            CreateNode("ParamsOpen").AddChild(
-//                                @params.AddChild(
-//                                    paramsClose))))
-//                };
-//            }
-
-            /*{
                 var paramsClose = CreateNode("ParamsClose");
-                var paramsOpen = CreateNode("ParamsOpen")
-                    .AddChild(CreateNode("Literal").AddChild(paramsClose))
-                    .AddChild(paramsClose);
-                var functionName = CreateNode("FunctionName")
-                    .AddChild(paramsOpen);
-                paramsOpen.AddChild(functionName);
-                yield return new TestCase("Cycles with an or condition")
+                
+                var paramsSeparator = CreateNode("ParamsSeparator");
+                var literal1 = CreateNode("Literal").WithChild(paramsSeparator);
+                var literal2 = CreateNode("Literal").WithChild(paramsClose);
+                
+                var paramsBranch = new BranchNode().AddChild(literal1).AddChild(literal2);
+                paramsSeparator.WithChild(paramsBranch);
+                
+                yield return new TestCase("Simple cycle")
                 {
                     Grammar = @"
-                        <value> ::= Literal|$FunctionInvokation
+                        <value> ::= Literal
 
-                        <function-invokation> ::= FunctionName ParamsOpen ?<params> ParamsClose
-                        <params> ::= <value>
+                        <function-invokation> ::= FunctionName ParamsOpen <params> ParamsClose
+                        <params> ::= <value> ParamsSeparator <params> | <value>
 
-                        return $FunctionInvokation
+                        return <function-invokation>
                     ",
-                    ExpectedRoot = new Node().AddChild(functionName)
+                    ExpectedRoot = new RootNode().WithChild(
+                        CreateNode("FunctionName").WithChild(
+                            CreateNode("ParamsOpen").WithChild(
+                                paramsBranch)))
                 };
-            }*/
+            }
+            
+            // TODO: Advanced cycle. <function-invokation> using <value> which is using <function-invokation> and so on
+            // TODO: Unresolvable cycle (without or condition, should throw meaningful exception) - already implemented, only test is needed
+            // TODO: Exception on post cycle items, e.g. `<value> ParamsSeparator <params> SomePostCycleStuff | <value>`
         }
 
         public sealed class TestCase

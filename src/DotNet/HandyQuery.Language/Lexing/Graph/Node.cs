@@ -1,92 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using HandyQuery.Language.Lexing.Graph.Builder;
 
 namespace HandyQuery.Language.Lexing.Graph
 {
-    // TODO: move to somewhere else (along with node implementations)
-    // TODO: get rid of not used methods
-    // TODO: order of elements matters so HashSet is not really an option
     // TODO: use NodesCollection instead of List<Node> ?
 
     internal abstract class Node
     {
-        public readonly List<Node> Children = new List<Node>();
         public readonly List<Node> Parents = new List<Node>();
-        public abstract BuilderNodeType NodeType { get; }
+        public abstract IEnumerable<Node> Children { get; }
 
-        public void Walk(Func<Node, bool> forEachNode)
-        {
-            var moveOn = forEachNode(this);
-            if (moveOn == false) return;
-
-            foreach (var child in Children)
-            {
-                child.Walk(forEachNode);
-            }
-        }
-
-        public void AddParents(IEnumerable<Node> parents)
-        {
-            if (parents != null)
-            {
-                foreach (var parent in parents)
-                {
-                    parent?.AddChildImpl(this);
-                }
-            }
-        }
-
-        internal void AddChildImpl(Node child)
-        {
-            Children.Add(child);
-            child.AddParent(this);
-        }
-
-        private Node AddChildren(Node[] children)
-        {
-            foreach (var child in children)
-            {
-                Children.Add(child);
-                child.AddParent(this);
-            }
-            return this;
-        }
-
-        public IEnumerable<Node> GetDeepChildren()
-        {
-            foreach (var child in Children)
-            {
-                yield return child;
-
-                foreach (var node in child.GetDeepChildren())
-                {
-                    yield return node;
-                }
-            }
-        }
-
-        private void AddParent(Node parent)
+        public void AddParent(Node parent)
         {
             Parents.Add(parent);
         }
 
-        public virtual bool Equals(Node node, HashSet<Node> visitedNodes = null)
-        {
-            visitedNodes = visitedNodes ?? new HashSet<Node>();
-            if (visitedNodes.Contains(node)) return true;
-            visitedNodes.Add(node);
+        public abstract bool Equals(Node nodeBase, HashSet<Node> visitedNodes = null);
 
-            if (AreSame(node.Children, Children, visitedNodes) == false)
-            {
-                return false;
-            }
-
-            return true;
-        }
-
-        private static bool AreSame(IEnumerable<Node> items, IEnumerable<Node> items2, HashSet<Node> visitedNodes)
+        protected static bool AreSame(IEnumerable<Node> items, IEnumerable<Node> items2, HashSet<Node> visitedNodes)
         {
             var i1 = items.ToList();
             var i2 = items2.ToList();

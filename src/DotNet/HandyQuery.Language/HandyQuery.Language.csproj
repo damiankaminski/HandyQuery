@@ -64,9 +64,9 @@
     <Compile Include="Configuration\TokenType.cs" />
     <Compile Include="HandyQueryInitializationException.cs" />
     <Compile Include="Lexing\Grammar\Structure\GrammarReturn.cs" />
+    <Compile Include="Lexing\Graph\Builder\BranchNode.cs" />
     <Compile Include="Lexing\Graph\Node.cs" />
     <Compile Include="Lexing\Graph\Builder\LexerExecutionGraphBuilder.cs" />
-    <Compile Include="Lexing\Graph\Builder\BuilderNodeType.cs" />
     <Compile Include="Lexing\Graph\Builder\RootNode.cs" />
     <Compile Include="Lexing\Graph\Builder\TerminalNode.cs" />
     <Compile Include="Lexing\Graph\LexerExecutionGraph.cs" />
@@ -112,7 +112,7 @@
     <Compile Include="TokenizersSource.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Lexing\Grammar\Language.grammar" />
+    <EmbeddedResource Include="Lexing\Grammar\Language.grammar" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
