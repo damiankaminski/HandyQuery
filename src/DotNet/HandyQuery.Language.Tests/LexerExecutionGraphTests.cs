@@ -114,7 +114,7 @@ namespace HandyQuery.Language.Tests
                 var paramsBranch = new BranchNode().AddChild(literal1).AddChild(literal2);
                 paramsSeparator.WithChild(paramsBranch);
                 
-                yield return new TestCase("Simple cycle")
+                yield return new TestCase("Simple recursion")
                 {
                     Grammar = @"
                         <value> ::= Literal
@@ -131,9 +131,37 @@ namespace HandyQuery.Language.Tests
                 };
             }
             
-            // TODO: Advanced cycle. <function-invokation> using <value> which is using <function-invokation> and so on
-            // TODO: Unresolvable cycle (without or condition, should throw meaningful exception) - already implemented, only test is needed
-            // TODO: Exception on post cycle items, e.g. `<value> ParamsSeparator <params> SomePostCycleStuff | <value>`
+            {
+                var paramsClose = CreateNode("ParamsClose");
+                
+                var paramsSeparator = CreateNode("ParamsSeparator");
+                var valueBranch1 = new BranchNode().AddChild(CreateNode("Literal").WithChild(paramsSeparator));
+                var valueBranch2 = new BranchNode().AddChild(CreateNode("Literal").WithChild(paramsClose));
+                
+                var paramsBranch = new BranchNode().AddChild(valueBranch1).AddChild(valueBranch2);
+                paramsSeparator.WithChild(paramsBranch);
+
+                var functionInvokation = CreateNode("FunctionName").WithChild(
+                    CreateNode("ParamsOpen").WithChild(paramsBranch));
+
+                valueBranch1.AddChild(functionInvokation);
+                valueBranch2.AddChild(functionInvokation);
+                
+                yield return new TestCase("Deep recursion")
+                {
+                    Grammar = @"
+                        <value> ::= Literal | <function-invokation>
+
+                        <function-invokation> ::= FunctionName ParamsOpen <params> ParamsClose
+                        <params> ::= <value> ParamsSeparator <params> | <value>
+
+                        return <function-invokation>
+                    ",
+                    ExpectedRoot = new RootNode().WithChild(functionInvokation)
+                };
+            }
+            
+            // TODO: Unresolvable recursion (without or condition, should throw meaningful exception) - already implemented, only test is needed
         }
 
         public sealed class TestCase

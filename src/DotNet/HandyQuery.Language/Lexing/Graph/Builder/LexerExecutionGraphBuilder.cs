@@ -1,11 +1,15 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
+using System.Text;
 using HandyQuery.Language.Lexing.Grammar.Structure;
 
 namespace HandyQuery.Language.Lexing.Graph.Builder
 {
     internal sealed class LexerExecutionGraphBuilder
     {
+        private readonly Stack<ProcessContext> _contexts = new Stack<ProcessContext>();
+        
         public RootNode BuildGraph(GrammarReturn grammarRoot)
         {
             var root = new RootNode();
@@ -15,13 +19,29 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
             return root;
         }
 
-        private NodesCollection Process(NodesCollection tail, GrammarNonTerminal nonTerminal)
+        private ProcessContext Process(NodesCollection tail, GrammarNonTerminal nonTerminal)
         {
-            var finalTail = new NodesCollection();
-
+            var recursiveContext = _contexts.FirstOrDefault(x => ReferenceEquals(x.NonTerminal, nonTerminal));
+            if (recursiveContext != null)
+            {
+                // deep recursion
+                var upperContext = _contexts.Peek();
+                if (upperContext.Head == null)
+                {
+                    throw new LexerExecutionGraphException("Not allowed recursion type detected.");
+                }
+                
+                upperContext.Head.AddChild(recursiveContext.Head);
+                return recursiveContext;
+            }
+            
+            var context = new ProcessContext(nonTerminal);
+            _contexts.Push(context);
+            
             if (nonTerminal.Body.Operands.Count > 1)
             {
                 var branch = new BranchNode();
+                context.Head = branch;
                 tail.AddChild(branch);
                 tail = new NodesCollection(branch);
             }
@@ -30,36 +50,49 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
             {
                 var currentTail = tail;
                 var hasTail = true;
-                
-                foreach (var bodyItem in body)
+
+                for (var index = 0; index < body.Count; index++)
                 {
+                    var bodyItem = body[index];
+                    
                     switch (bodyItem)
                     {
                         case GrammarTerminalUsage terminalUsage:
                             var terminalNode = new TerminalNode(terminalUsage);
                             currentTail.AddChild(terminalNode);
                             currentTail = terminalNode;
-                            break;
                             
+                            if (index == 0 && context.Head == null)
+                            {
+                                context.Head = terminalNode;
+                            }
+                            break;
+
                         case GrammarNonTerminalUsage nonTerminalUsage:
                             if (ReferenceEquals(nonTerminalUsage.Impl, nonTerminal))
                             {
-                                // cycle
-                                
+                                // simple recursion (non-terminal used directly in itself)
+
                                 if (nonTerminal.Body.Operands.Count < 2)
                                 {
-                                    throw new LexerExecutionGraphException("Infinite cycle detected. " +
+                                    throw new LexerExecutionGraphException("Infinite recursion detected. " +
                                                                            "Use '|' to create escape path.");
                                 }
-                                
+
                                 currentTail.AddChildren(tail);
                                 hasTail = false; // cyclic operands do not have tails
                                 break;
                             }
+
+                            var tmpContext = Process(currentTail, nonTerminalUsage.Impl);
+                            currentTail = tmpContext.Tail;
                             
-                            currentTail = Process(currentTail, nonTerminalUsage.Impl);
+                            if (index == 0 && context.Head == null)
+                            {
+                                context.Head = tmpContext.Head;
+                            }
                             break;
-                            
+
                         default:
                             throw new LexerExecutionGraphException(
                                 $"Unknown non-terminal body item type: {bodyItem.Type}");
@@ -68,13 +101,33 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
 
                 if (hasTail)
                 {
-                    finalTail.AddRange(currentTail);                    
+                    context.Tail.AddRange(currentTail);                    
                 }
             }
 
-            return finalTail;
+            _contexts.Pop();
+            return context;
         }
 
+        private sealed class ProcessContext
+        {
+            public readonly GrammarNonTerminal NonTerminal;
+
+            public Node Head { get; set; }
+
+            public readonly NodesCollection Tail = new NodesCollection();
+
+            public ProcessContext(GrammarNonTerminal nonTerminal)
+            {
+                NonTerminal = nonTerminal;
+            }
+
+            public override string ToString()
+            {
+                return NonTerminal.ToString();
+            }
+        }
+        
         private sealed class NodesCollection : Collection<Node>
         {
             public NodesCollection()
@@ -104,20 +157,7 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
             {
                 foreach (var item in this)
                 {
-                    switch (item)
-                    {    
-                        case BranchNode n:
-                            n.AddChild(node);
-                            break;
-                        case RootNode n:
-                            n.WithChild(node);
-                            break;
-                        case TerminalNode n:
-                            n.WithChild(node);
-                            break;
-                        default:
-                            throw new LexerExecutionGraphException($"Unkown type: {item.GetType()}");
-                    }
+                    item.AddChild(node);
                 }
             }
 

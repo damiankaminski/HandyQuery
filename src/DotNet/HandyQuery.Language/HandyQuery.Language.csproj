@@ -71,6 +71,7 @@
     <Compile Include="Lexing\Graph\Builder\TerminalNode.cs" />
     <Compile Include="Lexing\Graph\LexerExecutionGraph.cs" />
     <Compile Include="Lexing\Graph\LexerExecutionGraphException.cs" />
+    <Compile Include="Lexing\Graph\NodeExtensions.cs" />
     <Compile Include="Lexing\Lexer.cs" />
     <Compile Include="Lexing\LexerConfig.cs" />
     <Compile Include="Lexing\Grammar\Structure\GrammarNonTerminalBody.cs" />
