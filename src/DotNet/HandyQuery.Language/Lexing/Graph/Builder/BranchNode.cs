@@ -10,6 +10,11 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
 
         public BranchNode AddChild(Node child)
         {
+            if (_children.Contains(child))
+            {
+                return this;
+            }
+            
             _children.Add(child);
             child.AddParent(this);
             return this;

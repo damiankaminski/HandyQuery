@@ -160,6 +160,45 @@ namespace HandyQuery.Language.Tests
                     ExpectedRoot = new RootNode().WithChild(functionInvokation)
                 };
             }
+
+            {
+                var paramsClose = CreateNode("ParamsClose");
+                
+                var paramsSeparator = CreateNode("ParamsSeparator");
+                var valueBranch1 = new BranchNode().AddChild(CreateNode("Literal").WithChild(paramsSeparator));
+                var valueBranch2 = new BranchNode().AddChild(CreateNode("Literal").WithChild(paramsClose));
+                
+                var paramsBranch = new BranchNode().AddChild(valueBranch1).AddChild(valueBranch2);
+                paramsSeparator.WithChild(paramsBranch);
+
+                var functionInvokation = CreateNode("FunctionName").WithChild(
+                    CreateNode("ParamsOpen").WithChild(paramsBranch));
+
+                valueBranch1.AddChild(functionInvokation);
+                valueBranch2.AddChild(functionInvokation);
+                
+                var outerValueBranch = new BranchNode().AddChild(CreateNode("Literal")).AddChild(functionInvokation);
+                var compareOp = CreateNode("CompareOperator").WithChild(outerValueBranch);
+                var columnName = CreateNode("ColumnName").WithChild(compareOp);
+                
+                // TODO: create additinal NonTerminalNode(public Node head) to get rid of these kind of errors?
+                // TODO: copied <value> is aweful, maybe use "new" to indicate that it should be always recreated?
+                // TODO: same problem could be in other cases, like if after <function-invokation> there would be something
+                yield return new TestCase("Complex deep recursion")
+                {
+                    Grammar = @"
+                        <value>  ::= Literal | <function-invokation>
+
+                        <filter-with-compare-op> ::= ColumnName CompareOperator <value>
+
+                        <function-invokation> ::= FunctionName ParamsOpen <params> ParamsClose
+                        <params> ::= new <value> ParamsSeparator <params> | new <value>
+
+                        return <filter-with-compare-op>
+                    ",
+                    ExpectedRoot = new RootNode().WithChild(columnName)
+                };
+            }
             
             // TODO: Unresolvable recursion (without or condition, should throw meaningful exception) - already implemented, only test is needed
         }

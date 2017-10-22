@@ -11,7 +11,7 @@ namespace HandyQuery.Language.Lexing.Grammar.Structure
         
         public override string ToString()
         {
-            return string.Join("|", Operands.Select(x => x.ToString()));
+            return string.Join(" | ", Operands.Select(x => x.ToString()));
         }
 
         public class Operand : List<IGrammarBodyItem>

@@ -24,6 +24,7 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
             var recursiveContext = _contexts.FirstOrDefault(x => ReferenceEquals(x.NonTerminal, nonTerminal));
             if (recursiveContext != null)
             {
+                // TODO: does not always detect properly...
                 // deep recursion
                 var upperContext = _contexts.Peek();
                 if (upperContext.Head == null)
@@ -80,7 +81,7 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
                                 }
 
                                 currentTail.AddChildren(tail);
-                                hasTail = false; // cyclic operands do not have tails
+                                hasTail = false; // recursive operands do not have tails
                                 break;
                             }
 
