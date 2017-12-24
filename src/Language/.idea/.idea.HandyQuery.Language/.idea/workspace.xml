@@ -1,0 +1,638 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="5f875ecb-d609-45cb-b61c-4f4b56596fcb" name="Default" comment="">
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/.gitignore" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language.Tests/Debug.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language.Tests/HandyQuery.Language.Tests.csproj" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language.Tests/LexerExecutionGraphTests.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language.Tests/Lexing/Grammar/GrammarParserTests.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language.Tests/LexingTests.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language.Tests/Model/DataSample.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language.Tests/Model/Emoloyee.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language.Tests/Model/Person.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language.Tests/Properties/AssemblyInfo.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language.Tests/packages.config" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Configuration/ColumnInfo.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Configuration/CultureConfig.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Configuration/ICultureConfig.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Configuration/ISyntaxConfig.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Configuration/Keywords/CompareOperatorKeyword.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Configuration/Keywords/Keyword.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Configuration/Keywords/LogicalOperatorKeyword.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Configuration/Keywords/StatementKeyword.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Configuration/LanguageConfig.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Configuration/LanguageInternalConfig.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Configuration/SyntaxConfig.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Configuration/SyntaxInfo.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Configuration/TokenType.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Error.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/ErrorList.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Extensions/EnumerableExtensions.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Extensions/ExpressionExtensions.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Extensions/TypeExtensions.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/HandyQuery.Language.csproj" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/HandyQueryInitializationException.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/HandyType.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Lexing/Grammar/Grammar.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Lexing/Grammar/GrammarParser.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Lexing/Grammar/GrammarParserException.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Lexing/Grammar/Language.grammar" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Lexing/Grammar/LexerGenerator.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Lexing/Grammar/Readme.md" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Lexing/Grammar/Structure/GrammarNonTerminal.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Lexing/Grammar/Structure/GrammarNonTerminalBody.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Lexing/Grammar/Structure/GrammarNonTerminalBodyItemType.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Lexing/Grammar/Structure/GrammarNonTerminalUsage.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Lexing/Grammar/Structure/GrammarReturn.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Lexing/Grammar/Structure/GrammarTerminalUsage.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Lexing/Grammar/Structure/IGrammarBodyItem.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Lexing/Grammar/Structure/IGrammarElement.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Lexing/Graph/Builder/BranchNode.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Lexing/Graph/Builder/LexerExecutionGraphBuilder.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Lexing/Graph/Builder/NonTerminalUsageNode.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Lexing/Graph/Builder/RootNode.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Lexing/Graph/Builder/TerminalNode.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Lexing/Graph/LexerExecutionGraph.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Lexing/Graph/LexerExecutionGraphException.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Lexing/Graph/Node.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Lexing/Graph/NodeExtensions.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Lexing/Lexer.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Lexing/LexerConfig.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Lexing/LexerResult.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Lexing/LexerRuntimeInfo.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Lexing/LexerStringReader.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Lexing/TokenList.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Lexing/TokenizationResult.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Lexing/Tokenizers/Abstract/ITokenizer.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Lexing/Tokenizers/Abstract/KeywordTokenizerBase.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Lexing/Tokenizers/BooleanOperatorTokenizer.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Lexing/Tokenizers/ColumnNameTokenizer.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Lexing/Tokenizers/CompareOperatorTokenizer.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Lexing/Tokenizers/FunctionNameTokenizer.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Lexing/Tokenizers/GroupCloseTokenizer.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Lexing/Tokenizers/GroupOpenTokenizer.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Lexing/Tokenizers/InTokenizer.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Lexing/Tokenizers/LiteralTokenizer.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Lexing/Tokenizers/ParamsCloseTokenizer.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Lexing/Tokenizers/ParamsOpenTokenizer.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Lexing/Tokenizers/ParamsSeparatorTokenizer.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Lexing/Tokenizers/StatementTokenizer.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Lexing/Tokens/Abstract/KeywordTokenBase.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Lexing/Tokens/Abstract/TokenBase.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Lexing/Tokens/ColumnToken.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Lexing/Tokens/StatementToken.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Lexing/Tokens/WhitespaceToken.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/Properties/AssemblyInfo.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/QueryLanguageException.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/SystemTypesAttribute.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/TODO.txt" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/TokenizersSource.cs" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.Language/packages.config" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../DotNet/HandyQuery.sln" afterPath="" />
+    </list>
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="TRACKING_ENABLED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileEditorManager">
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file leaf-file-name="Debug.cs" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/HandyQuery.Language.Tests/Debug.cs">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="0">
+              <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+              <folding>
+                <marker date="1514118355130" expanded="false" signature="6:166" ph="..." />
+                <marker date="1514118355130" expanded="true" signature="3459:3524" ph="{...}" />
+                <marker date="1514118355130" expanded="true" signature="3459:3985" ph="{...}" />
+                <marker date="1514118355130" expanded="true" signature="3564:3979" ph="{...}" />
+                <marker date="1514118355130" expanded="true" signature="3896:3969" ph="{...}" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="LexerExecutionGraphTests.cs" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/HandyQuery.Language.Tests/LexerExecutionGraphTests.cs">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="256">
+              <caret line="24" column="0" lean-forward="false" selection-start-line="24" selection-start-column="0" selection-end-line="24" selection-end-column="0" />
+              <folding>
+                <marker date="1514036410867" expanded="false" signature="6:310" ph="..." />
+                <marker date="1514036410867" expanded="true" signature="347:17774" ph="{...}" />
+                <marker date="1514036410867" expanded="true" signature="398:17772" ph="{...}" />
+                <marker date="1514036410867" expanded="true" signature="647:923" ph="{...}" />
+                <marker date="1514036410867" expanded="true" signature="1012:5697" ph="{...}" />
+                <marker date="1514036410867" expanded="true" signature="1119:1337" ph="{...}" />
+                <marker date="1514036410867" expanded="true" signature="1474:1968" ph="{...}" />
+                <marker date="1514036410867" expanded="true" signature="2112:2240" ph="{...}" />
+                <marker date="1514036410867" expanded="true" signature="2966:3094" ph="{...}" />
+                <marker date="1514036410867" expanded="true" signature="4203:4334" ph="{...}" />
+                <marker date="1514036410867" expanded="true" signature="5445:5672" ph="{...}" />
+                <marker date="1514036410867" expanded="true" signature="5749:6181" ph="{...}" />
+                <marker date="1514036410867" expanded="true" signature="5992:6049" ph="{...}" />
+                <marker date="1514036410867" expanded="true" signature="6096:6171" ph="{...}" />
+                <marker date="1514036410867" expanded="true" signature="6317:6886" ph="{...}" />
+                <marker date="1514036410867" expanded="true" signature="6369:6577" ph="{...}" />
+                <marker date="1514036410867" expanded="true" signature="6594:6876" ph="{...}" />
+                <marker date="1514036410867" expanded="true" signature="6957:16672" ph="{...}" />
+                <marker date="1514036410867" expanded="true" signature="7068:7422" ph="{...}" />
+                <marker date="1514036410867" expanded="true" signature="7538:8057" ph="{...}" />
+                <marker date="1514036410867" expanded="true" signature="8495:9044" ph="{...}" />
+                <marker date="1514036410867" expanded="true" signature="9715:10257" ph="{...}" />
+                <marker date="1514036410867" expanded="true" signature="11112:11537" ph="{...}" />
+                <marker date="1514036410867" expanded="true" signature="12535:12984" ph="{...}" />
+                <marker date="1514036410867" expanded="true" signature="14204:14754" ph="{...}" />
+                <marker date="1514036410867" expanded="true" signature="14914:15163" ph="{...}" />
+                <marker date="1514036410867" expanded="true" signature="15305:15630" ph="{...}" />
+                <marker date="1514036410867" expanded="true" signature="15788:16080" ph="{...}" />
+                <marker date="1514036410867" expanded="true" signature="16243:16578" ph="{...}" />
+                <marker date="1514036410867" expanded="true" signature="16715:17245" ph="{...}" />
+                <marker date="1514036410867" expanded="true" signature="16994:17051" ph="{...}" />
+                <marker date="1514036410867" expanded="true" signature="17098:17235" ph="{...}" />
+                <marker date="1514036410867" expanded="true" signature="17312:17438" ph="{...}" />
+                <marker date="1514036410867" expanded="true" signature="17514:17766" ph="{...}" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Microsoft.CSharp.Core.targets" pinned="false" current-in-tab="true">
+        <entry file="file://C:/Program Files/dotnet/sdk/2.1.3/Roslyn/Microsoft.CSharp.Core.targets">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="511">
+              <caret line="110" column="35" lean-forward="false" selection-start-line="110" selection-start-column="35" selection-end-line="110" selection-end-column="35" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/HandyQuery.Language.Tests/LexerExecutionGraphTests.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/HandyQuery.Language.Tests/Debug.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://C:/GIT/NuGet.Config" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://C:/Program Files (x86)/NuGet/Config/Microsoft.VisualStudio.Offline.config" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/AppData/Roaming/NuGet/NuGet.Config" root0="FORCE_HIGHLIGHTING" />
+  </component>
+  <component name="IdeDocumentHistory">
+    <option name="CHANGED_PATHS">
+      <list>
+        <option value="$PROJECT_DIR$/HandyQuery.Language/HandyQuery.Language.csproj" />
+        <option value="$PROJECT_DIR$/HandyQuery.Language.Tests/Tests.cs" />
+        <option value="C:/GIT/NuGet.Config" />
+        <option value="$USER_HOME$/AppData/Roaming/NuGet/NuGet.Config" />
+      </list>
+    </option>
+  </component>
+  <component name="JsBuildToolGruntFileManager" detection-done="true" sorting="DEFINITION_ORDER" />
+  <component name="JsBuildToolPackageJson" detection-done="true" sorting="DEFINITION_ORDER" />
+  <component name="JsGulpfileManager">
+    <detection-done>true</detection-done>
+    <sorting>DEFINITION_ORDER</sorting>
+  </component>
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="x" value="-8" />
+    <option name="y" value="-8" />
+    <option name="width" value="1932" />
+    <option name="height" value="1176" />
+  </component>
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="1" id="Add" />
+  </component>
+  <component name="ProjectView">
+    <navigator currentView="SolutionExplorer" proportions="" version="1">
+      <flattenPackages />
+      <showMembers />
+      <showModules />
+      <showLibraryContents />
+      <hideEmptyPackages />
+      <abbreviatePackageNames />
+      <autoscrollToSource />
+      <autoscrollFromSource />
+      <sortByType />
+      <manualOrder />
+      <foldersAlwaysOnTop value="true" />
+    </navigator>
+    <panes>
+      <pane id="SolutionExplorer">
+        <subPane>
+          <expand>
+            <path>
+              <item name="" type="13324e5d:SolutionExplorerViewPane$ProjectViewPaneTreeStructure$createRoot$1" />
+              <item name="HandyQuery.Language (2 projects)" type="977d5f41:SolutionExplorerNodeRider" />
+            </path>
+            <path>
+              <item name="" type="13324e5d:SolutionExplorerViewPane$ProjectViewPaneTreeStructure$createRoot$1" />
+              <item name="HandyQuery.Language (2 projects)" type="977d5f41:SolutionExplorerNodeRider" />
+              <item name="HandyQuery.Language" type="977d5f41:SolutionExplorerNodeRider" />
+            </path>
+            <path>
+              <item name="" type="13324e5d:SolutionExplorerViewPane$ProjectViewPaneTreeStructure$createRoot$1" />
+              <item name="HandyQuery.Language (2 projects)" type="977d5f41:SolutionExplorerNodeRider" />
+              <item name="HandyQuery.Language" type="977d5f41:SolutionExplorerNodeRider" />
+              <item name="Dependencies" type="977d5f41:SolutionExplorerNodeRider" />
+            </path>
+            <path>
+              <item name="" type="13324e5d:SolutionExplorerViewPane$ProjectViewPaneTreeStructure$createRoot$1" />
+              <item name="HandyQuery.Language (2 projects)" type="977d5f41:SolutionExplorerNodeRider" />
+              <item name="HandyQuery.Language" type="977d5f41:SolutionExplorerNodeRider" />
+              <item name="Dependencies" type="977d5f41:SolutionExplorerNodeRider" />
+              <item name=".NETStandard 2" type="977d5f41:SolutionExplorerNodeRider" />
+            </path>
+            <path>
+              <item name="" type="13324e5d:SolutionExplorerViewPane$ProjectViewPaneTreeStructure$createRoot$1" />
+              <item name="HandyQuery.Language (2 projects)" type="977d5f41:SolutionExplorerNodeRider" />
+              <item name="HandyQuery.Language" type="977d5f41:SolutionExplorerNodeRider" />
+              <item name="Dependencies" type="977d5f41:SolutionExplorerNodeRider" />
+              <item name=".NETStandard 2" type="977d5f41:SolutionExplorerNodeRider" />
+              <item name="SDK" type="977d5f41:SolutionExplorerNodeRider" />
+            </path>
+            <path>
+              <item name="" type="13324e5d:SolutionExplorerViewPane$ProjectViewPaneTreeStructure$createRoot$1" />
+              <item name="HandyQuery.Language (2 projects)" type="977d5f41:SolutionExplorerNodeRider" />
+              <item name="HandyQuery.Language" type="977d5f41:SolutionExplorerNodeRider" />
+              <item name="Dependencies" type="977d5f41:SolutionExplorerNodeRider" />
+              <item name=".NETStandard 2" type="977d5f41:SolutionExplorerNodeRider" />
+              <item name="SDK" type="977d5f41:SolutionExplorerNodeRider" />
+              <item name="NETStandard.Library/2.0.1" type="977d5f41:SolutionExplorerNodeRider" />
+            </path>
+            <path>
+              <item name="" type="13324e5d:SolutionExplorerViewPane$ProjectViewPaneTreeStructure$createRoot$1" />
+              <item name="HandyQuery.Language (2 projects)" type="977d5f41:SolutionExplorerNodeRider" />
+              <item name="HandyQuery.Language.Tests (has missing packages)" type="977d5f41:SolutionExplorerNodeRider" />
+            </path>
+            <path>
+              <item name="" type="13324e5d:SolutionExplorerViewPane$ProjectViewPaneTreeStructure$createRoot$1" />
+              <item name="HandyQuery.Language (2 projects)" type="977d5f41:SolutionExplorerNodeRider" />
+              <item name="HandyQuery.Language.Tests (has missing packages)" type="977d5f41:SolutionExplorerNodeRider" />
+              <item name="Dependencies" type="977d5f41:SolutionExplorerNodeRider" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+        <option name="show-file-system" value="false" />
+        <option name="show-all-items" value="false" />
+      </pane>
+      <pane id="Scratches" />
+    </panes>
+  </component>
+  <component name="PropertiesComponent">
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="settings.editor.selected.configurable" value="RiderNuGetOptionsPageId" />
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="RunManager" selected=".NET Project.Default">
+    <configuration name="Default" type="DotNetProject" factoryName=".NET Project">
+      <option name="EXE_PATH" value="" />
+      <option name="PROGRAM_PARAMETERS" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="PASS_PARENT_ENVS" value="1" />
+      <envs />
+      <option name="USE_MONO" value="0" />
+      <option name="USE_EXTERNAL_CONSOLE" value="0" />
+      <option name="PROJECT_PATH" value="" />
+      <option name="PROJECT_OUTPUT_TRACKING" value="1" />
+      <option name="PROJECT_KIND" value="None" />
+      <option name="PROJECT_TFM" value="" />
+    </configuration>
+  </component>
+  <component name="ShelveChangesManager" show_recycled="false">
+    <option name="remove_strategy" value="false" />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="5f875ecb-d609-45cb-b61c-4f4b56596fcb" name="Default" comment="" />
+      <created>1514036926844</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1514036926844</updated>
+      <workItem from="1514036929359" duration="214000" />
+      <workItem from="1514037214084" duration="324000" />
+      <workItem from="1514039013089" duration="62000" />
+      <workItem from="1514039097484" duration="873000" />
+      <workItem from="1514118780309" duration="319000" />
+      <workItem from="1514119122137" duration="1182000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TimeTrackingManager">
+    <option name="totallyTimeSpent" value="2974000" />
+  </component>
+  <component name="TodoView">
+    <todo-panel id="selected-file">
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+    <todo-panel id="all">
+      <are-packages-shown value="true" />
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+  </component>
+  <component name="ToolWindowManager">
+    <frame x="-8" y="-8" width="1936" height="1176" extended-state="6" />
+    <editor active="true" />
+    <layout>
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Errors In Solution" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32981783" sideWeight="0.50852877" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Unit Tests" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="NuGet" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32981783" sideWeight="0.49573562" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.26599148" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Build" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32981783" sideWeight="0.4914712" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Data View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+    </layout>
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="VcsContentAnnotationSettings">
+    <option name="myLimit" value="2678400000" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager />
+    <watches-manager />
+  </component>
+  <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/HandyQuery.Language.Tests/Debug.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
+            <marker date="1514118355130" expanded="false" signature="6:166" ph="..." />
+            <marker date="1514118355130" expanded="true" signature="3459:3524" ph="{...}" />
+            <marker date="1514118355130" expanded="true" signature="3459:3985" ph="{...}" />
+            <marker date="1514118355130" expanded="true" signature="3564:3979" ph="{...}" />
+            <marker date="1514118355130" expanded="true" signature="3896:3969" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/HandyQuery.Language.Tests/LexerExecutionGraphTests.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="256">
+          <caret line="24" column="0" lean-forward="false" selection-start-line="24" selection-start-column="0" selection-end-line="24" selection-end-column="0" />
+          <folding>
+            <marker date="1514036410867" expanded="false" signature="6:310" ph="..." />
+            <marker date="1514036410867" expanded="true" signature="347:17774" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="398:17772" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="647:923" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="1012:5697" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="1119:1337" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="1474:1968" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="2112:2240" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="2966:3094" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="4203:4334" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="5445:5672" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="5749:6181" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="5992:6049" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="6096:6171" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="6317:6886" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="6369:6577" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="6594:6876" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="6957:16672" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="7068:7422" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="7538:8057" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="8495:9044" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="9715:10257" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="11112:11537" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="12535:12984" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="14204:14754" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="14914:15163" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="15305:15630" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="15788:16080" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="16243:16578" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="16715:17245" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="16994:17051" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="17098:17235" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="17312:17438" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="17514:17766" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/HandyQuery.Language.Tests/Debug.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
+            <marker date="1514118355130" expanded="false" signature="6:166" ph="..." />
+            <marker date="1514118355130" expanded="true" signature="3459:3524" ph="{...}" />
+            <marker date="1514118355130" expanded="true" signature="3459:3985" ph="{...}" />
+            <marker date="1514118355130" expanded="true" signature="3564:3979" ph="{...}" />
+            <marker date="1514118355130" expanded="true" signature="3896:3969" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/HandyQuery.Language.Tests/LexerExecutionGraphTests.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="256">
+          <caret line="24" column="0" lean-forward="false" selection-start-line="24" selection-start-column="0" selection-end-line="24" selection-end-column="0" />
+          <folding>
+            <marker date="1514036410867" expanded="false" signature="6:310" ph="..." />
+            <marker date="1514036410867" expanded="true" signature="347:17774" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="398:17772" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="647:923" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="1012:5697" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="1119:1337" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="1474:1968" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="2112:2240" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="2966:3094" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="4203:4334" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="5445:5672" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="5749:6181" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="5992:6049" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="6096:6171" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="6317:6886" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="6369:6577" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="6594:6876" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="6957:16672" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="7068:7422" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="7538:8057" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="8495:9044" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="9715:10257" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="11112:11537" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="12535:12984" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="14204:14754" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="14914:15163" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="15305:15630" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="15788:16080" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="16243:16578" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="16715:17245" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="16994:17051" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="17098:17235" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="17312:17438" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="17514:17766" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/HandyQuery.Language/Class1.cs" />
+    <entry file="file://C:/Program Files/dotnet/sdk/2.1.3/Roslyn/Microsoft.CSharp.Core.targets">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/HandyQuery.Language/HandyQuery.Language.csproj">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="112">
+          <caret line="7" column="0" lean-forward="false" selection-start-line="7" selection-start-column="0" selection-end-line="7" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/HandyQuery.Language/Class1.cs" />
+    <entry file="file://C:/Program Files/dotnet/sdk/2.1.3/Roslyn/Microsoft.CSharp.Core.targets">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1328">
+          <caret line="83" column="4" lean-forward="false" selection-start-line="83" selection-start-column="4" selection-end-line="83" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/HandyQuery.Language/Class1.cs" />
+    <entry file="file://$PROJECT_DIR$/HandyQuery.Language.Tests/Tests.cs" />
+    <entry file="file://$PROJECT_DIR$/HandyQuery.Language/HandyQuery.Language.csproj">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="112">
+          <caret line="7" column="0" lean-forward="false" selection-start-line="7" selection-start-column="0" selection-end-line="7" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/HandyQuery.Language.Tests/Debug.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
+            <marker date="1514118355130" expanded="false" signature="6:166" ph="..." />
+            <marker date="1514118355130" expanded="true" signature="3459:3524" ph="{...}" />
+            <marker date="1514118355130" expanded="true" signature="3459:3985" ph="{...}" />
+            <marker date="1514118355130" expanded="true" signature="3564:3979" ph="{...}" />
+            <marker date="1514118355130" expanded="true" signature="3896:3969" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://C:/GIT/NuGet.Config">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="144">
+          <caret line="9" column="22" lean-forward="true" selection-start-line="9" selection-start-column="22" selection-end-line="9" selection-end-column="22" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://C:/Program Files (x86)/NuGet/Config/Microsoft.VisualStudio.Offline.config">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/AppData/Roaming/NuGet/NuGet.Config">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="320">
+          <caret line="20" column="16" lean-forward="true" selection-start-line="20" selection-start-column="16" selection-end-line="20" selection-end-column="16" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/HandyQuery.Language.Tests/LexerExecutionGraphTests.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="256">
+          <caret line="24" column="0" lean-forward="false" selection-start-line="24" selection-start-column="0" selection-end-line="24" selection-end-column="0" />
+          <folding>
+            <marker date="1514036410867" expanded="false" signature="6:310" ph="..." />
+            <marker date="1514036410867" expanded="true" signature="347:17774" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="398:17772" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="647:923" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="1012:5697" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="1119:1337" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="1474:1968" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="2112:2240" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="2966:3094" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="4203:4334" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="5445:5672" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="5749:6181" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="5992:6049" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="6096:6171" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="6317:6886" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="6369:6577" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="6594:6876" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="6957:16672" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="7068:7422" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="7538:8057" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="8495:9044" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="9715:10257" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="11112:11537" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="12535:12984" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="14204:14754" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="14914:15163" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="15305:15630" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="15788:16080" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="16243:16578" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="16715:17245" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="16994:17051" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="17098:17235" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="17312:17438" ph="{...}" />
+            <marker date="1514036410867" expanded="true" signature="17514:17766" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://C:/Program Files/dotnet/sdk/2.0.2/Roslyn/Microsoft.CSharp.Core.targets">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-976">
+          <caret line="26" column="35" lean-forward="false" selection-start-line="26" selection-start-column="35" selection-end-line="26" selection-end-column="35" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://C:/Program Files/dotnet/sdk/2.1.2/Roslyn/Microsoft.CSharp.Core.targets">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="432">
+          <caret line="114" column="40" lean-forward="false" selection-start-line="114" selection-start-column="40" selection-end-line="114" selection-end-column="40" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://C:/Program Files/dotnet/sdk/2.1.3/Roslyn/Microsoft.CSharp.Core.targets">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="511">
+          <caret line="110" column="35" lean-forward="false" selection-start-line="110" selection-start-column="35" selection-end-line="110" selection-end-column="35" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+  </component>
+</project>
