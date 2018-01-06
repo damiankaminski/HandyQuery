@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Globalization;
 using HandyQuery.Language.Configuration;
 using HandyQuery.Language.Lexing.Grammar.Structure;
@@ -24,6 +25,8 @@ namespace HandyQuery.Language.Lexing
         
         public LexerResult Tokenize(string query, ILanguageInternalConfig languageConfig, CultureInfo cultureInfo, LexerConfig config = null)
         {
+            if(string.IsNullOrWhiteSpace(query)) throw new ArgumentException();
+            
             config = config ?? LexerConfig.Default;
             var finalResult = new LexerResult();
             var reader = new LexerStringReader(query, 0); // TODO: pool or maybe struct?

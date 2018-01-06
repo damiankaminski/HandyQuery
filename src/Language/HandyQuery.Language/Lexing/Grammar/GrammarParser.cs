@@ -73,8 +73,8 @@ namespace HandyQuery.Language.Lexing.Grammar
                     }
 
                     // skip '::='
-                    var equals = _reader.ReadTill(x => x == '=') + _reader.CurrentChar;
-                    if (@equals.EndsWith("::=") == false)
+                    var equals = _reader.ReadWhile(x => x != '=') + _reader.CurrentChar;
+                    if (equals.EndsWith("::=") == false)
                     {
                         throw new GrammarParserException($"Invalid syntax for {nonTerminalName}.");
                     }

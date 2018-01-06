@@ -11,24 +11,27 @@ namespace HandyQuery.Language.Lexing.Tokenizers.Abstract
     {
         public TokenizationResult Tokenize(LexerRuntimeInfo info)
         {
-            var reader = info.Reader;
-            var startPosition = reader.CurrentPosition;
-            var text = reader.ReadTillEndOfKeyword(
-                GetCandidatesForKeyword(info), 
-                info.CurrentCulture, 
-                info.Config.SyntaxInfo);
-
-            var keyword = info.CurrentCulture.GetKeyword(text);
-            var token = CreateToken(startPosition, reader.ReadLength, keyword);
-
-            if (token.Keyword == null)
-            {
-                reader.RestoreCurrentPosition();
-                var word = reader.ReadTillEndOfWord();
-                return TokenizationResult.Failed(OnNotFoundError(word));
-            }
-
-            return TokenizationResult.Successful(token);
+            // TODO:
+            
+//            var reader = info.Reader;
+//            var startPosition = reader.CurrentPosition;
+//            var text = reader.ReadTillEndOfKeyword(
+//                GetCandidatesForKeyword(info), 
+//                info.CurrentCulture, 
+//                info.Config.SyntaxInfo);
+//
+//            var keyword = info.CurrentCulture.GetKeyword(text);
+//            var token = CreateToken(startPosition, reader.ReadLength, keyword);
+//
+//            if (token.Keyword == null)
+//            {
+//                reader.RestoreCurrentPosition();
+//                var word = reader.ReadTillEndOfWord();
+//                return TokenizationResult.Failed(OnNotFoundError(word));
+//            }
+//
+//            return TokenizationResult.Successful(token);
+            return TokenizationResult.Successful(null);
         }
 
         /// <summary>
