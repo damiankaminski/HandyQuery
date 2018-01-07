@@ -38,7 +38,7 @@ namespace HandyQuery.Language.Lexing.Grammar
 
             while (_reader.IsInRange())
             {
-                if (_reader.IsNewLine())
+                if (_reader.IsEndOfLine())
                 {
                     _reader.MoveNext();
                     continue;

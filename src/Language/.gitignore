@@ -190,11 +190,5 @@ npm_modules/
 jspm_packages/
 **/wwwroot/lib/
 
-#MarvelousSoftware
-MarvelousSoftware/MarvelousSoftware.Aurelia/dist/
-MarvelousSoftware/MarvelousSoftware.Aurelia.Demo/dist/
-MarvelousSoftware/MarvelousSoftware.DotNet/.vs/config/applicationhost.config
-
-#AwesomeSolutions
-AwesomeSolutions/dist/
-AwesomeSolutionsDemo/dist/
+# Rider
+.idea

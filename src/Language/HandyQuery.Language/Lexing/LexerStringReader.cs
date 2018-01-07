@@ -7,7 +7,7 @@ using HandyQuery.Language.Configuration.Keywords;
 
 namespace HandyQuery.Language.Lexing
 {
-    // TODO: change to struct
+    // TODO: change to struct and reuse it all over the place
     // TODO: use Span instead of string API
     
     /// <summary>
@@ -17,26 +17,22 @@ namespace HandyQuery.Language.Lexing
     {
         public LexerStringReader(string query, int position)
         {
+            if (position >= query.Length) throw new IndexOutOfRangeException();
+            
             CurrentPosition = position;
             Query = query;
             QueryLength = query.Length;
         }
 
-        public string Query { get; }
+        private string Query { get; }
         private int QueryLength { get; }
 
         public int CurrentPosition { get; private set; }
-        private int CapturedCurrentPosition { get; set; }
-
-        /// <summary>
-        /// If true then length is being reset on each `ReadSomething` method invokation.
-        /// </summary>
-        public bool ResetLengthOnEachRead { get; set; } = true;
 
         /// <summary>
         /// A number of chars read by 'ReadTill...' methods.
         /// </summary>
-        public int ReadLength { get; private set; }
+        public int ReadLength { get; private set; } // TODO: not sure if that's ever needed, length of returned string/span could be used instead
 
         public char CurrentChar => Query[CurrentPosition];
 
@@ -61,7 +57,7 @@ namespace HandyQuery.Language.Lexing
         /// </summary>
         public string ReadTillEndOfXWords(int x)
         {
-            // TODO: heap alloc via closure
+            // TODO: fix heap alloc via closure
             var counter = 0;
             var isWithinWhitespaceContext = false;
             
@@ -90,7 +86,7 @@ namespace HandyQuery.Language.Lexing
         /// </summary>
         public string ReadTillEndOfNumber(char seperator)
         {
-            // TODO: heap alloc via closure
+            // TODO: fix heap alloc via closure
             return ReadWhile(x => char.IsDigit(x) || x == seperator);
         }
 
@@ -100,7 +96,7 @@ namespace HandyQuery.Language.Lexing
         public string ReadTillIvalidChar(IEnumerable<char> invalidChars)
         {
             // TODO: use Span instead of IEnumerable?
-            // TODO: heap alloc via closure
+            // TODO: fix heap alloc via closure
             return ReadWhile(x => invalidChars.Contains(x) == false);
         }
 
@@ -110,7 +106,7 @@ namespace HandyQuery.Language.Lexing
         public string ReadTillIvalidCharOrWhitespace(IEnumerable<char> invalidChars)
         {
             // TODO: use Span instead of IEnumerable?
-            // TODO: heap alloc via closure
+            // TODO: fix heap alloc via closure
             return ReadWhile(x => invalidChars.Contains(x) == false && char.IsWhiteSpace(x) == false);
         }
 
@@ -122,7 +118,7 @@ namespace HandyQuery.Language.Lexing
             return ReadWhile(x => x != '\n' && x != '\r');
         }
 
-        // TODO: move outside of LexerStringReader?
+        // TODO: move outside of LexerStringReader? maybe as an extension method?
         // TODO: avoid heap allocations
         // TODO: test
 //        /// <summary>
@@ -191,10 +187,21 @@ namespace HandyQuery.Language.Lexing
         /// </summary>
         public bool StartsWith(string value)
         {
-            // TODO: test
-            for (int i = 0; i < value.Length; i++)
+            if (value == null) throw new ArgumentException(nameof(value));
+            if (value == string.Empty) return true;
+            
+            var valueLength = value.Length;
+            
+            if (IsInRange(CurrentPosition + valueLength - 1) == false)
             {
-                if (Query[CurrentPosition + i] != value[i]) return false;
+                return false;
+            }
+            
+            for (var i = 0; i < valueLength; i++)
+            {
+                var pos = CurrentPosition + i;
+                
+                if (Query[pos] != value[i]) return false;
             }
 
             return true;
@@ -203,37 +210,23 @@ namespace HandyQuery.Language.Lexing
         /// <summary>
         /// Checks wheter <see cref="CurrentPosition"/> is in range of <see cref="Query"/>.
         /// </summary>
-        public bool IsInRange()
-        {
-            // TODO: test
-            return IsInRange(CurrentPosition);
-        }
+        public bool IsInRange() => IsInRange(CurrentPosition);
 
         /// <summary>
         /// Checks wheter given <see cref="position"/> is in range of <see cref="Query"/>.
         /// </summary>
-        public bool IsInRange(int position)
-        {
-            // TODO: test
-            return QueryLength > position;
-        }
-
-        // TODO: test 
+        public bool IsInRange(int position) => QueryLength > position && position >= 0;
+ 
         /// <summary>
         /// Checks wheter everything has been already read.
         /// </summary>
         public bool IsEndOfQuery() => IsInRange(CurrentPosition + 1) == false;
 
-        // TODO: test
         /// <summary>
         /// Moves to next char. Increases <see cref="ReadLength"/>.
         /// </summary>
-        public bool MoveNext()
-        {
-            return MoveBy(1);
-        }
+        public bool MoveNext() => MoveBy(1);
 
-        // TODO: test
         /// <summary>
         /// Moves <see cref="CurrentPosition"/> and <see cref="ReadLength"/> by <see cref="x"/>.
         /// </summary>
@@ -250,22 +243,27 @@ namespace HandyQuery.Language.Lexing
             return true;
         }
 
-        // TODO: test
         public bool MoveToNextLine()
         {
-            var index = Query.IndexOf('\r', CurrentPosition);
-            if (index == -1)
+            var queryLength = Query.Length;
+            for (var i = CurrentPosition; i < queryLength; i++)
             {
-                index = Query.IndexOf('\n', CurrentPosition);
-                return index != -1 && MoveBy(index - CurrentPosition + 1);
+                if (i >= queryLength) return false;
+
+                if (Query[i] == '\n') return MoveBy(i - CurrentPosition + 1);
+
+                if (Query[i] == '\r')
+                {
+                    if (MoveBy(i - CurrentPosition + 1) == false) return false;
+                    if (CurrentChar == '\n') return MoveBy(1);
+                    return true;
+                }
             }
-            if (MoveBy(index - CurrentPosition + 1) == false) return false;
-            if (CurrentChar == '\n') return MoveBy(1);
-            return true;
+
+            return false;
         }
 
-        // TODO: test
-        public bool IsNewLine()
+        public bool IsEndOfLine()
         {
             return CurrentChar == '\r' || CurrentChar == '\n';
         }
@@ -278,11 +276,6 @@ namespace HandyQuery.Language.Lexing
             if (IsInRange(CurrentPosition) == false)
             {
                 return "";
-            }
-            
-            if (ResetLengthOnEachRead)
-            {
-                ReadLength = 0;
             }
 
             var length = 0;
@@ -301,33 +294,6 @@ namespace HandyQuery.Language.Lexing
             ReadLength += length;
 
             return Query.Substring(startIndex, length);
-        }
-
-        // TODO: test
-        /// <summary>
-        /// Resets read length to 0.
-        /// </summary>
-        public void ResetReadLength()
-        {
-            ReadLength = 0;
-        }
-
-        // TODO: test
-        /// <summary>
-        /// Captures current position and allows to restore it using <see cref="RestoreCurrentPosition"/> method.
-        /// </summary>
-        public void CaptureCurrentPosition()
-        {
-            CapturedCurrentPosition = CurrentPosition;
-        }
-
-        // TODO: test
-        /// <summary>
-        /// Restores current position to last captured by <see cref="CaptureCurrentPosition"/> method.
-        /// </summary>
-        public void RestoreCurrentPosition()
-        {
-            CurrentPosition = CapturedCurrentPosition;
         }
     }
 }
