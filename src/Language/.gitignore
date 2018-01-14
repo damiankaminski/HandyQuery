@@ -192,3 +192,6 @@ jspm_packages/
 
 # Rider
 .idea
+
+# BenchmarkDotNet
+BenchmarkDotNet.Artifacts

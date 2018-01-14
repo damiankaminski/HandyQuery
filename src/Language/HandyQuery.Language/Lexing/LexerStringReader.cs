@@ -29,10 +29,11 @@ namespace HandyQuery.Language.Lexing
 
         public int CurrentPosition { get; private set; }
 
+        // TODO: not sure if that's ever needed, length of returned string/span could be used instead
         /// <summary>
         /// A number of chars read by 'ReadTill...' methods.
         /// </summary>
-        public int ReadLength { get; private set; } // TODO: not sure if that's ever needed, length of returned string/span could be used instead
+        public int ReadLength { get; private set; }
 
         public char CurrentChar => Query[CurrentPosition];
 
@@ -86,8 +87,7 @@ namespace HandyQuery.Language.Lexing
         /// </summary>
         public string ReadTillEndOfNumber(char seperator)
         {
-            // TODO: fix heap alloc via closure
-            return ReadWhile(x => char.IsDigit(x) || x == seperator);
+            return ReadWhile(seperator, (sep, x) => char.IsDigit(x) || x == sep);
         }
 
         /// <summary>
@@ -96,8 +96,7 @@ namespace HandyQuery.Language.Lexing
         public string ReadTillIvalidChar(IEnumerable<char> invalidChars)
         {
             // TODO: use Span instead of IEnumerable?
-            // TODO: fix heap alloc via closure
-            return ReadWhile(x => invalidChars.Contains(x) == false);
+            return ReadWhile(invalidChars, (chars, x) => chars.Contains(x) == false);
         }
 
         /// <summary>
@@ -106,8 +105,7 @@ namespace HandyQuery.Language.Lexing
         public string ReadTillIvalidCharOrWhitespace(IEnumerable<char> invalidChars)
         {
             // TODO: use Span instead of IEnumerable?
-            // TODO: fix heap alloc via closure
-            return ReadWhile(x => invalidChars.Contains(x) == false && char.IsWhiteSpace(x) == false);
+            return ReadWhile(invalidChars, (chars, x) => chars.Contains(x) == false && char.IsWhiteSpace(x) == false);
         }
 
         /// <summary>
@@ -282,6 +280,34 @@ namespace HandyQuery.Language.Lexing
             var startIndex = CurrentPosition;
 
             while (predicate(CurrentChar))
+            {
+                length++;
+
+                if (MoveNext() == false)
+                {
+                    break;
+                }
+            }
+
+            ReadLength += length;
+
+            return Query.Substring(startIndex, length);
+        }
+        
+        /// <summary>
+        /// Reads the query while predicate returns true.
+        /// </summary>
+        public string ReadWhile<T>(T state, Func<T, char, bool> predicate)
+        {
+            if (IsInRange(CurrentPosition) == false)
+            {
+                return "";
+            }
+
+            var length = 0;
+            var startIndex = CurrentPosition;
+
+            while (predicate(state, CurrentChar))
             {
                 length++;
 
