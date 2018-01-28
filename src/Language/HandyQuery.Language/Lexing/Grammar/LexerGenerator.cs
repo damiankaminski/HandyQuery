@@ -19,8 +19,7 @@ namespace HandyQuery.Language.Lexing.Grammar
             using (var textStream = new StreamReader(stream ?? throw notFoundException))
             {
                 var grammarText = textStream.ReadToEnd();
-                var reader = new LexerStringReader(grammarText, 0);
-                var parser = new GrammarParser(reader, tokenizersSource);
+                var parser = new GrammarParser(grammarText, tokenizersSource);
                 var grammar = parser.Parse();
 
                 return Lexer.Build(grammar);

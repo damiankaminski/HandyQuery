@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using FluentAssertions;
+using HandyQuery.Language.Extensions;
 using HandyQuery.Language.Lexing;
 using NUnit.Framework;
 
@@ -108,7 +109,7 @@ namespace HandyQuery.Language.Tests.Lexing
             
             var result = reader.ReadWhile(x => x != invalidChar);
 
-            result.Should().Be(expectedResult);
+            result.SlowlyCreateString().Should().Be(expectedResult);
             reader.ReadLength.Should().Be(expectedResult.Length);
         }
         
@@ -123,7 +124,7 @@ namespace HandyQuery.Language.Tests.Lexing
             
             var result = reader.ReadTillEndOfWhitespace();
 
-            result.Should().Be(expectedResult);
+            result.SlowlyCreateString().Should().Be(expectedResult);
             reader.ReadLength.Should().Be(expectedResult.Length);
         }
         
@@ -139,7 +140,7 @@ namespace HandyQuery.Language.Tests.Lexing
             
             var result = reader.ReadTillEndOfWord();
 
-            result.Should().Be(expectedResult);
+            result.SlowlyCreateString().Should().Be(expectedResult);
             reader.ReadLength.Should().Be(expectedResult.Length);
         }
         
@@ -160,7 +161,7 @@ namespace HandyQuery.Language.Tests.Lexing
             
             var result = reader.ReadTillEndOfXWords(x);
 
-            result.Should().Be(expectedResult);
+            result.SlowlyCreateString().Should().Be(expectedResult);
             reader.ReadLength.Should().Be(expectedResult.Length);
         }
         
@@ -180,7 +181,7 @@ namespace HandyQuery.Language.Tests.Lexing
             
             var result = reader.ReadTillEndOfNumber(separator);
 
-            result.Should().Be(expectedResult);
+            result.SlowlyCreateString().Should().Be(expectedResult);
             reader.ReadLength.Should().Be(expectedResult.Length);
         }
 
@@ -197,7 +198,7 @@ namespace HandyQuery.Language.Tests.Lexing
             
             var result = reader.ReadTillIvalidChar(invalidChars);
 
-            result.Should().Be(expectedResult);
+            result.SlowlyCreateString().Should().Be(expectedResult);
             reader.ReadLength.Should().Be(expectedResult.Length);
         }
         
@@ -216,7 +217,7 @@ namespace HandyQuery.Language.Tests.Lexing
             
             var result = reader.ReadTillIvalidCharOrWhitespace(invalidChars);
 
-            result.Should().Be(expectedResult);
+            result.SlowlyCreateString().Should().Be(expectedResult);
             reader.ReadLength.Should().Be(expectedResult.Length);
         }
         
@@ -231,7 +232,7 @@ namespace HandyQuery.Language.Tests.Lexing
             
             var result = reader.ReadTillNewLine();
 
-            result.Should().Be(expectedResult);
+            result.SlowlyCreateString().Should().Be(expectedResult);
             reader.ReadLength.Should().Be(expectedResult.Length);
         }
         
@@ -249,7 +250,7 @@ namespace HandyQuery.Language.Tests.Lexing
         {
             var reader = CreateReader(query);
             
-            var result = reader.StartsWith(value);
+            var result = reader.StartsWith(value.AsSpan());
 
             result.Should().Be(expectedResult);
         }

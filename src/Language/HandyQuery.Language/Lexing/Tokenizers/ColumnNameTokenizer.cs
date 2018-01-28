@@ -1,4 +1,5 @@
-﻿using HandyQuery.Language.Lexing.Tokenizers.Abstract;
+﻿using HandyQuery.Language.Extensions;
+using HandyQuery.Language.Lexing.Tokenizers.Abstract;
 using HandyQuery.Language.Lexing.Tokens;
 
 namespace HandyQuery.Language.Lexing.Tokenizers
@@ -7,7 +8,8 @@ namespace HandyQuery.Language.Lexing.Tokenizers
     {
         public TokenizationResult Tokenize(LexerRuntimeInfo info)
         {
-            var columnName = info.Reader.ReadTillIvalidCharOrWhitespace(info.Config.SyntaxInfo.ReservedChars);
+            // TODO: get rid of SlowlyCreateString and store as ReadOnlySpan<char>
+            var columnName = info.Reader.ReadTillIvalidCharOrWhitespace(info.Config.SyntaxInfo.ReservedChars).SlowlyCreateString();
 
             var token = new ColumnToken(info.Reader.CurrentPosition, info.Reader.ReadLength, info.Config.GetColumnInfo(columnName));
 

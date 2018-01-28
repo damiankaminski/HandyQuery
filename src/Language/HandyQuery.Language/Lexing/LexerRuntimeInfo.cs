@@ -3,7 +3,7 @@ using HandyQuery.Language.Configuration;
 
 namespace HandyQuery.Language.Lexing
 {
-    internal sealed class LexerRuntimeInfo
+    internal struct LexerRuntimeInfo
     {
         public readonly LexerStringReader Reader;
         public readonly ILanguageInternalConfig Config;

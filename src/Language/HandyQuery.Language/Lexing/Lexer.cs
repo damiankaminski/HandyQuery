@@ -23,14 +23,15 @@ namespace HandyQuery.Language.Lexing
             return new Lexer(LexerExecutionGraph.Build(grammar));
         }
         
+        [PerformanceCritical]
         public LexerResult Tokenize(string query, ILanguageInternalConfig languageConfig, CultureInfo cultureInfo, LexerConfig config = null)
         {
             if(string.IsNullOrWhiteSpace(query)) throw new ArgumentException();
             
-            config = config ?? LexerConfig.Default;
+            //config = config ?? LexerConfig.Default;
             var finalResult = new LexerResult();
-            var reader = new LexerStringReader(query, 0); // TODO: pool or maybe struct?
-            var runtimeInfo = new LexerRuntimeInfo(reader, languageConfig, cultureInfo); // TODO: pool or maybe struct?
+            //var reader = new LexerStringReader(query, 0); // TODO: pass by ref
+            //var runtimeInfo = new LexerRuntimeInfo(reader, languageConfig, cultureInfo); // TODO: struct
 
             // TODO: implement
             

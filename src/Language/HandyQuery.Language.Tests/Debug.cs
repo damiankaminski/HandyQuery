@@ -13,7 +13,7 @@ namespace HandyQuery.Language.Tests
 {
     public sealed class Debug
     {
-        [Test]
+        //[Test]
         [Explicit("Just for debug.")]
         public void GetLexerGraph()
         {

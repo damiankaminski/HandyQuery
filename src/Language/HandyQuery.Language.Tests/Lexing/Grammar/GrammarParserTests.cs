@@ -37,8 +37,7 @@ namespace HandyQuery.Language.Tests.Lexing.Grammar
 
         private static Language.Lexing.Grammar.Grammar Parse(string grammarText)
         {
-            var reader = new LexerStringReader(grammarText, 0);
-            var parser = new GrammarParser(reader, TokenizersSource);
+            var parser = new GrammarParser(grammarText, TokenizersSource);
             return parser.Parse();
         }
     }

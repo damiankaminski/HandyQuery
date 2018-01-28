@@ -434,8 +434,7 @@ namespace HandyQuery.Language.Tests
 
         private static LexerExecutionGraph CreateGraph(string grammarText)
         {
-            var reader = new LexerStringReader(grammarText, 0);
-            var parser = new GrammarParser(reader, TokenizersSource);
+            var parser = new GrammarParser(grammarText, TokenizersSource);
             var grammar = parser.Parse();
 
             return LexerExecutionGraph.Build(grammar);

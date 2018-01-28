@@ -9,6 +9,7 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.5.0" />
     <PackageReference Include="NUnit" Version="3.9.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.9.0" />
+    <PackageReference Include="System.Memory" Version="4.4.0-preview1-25305-02" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\HandyQuery.Language\HandyQuery.Language.csproj" />

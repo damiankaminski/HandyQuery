@@ -1,31 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using HandyQuery.Language.Configuration;
-using HandyQuery.Language.Configuration.Keywords;
 
 namespace HandyQuery.Language.Lexing
 {
-    // TODO: change to struct and reuse it all over the place
-    // TODO: use Span instead of string API
+    // TODO: rename to NoAllocStringReader?
     
     /// <summary>
     /// Provides methods to read a string using different scenarios, e.g. till the end of whitespaces, or till the first whitespace.
     /// </summary>
-    internal sealed class LexerStringReader
+    internal struct LexerStringReader
     {
         public LexerStringReader(string query, int position)
         {
             if (position >= query.Length) throw new IndexOutOfRangeException();
             
             CurrentPosition = position;
-            Query = query;
-            QueryLength = query.Length;
+            _query = query.AsSpan();
+            _queryLength = query.Length;
+            ReadLength = 0;
         }
 
-        private string Query { get; }
-        private int QueryLength { get; }
+        private readonly ReadOnlySpan<char> _query;
+        private readonly int _queryLength;
 
         public int CurrentPosition { get; private set; }
 
@@ -35,28 +32,28 @@ namespace HandyQuery.Language.Lexing
         /// </summary>
         public int ReadLength { get; private set; }
 
-        public char CurrentChar => Query[CurrentPosition];
+        public char CurrentChar => _query[CurrentPosition];
 
         /// <summary>
-        /// Reads the <see cref="Query"/> till first non whitespace occurrence.
+        /// Reads the query till first non whitespace occurrence.
         /// </summary>
-        public string ReadTillEndOfWhitespace()
+        public ReadOnlySpan<char> ReadTillEndOfWhitespace()
         {
             return ReadWhile(char.IsWhiteSpace);
         }
 
         /// <summary>
-        /// Reads the <see cref="Query"/> till first whitespace occurence.
+        /// Reads the query till first whitespace occurence.
         /// </summary>
-        public string ReadTillEndOfWord()
+        public ReadOnlySpan<char> ReadTillEndOfWord()
         {
             return ReadWhile(x => char.IsWhiteSpace(x) == false);
         }
 
         /// <summary>
-        /// Reads the <see cref="Query"/> till finds <see cref="x"/> words separated by whitespaces.
+        /// Reads the query till finds <see cref="x"/> words separated by whitespaces.
         /// </summary>
-        public string ReadTillEndOfXWords(int x)
+        public ReadOnlySpan<char> ReadTillEndOfXWords(int x)
         {
             // TODO: fix heap alloc via closure
             var counter = 0;
@@ -83,26 +80,26 @@ namespace HandyQuery.Language.Lexing
         }
         
         /// <summary>
-        /// Reads the <see cref="Query"/> till end of number.
+        /// Reads the query till end of number.
         /// </summary>
-        public string ReadTillEndOfNumber(char seperator)
+        public ReadOnlySpan<char> ReadTillEndOfNumber(char seperator)
         {
             return ReadWhile(seperator, (sep, x) => char.IsDigit(x) || x == sep);
         }
 
         /// <summary>
-        /// Reads the <see cref="Query"/> till the first occurrance of invalid char.
+        /// Reads the query till the first occurrance of invalid char.
         /// </summary>
-        public string ReadTillIvalidChar(IEnumerable<char> invalidChars)
+        public ReadOnlySpan<char> ReadTillIvalidChar(IEnumerable<char> invalidChars)
         {
             // TODO: use Span instead of IEnumerable?
             return ReadWhile(invalidChars, (chars, x) => chars.Contains(x) == false);
         }
 
         /// <summary>
-        /// Reads the <see cref="Query"/> till the first occurrance of invalid char.
+        /// Reads the query till the first occurrance of invalid char.
         /// </summary>
-        public string ReadTillIvalidCharOrWhitespace(IEnumerable<char> invalidChars)
+        public ReadOnlySpan<char> ReadTillIvalidCharOrWhitespace(IEnumerable<char> invalidChars)
         {
             // TODO: use Span instead of IEnumerable?
             return ReadWhile(invalidChars, (chars, x) => chars.Contains(x) == false && char.IsWhiteSpace(x) == false);
@@ -111,82 +108,17 @@ namespace HandyQuery.Language.Lexing
         /// <summary>
         /// Reads until new line character is found.
         /// </summary>
-        public string ReadTillNewLine()
+        public ReadOnlySpan<char> ReadTillNewLine()
         {
             return ReadWhile(x => x != '\n' && x != '\r');
         }
 
-        // TODO: move outside of LexerStringReader? maybe as an extension method?
-        // TODO: avoid heap allocations
-        // TODO: test
-//        /// <summary>
-//        /// Reads the <see cref="Query"/> till the end of keyword.
-//        /// </summary>
-//        public string ReadTillEndOfKeyword(IEnumerable<Keyword> keywords, ICultureConfig culture, SyntaxInfo syntax)
-//        {
-//            var result = string.Empty;
-//            var keywordTexts = keywords.Select(culture.GetKeywordText).OrderByDescending(x => x.Length).ToArray();
-//            var caseSensitive = syntax.Config.KeywordCaseSensitive;
-//            var reservedChars = syntax.ReservedChars;
-//
-//            foreach (var keyword in keywordTexts)
-//            {
-//                var keywordName = caseSensitive== false ? keyword.ToLowerInvariant() : keyword;
-//
-//                var prevIndex = CurrentPosition - 1;
-//                var nextIndex = CurrentPosition + keywordName.Length;
-//                var prevChar = prevIndex < 0 ? null as char? : Query[prevIndex];
-//                var nextChar = IsInRange(nextIndex) == false ? null as char? : Query[nextIndex];
-//
-//                // keyword out of range of provided query
-//                if (IsInRange(nextIndex - 1) == false)
-//                {
-//                    continue;
-//                }
-//
-//                // keyword not found
-//                var queryPart = Query.Substring(CurrentPosition, keywordName.Length);
-//                queryPart = caseSensitive == false ? queryPart.ToLowerInvariant() : queryPart;
-//                if (keywordName != queryPart)
-//                {
-//                    continue;
-//                }
-//
-//                // keyword starts with letter or digit and previous char isn't special character or whitespace
-//                // e.g. Namestarts with
-//                //          ^
-//                if (char.IsLetterOrDigit(keywordName.First()) && CurrentPosition > 0
-//                    && char.IsWhiteSpace(prevChar.Value) == false
-//                    && reservedChars.Contains(prevChar.Value) == false)
-//                {
-//                    continue;
-//                }
-//
-//                // keyword ends with letter or digit and special character or whitespace after is missing
-//                // e.g. Name starts withDamian
-//                //           ^
-//                if (char.IsLetterOrDigit(keywordName.Last()) && IsInRange(nextIndex)
-//                    && char.IsWhiteSpace(nextChar.Value) == false
-//                    && reservedChars.Contains(nextChar.Value) == false)
-//                {
-//                    continue;
-//                }
-//
-//                result = keywordName;
-//                break;
-//            }
-//
-//            ReadLength = result.Length;
-//            return result;
-//        }
-
         /// <summary>
-        /// Determines whether <see cref="Query"/> in <see cref="CurrentPosition"/> starts with given value.
+        /// Determines whether query in <see cref="CurrentPosition"/> starts with given value.
         /// </summary>
-        public bool StartsWith(string value)
+        public bool StartsWith(ReadOnlySpan<char> value)
         {
-            if (value == null) throw new ArgumentException(nameof(value));
-            if (value == string.Empty) return true;
+            if (value.Length == 0) return true;
             
             var valueLength = value.Length;
             
@@ -199,21 +131,21 @@ namespace HandyQuery.Language.Lexing
             {
                 var pos = CurrentPosition + i;
                 
-                if (Query[pos] != value[i]) return false;
+                if (_query[pos] != value[i]) return false;
             }
 
             return true;
         }
 
         /// <summary>
-        /// Checks wheter <see cref="CurrentPosition"/> is in range of <see cref="Query"/>.
+        /// Checks wheter <see cref="CurrentPosition"/> is in range of query.
         /// </summary>
         public bool IsInRange() => IsInRange(CurrentPosition);
 
         /// <summary>
-        /// Checks wheter given <see cref="position"/> is in range of <see cref="Query"/>.
+        /// Checks wheter given <see cref="position"/> is in range of query.
         /// </summary>
-        public bool IsInRange(int position) => QueryLength > position && position >= 0;
+        public bool IsInRange(int position) => _queryLength > position && position >= 0;
  
         /// <summary>
         /// Checks wheter everything has been already read.
@@ -243,14 +175,14 @@ namespace HandyQuery.Language.Lexing
 
         public bool MoveToNextLine()
         {
-            var queryLength = Query.Length;
+            var queryLength = _query.Length;
             for (var i = CurrentPosition; i < queryLength; i++)
             {
                 if (i >= queryLength) return false;
 
-                if (Query[i] == '\n') return MoveBy(i - CurrentPosition + 1);
+                if (_query[i] == '\n') return MoveBy(i - CurrentPosition + 1);
 
-                if (Query[i] == '\r')
+                if (_query[i] == '\r')
                 {
                     if (MoveBy(i - CurrentPosition + 1) == false) return false;
                     if (CurrentChar == '\n') return MoveBy(1);
@@ -269,11 +201,11 @@ namespace HandyQuery.Language.Lexing
         /// <summary>
         /// Reads the query while predicate returns true.
         /// </summary>
-        public string ReadWhile(Func<char, bool> predicate)
+        public ReadOnlySpan<char> ReadWhile(Func<char, bool> predicate)
         {
             if (IsInRange(CurrentPosition) == false)
             {
-                return "";
+                return ReadOnlySpan<char>.Empty;
             }
 
             var length = 0;
@@ -291,17 +223,17 @@ namespace HandyQuery.Language.Lexing
 
             ReadLength += length;
 
-            return Query.Substring(startIndex, length);
+            return _query.Slice(startIndex, length);
         }
         
         /// <summary>
         /// Reads the query while predicate returns true.
         /// </summary>
-        public string ReadWhile<T>(T state, Func<T, char, bool> predicate)
+        public ReadOnlySpan<char> ReadWhile<T>(T state, Func<T, char, bool> predicate)
         {
             if (IsInRange(CurrentPosition) == false)
             {
-                return "";
+                return ReadOnlySpan<char>.Empty;
             }
 
             var length = 0;
@@ -319,7 +251,7 @@ namespace HandyQuery.Language.Lexing
 
             ReadLength += length;
 
-            return Query.Substring(startIndex, length);
+            return _query.Slice(startIndex, length);
         }
     }
 }
