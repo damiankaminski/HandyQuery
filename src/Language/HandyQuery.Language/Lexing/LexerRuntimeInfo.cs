@@ -7,13 +7,13 @@ namespace HandyQuery.Language.Lexing
     {
         public readonly LexerStringReader Reader;
         public readonly ILanguageInternalConfig Config;
-        public readonly ICultureConfig CurrentCulture;
+        public readonly ICultureConfig CurrentCultureConfig;
 
         public LexerRuntimeInfo(LexerStringReader reader, ILanguageInternalConfig config, CultureInfo cultureInfo)
         {
             Reader = reader;
             Config = config;
-            CurrentCulture = config.GetCulture(cultureInfo);
+            CurrentCultureConfig = config.GetCultureConfig(cultureInfo);
         }
     }
 }

@@ -5,6 +5,7 @@ using HandyQuery.Language.Lexing.Tokens;
 
 namespace HandyQuery.Language.Lexing.Tokenizers
 {
+    [PerformanceCritical]
     internal sealed class StatementTokenizer : KeywordTokenizerBase<StatementToken>
     {
         public override StatementToken CreateToken(int startPosition, int length, Keyword keyword) 

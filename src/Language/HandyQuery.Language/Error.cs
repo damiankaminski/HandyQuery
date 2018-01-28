@@ -6,7 +6,7 @@
         public readonly ErrorId Id;
         public readonly string Subject;
 
-        public Error(string message, ErrorId id, string subject)
+        public Error(string message, ErrorId id, string subject = null)
         {
             Message = message;
             Id = id;

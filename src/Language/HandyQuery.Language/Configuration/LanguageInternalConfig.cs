@@ -17,7 +17,7 @@ namespace HandyQuery.Language.Configuration
         /// </summary>
         ColumnInfo GetColumnInfo(string columnName); // TODO: create ColumnList and move it there
 
-        ICultureConfig GetCulture(CultureInfo culture);
+        ICultureConfig GetCultureConfig(CultureInfo culture);
     }
 
     internal sealed class LanguageInternalConfig : ILanguageInternalConfig
@@ -46,7 +46,7 @@ namespace HandyQuery.Language.Configuration
             return UnderlyingColumns.FirstOrDefault(x => x.ColumnName.Equals(columnName, StringComparison.InvariantCultureIgnoreCase));
         }
 
-        public ICultureConfig GetCulture(CultureInfo culture)
+        public ICultureConfig GetCultureConfig(CultureInfo culture)
         {
             CultureConfig cultureConfig;
             if (UnderlyingCultures.TryGetValue(culture, out cultureConfig) == false)

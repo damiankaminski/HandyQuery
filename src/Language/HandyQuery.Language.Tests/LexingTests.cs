@@ -19,7 +19,7 @@ namespace HandyQuery.Language.Tests
             _lexer = generator.GenerateLexer();
         }
 
-        //[Test]
+        [Test]
         public void Lexer_ShouldBeAbleToTokenizeStatements()
         {
             var config = new LanguageConfig<Person>()
@@ -27,7 +27,7 @@ namespace HandyQuery.Language.Tests
                 .AddColumn(x => x.LastName)
                 .InternalConfig;
 
-            // TODO: test query builder
+            // TODO: implement test query builder
 
             var firstName = "FirstName";
             var isEmpty = "is empty";
@@ -35,7 +35,7 @@ namespace HandyQuery.Language.Tests
             {
                 new ColumnToken(0, firstName.Length, config.GetColumnInfo(firstName)),
                 new WhitespaceToken(9, 1),
-                new StatementToken(10, isEmpty.Length, config.GetCulture(CultureInfo.InvariantCulture).GetKeyword(isEmpty))
+                new StatementToken(10, isEmpty.Length, config.GetCultureConfig(CultureInfo.InvariantCulture).GetKeyword(isEmpty))
             };
 
             var result = _lexer.Tokenize("FirstName is empty", config, CultureInfo.InvariantCulture);

@@ -4,11 +4,12 @@ using HandyQuery.Language.Lexing.Tokens;
 
 namespace HandyQuery.Language.Lexing.Tokenizers
 {
+    [PerformanceCritical]
     internal sealed class ColumnNameTokenizer : ITokenizer
     {
         public TokenizationResult Tokenize(LexerRuntimeInfo info)
         {
-            // TODO: get rid of SlowlyCreateString and store as ReadOnlySpan<char>
+            // TODO: get rid of SlowlyCreateString usage
             var columnName = info.Reader.ReadTillIvalidCharOrWhitespace(info.Config.SyntaxInfo.ReservedChars).SlowlyCreateString();
 
             var token = new ColumnToken(info.Reader.CurrentPosition, info.Reader.ReadLength, info.Config.GetColumnInfo(columnName));

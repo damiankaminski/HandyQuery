@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using HandyQuery.Language.Configuration;
+﻿using System.Collections.Generic;
 using HandyQuery.Language.Configuration.Keywords;
 using HandyQuery.Language.Lexing.Tokens.Abstract;
 
 namespace HandyQuery.Language.Lexing.Tokenizers.Abstract
 {
+    [PerformanceCritical]
     internal abstract class KeywordTokenizerBase<TKeywordToken> : ITokenizer
         where TKeywordToken : KeywordTokenBase
     {
@@ -17,10 +16,10 @@ namespace HandyQuery.Language.Lexing.Tokenizers.Abstract
 //            var startPosition = reader.CurrentPosition;
 //            var text = reader.ReadTillEndOfKeyword(
 //                GetCandidatesForKeyword(info), 
-//                info.CurrentCulture, 
+//                info.CurrentCultureConfig, 
 //                info.Config.SyntaxInfo);
 //
-//            var keyword = info.CurrentCulture.GetKeyword(text);
+//            var keyword = info.CurrentCultureConfig.GetKeyword(text);
 //            var token = CreateToken(startPosition, reader.ReadLength, keyword);
 //
 //            if (token.Keyword == null)

@@ -2,6 +2,7 @@
 
 namespace HandyQuery.Language.Lexing.Tokenizers
 {
+    [PerformanceCritical]
     internal sealed class LiteralTokenizer : ITokenizer
     {
         public TokenizationResult Tokenize(LexerRuntimeInfo info)
