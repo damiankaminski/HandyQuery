@@ -4,6 +4,7 @@ using System.Globalization;
 using HandyQuery.Language.Configuration;
 using HandyQuery.Language.Lexing.Graph;
 using HandyQuery.Language.Lexing.Graph.Builder;
+using HandyQuery.Language.Lexing.Tokenizers;
 
 namespace HandyQuery.Language.Lexing
 {
@@ -11,6 +12,8 @@ namespace HandyQuery.Language.Lexing
     {
         internal readonly LexerExecutionGraph ExecutionGraph;
 
+        private readonly WhitespaceTokenizer _whitespaceTokenizer = new WhitespaceTokenizer();
+        
         private Lexer(LexerExecutionGraph executionGraph)
         {
             ExecutionGraph = executionGraph;
@@ -45,6 +48,7 @@ namespace HandyQuery.Language.Lexing
                         if (tokenizationResult.Success == false)
                         {
                             // try to go with other branch if any available
+                            // TODO: remove tokens from finalResult.Tokens
                             var nextFound = false;
                             while (true)
                             {
@@ -74,8 +78,13 @@ namespace HandyQuery.Language.Lexing
                         }
 
                         finalResult.Tokens.Add(tokenizationResult.Token);
-                        
-                        // TODO: after each successful tokenization look for whitespaces and save them as WhitespaceTokens
+
+                        // search for whitespaces
+                        var whitespaceTokenizationResult = _whitespaceTokenizer.Tokenize(runtimeInfo);
+                        if (whitespaceTokenizationResult.Success && whitespaceTokenizationResult.Token.Length > 0)
+                        {
+                            finalResult.Tokens.Add(whitespaceTokenizationResult.Token);
+                        }
                         
                         node = terminalNode.Child;
                         break;

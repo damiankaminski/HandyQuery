@@ -2,6 +2,7 @@
 
 namespace HandyQuery.Language.Lexing
 {
+    // TODO: change to struct
     internal sealed class TokenizationResult
     {
         public bool Success { get; }

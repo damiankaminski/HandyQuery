@@ -35,7 +35,7 @@ namespace HandyQuery.Language.Tests
             {
                 new ColumnToken(0, firstName.Length, config.GetColumnInfo(firstName)),
                 new WhitespaceToken(9, 1),
-                new StatementToken(10, isEmpty.Length, config.GetCultureConfig(CultureInfo.InvariantCulture).GetKeyword(isEmpty))
+                //new StatementToken(10, isEmpty.Length, config.GetCultureConfig(CultureInfo.InvariantCulture).GetKeyword(isEmpty))
             };
 
             var result = _lexer.Tokenize("FirstName is empty", config, CultureInfo.InvariantCulture);
