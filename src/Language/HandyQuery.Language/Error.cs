@@ -1,5 +1,6 @@
 ﻿namespace HandyQuery.Language
 {
+    // TODO: change to struct
     internal sealed class Error
     {
         public readonly string Message;
