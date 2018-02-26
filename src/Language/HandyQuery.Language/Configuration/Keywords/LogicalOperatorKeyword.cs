@@ -1,3 +1,5 @@
+using HandyQuery.Language.Lexing;
+
 namespace HandyQuery.Language.Configuration.Keywords
 {
     internal sealed class LogicalOperatorKeyword : Keyword
@@ -8,7 +10,7 @@ namespace HandyQuery.Language.Configuration.Keywords
         public LogicalOperator Type { get; }
         public override TokenType TokenType { get; } = TokenType.LogicalOperator;
 
-        public LogicalOperatorKeyword(LogicalOperator type)
+        private LogicalOperatorKeyword(LogicalOperator type)
         {
             Type = type;
         }

@@ -1,4 +1,6 @@
-﻿namespace HandyQuery.Language.Configuration.Keywords
+﻿using HandyQuery.Language.Lexing;
+
+namespace HandyQuery.Language.Configuration.Keywords
 {
     internal abstract class Keyword
     {

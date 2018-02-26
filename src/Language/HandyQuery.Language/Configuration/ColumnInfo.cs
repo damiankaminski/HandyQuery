@@ -18,22 +18,22 @@ namespace HandyQuery.Language.Configuration
         public string ColumnName { get; }
 
         /// <summary>
-        /// Underlying member name in given model type.
+        /// Underlying member name in given .NET type.
         /// </summary>
         public string MemberName { get; }
 
         /// <summary>
-        /// Underlying .net type.
+        /// Underlying .NET type.
         /// </summary>
         public Type SystemType { get; }
 
         /// <summary>
-        /// Is <see cref="SystemType"/> is nullable.
+        /// Is <see cref="SystemType"/> nullable.
         /// </summary>
         public bool IsNullable { get; }
 
         /// <summary>
-        /// Type of a column.
+        /// HQL column type.
         /// </summary>
         public HandyType HandyType { get; }
 
@@ -96,7 +96,7 @@ namespace HandyQuery.Language.Configuration
             SystemType = systemType;
             IsNullable = systemType.IsNullable();
 
-            // todo: create a unit test for finding ColumnType property!
+            // todo: create a unit test for finding ColumnType property
             var columnTypeFound = false;
             foreach (var column in Enum.GetValues(typeof(HandyType)))
             {
@@ -117,7 +117,7 @@ namespace HandyQuery.Language.Configuration
             if (columnTypeFound == false)
             {
                 var msg = $"Column '{columnName}' has unsupported type.";
-                throw new QueryLanguageException(msg);
+                throw new ConfigurationException(msg);
             }
         }
 

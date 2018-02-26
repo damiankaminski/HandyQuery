@@ -2,25 +2,31 @@
 
 namespace HandyQuery.Language.Tests.Model
 {
-    public class Person : IEquatable<Person>
+    public enum Gender
     {
+        Unknown,
+        Male,
+        Female
+    }
+    
+    public class Person
+    {
+        public long Id { get; set; }
+        
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        public int S { get; set; }
-
-        public bool Equals(Person p)
-        {
-            if (p == null)
-            {
-                return false;
-            }
-            return p.FirstName == FirstName && p.LastName == LastName && p.S == S;
-        }
-
-        public override bool Equals(object obj)
-        {
-            var p = obj as Person;
-            return Equals(p);
-        }
+        
+        public short Age { get; set; }
+        
+        public Gender Gender { get; set; }
+        
+        public DateTime DateOfBirth { get; set; }
+        public float Height { get; set; }
+        public float Weight { get; set; }
+        
+        public decimal Salary { get; set; }
+        public bool IsEmployed { get; set; }
+        
+        public int LuckyNumber { get; set; }
     }
 }

@@ -1,3 +1,5 @@
+using HandyQuery.Language.Lexing;
+
 namespace HandyQuery.Language.Configuration.Keywords
 {
     internal sealed class CompareOperatorKeyword : Keyword
@@ -15,7 +17,7 @@ namespace HandyQuery.Language.Configuration.Keywords
         public CompareOperator Type { get; }
         public override TokenType TokenType { get; } = TokenType.CompareOperator;
 
-        public CompareOperatorKeyword(CompareOperator type)
+        private CompareOperatorKeyword(CompareOperator type)
         {
             Type = type;
         }

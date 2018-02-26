@@ -1,3 +1,5 @@
+using HandyQuery.Language.Lexing;
+
 namespace HandyQuery.Language.Configuration.Keywords
 {
     internal sealed class StatementKeyword : Keyword
@@ -10,7 +12,7 @@ namespace HandyQuery.Language.Configuration.Keywords
         public Statement Type { get; }
         public override TokenType TokenType { get; } = TokenType.Statement;
 
-        public StatementKeyword(Statement type)
+        private StatementKeyword(Statement type)
         {
             Type = type;
         }

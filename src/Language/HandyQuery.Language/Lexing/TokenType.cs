@@ -1,4 +1,4 @@
-﻿namespace HandyQuery.Language.Configuration
+﻿namespace HandyQuery.Language.Lexing
 {
     internal enum TokenType
     {

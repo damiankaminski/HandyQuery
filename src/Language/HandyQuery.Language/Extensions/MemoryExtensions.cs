@@ -11,7 +11,7 @@ namespace System
     /// <summary>
     /// Extension methods for Span{T}, Memory{T}, and friends.
     /// </summary>
-    public static partial class MemoryExtensions
+    internal static partial class MemoryExtensions
     {
         /// <summary>
         /// Removes all leading and trailing white-space characters from the span.

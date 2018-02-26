@@ -12,7 +12,7 @@ namespace HandyQuery.Language.Lexing.Tokenizers
             => new StatementToken(startPosition, length, keyword);
 
         public override IEnumerable<Keyword> GetCandidatesForKeyword(LexerRuntimeInfo info) 
-            => info.Config.SyntaxInfo.Statements;
+            => info.Config.SyntaxConfig.Statements;
 
         public override Error OnNotFoundError(string word)
             => new Error($"\"{word}\" is not a statement.", ErrorId.StatementNotFound, word);

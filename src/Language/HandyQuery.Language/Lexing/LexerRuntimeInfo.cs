@@ -6,14 +6,12 @@ namespace HandyQuery.Language.Lexing
     internal struct LexerRuntimeInfo
     {
         public readonly LexerStringReader Reader;
-        public readonly ILanguageInternalConfig Config;
-        public readonly ICultureConfig CurrentCultureConfig;
+        public readonly LanguageConfig Config;
 
-        public LexerRuntimeInfo(LexerStringReader reader, ILanguageInternalConfig config, CultureInfo cultureInfo)
+        public LexerRuntimeInfo(LexerStringReader reader, LanguageConfig config)
         {
             Reader = reader;
             Config = config;
-            CurrentCultureConfig = config.GetCultureConfig(cultureInfo);
         }
     }
 }

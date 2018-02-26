@@ -25,15 +25,14 @@ namespace HandyQuery.Language.Lexing
         }
 
         [PerformanceCritical]
-        public LexerResult Tokenize(string query, ILanguageInternalConfig languageConfig, CultureInfo cultureInfo,
-            LexerConfig config = null)
+        public LexerResult Tokenize(string query, LanguageConfig languageConfig, LexerConfig config = null)
         {
             if (string.IsNullOrWhiteSpace(query)) throw new ArgumentException();
 
             config = config ?? LexerConfig.Default;
             var finalResult = new LexerResult();
             var reader = new LexerStringReader(query, 0);
-            var runtimeInfo = new LexerRuntimeInfo(reader, languageConfig, cultureInfo); // TODO: ref reader?
+            var runtimeInfo = new LexerRuntimeInfo(reader, languageConfig); // TODO: ref reader?
 
             var stateStack = new Stack<BranchState>(); // TODO: pool?
 
