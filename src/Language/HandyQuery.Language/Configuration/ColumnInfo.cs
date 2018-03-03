@@ -117,7 +117,7 @@ namespace HandyQuery.Language.Configuration
             if (columnTypeFound == false)
             {
                 var msg = $"Column '{columnName}' has unsupported type.";
-                throw new ConfigurationException(msg);
+                throw new ConfigurationException(msg, ConfigurationExceptionType.UnsupportedColumnNameType);
             }
         }
 

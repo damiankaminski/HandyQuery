@@ -34,8 +34,8 @@ namespace HandyQuery.Language.Configuration
         /// </summary>
         public ConfigurationBuilder<T> AddColumn(Expression<Func<T, object>> propertyOrField)
         {
-            var columnName = propertyOrField.GetFullPropertyName();
-            return AddColumn(columnName, columnName);
+            var (memberName, memberType) = AnalyzeMemberDefinition(propertyOrField);
+            return AddColumn(memberName, memberName, memberType);
         }
 
         /// <summary>
@@ -43,25 +43,34 @@ namespace HandyQuery.Language.Configuration
         /// </summary>
         public ConfigurationBuilder<T> AddColumn(string columnName, Expression<Func<T, object>> propertyOrField)
         {
-            return AddColumn(columnName, propertyOrField.GetFullPropertyName());
+            var (memberName, memberType) = AnalyzeMemberDefinition(propertyOrField);
+            return AddColumn(columnName, memberName, memberType);
         }
 
-        private ConfigurationBuilder<T> AddColumn(string columnName, string accessor)
+        private static (string MemberName, Type MemberType) AnalyzeMemberDefinition(Expression<Func<T, object>> propertyOrField)
+        {
+            // TODO: support for fields
+            var memberName = propertyOrField.GetFullPropertyName();
+            var property = typeof(T).GetNestedProperty(memberName);
+
+            if (property == null)
+                throw new ConfigurationException(
+                    "Invalid column name definition. 'propertyOrField' argument needs to return a property or field " +
+                    $"and nothing else. Currently defined as: {propertyOrField}",
+                    ConfigurationExceptionType.InvalidColumnNameMemberDefinition);
+            
+            return (memberName, property.PropertyType);
+        }
+        
+        private ConfigurationBuilder<T> AddColumn(string columnName, string memberName, Type systemType)
         {
             var tmpConfig = CreateConfig();
             if (tmpConfig.GetColumnInfo(columnName) != null)
-                throw new ConfigurationException($"Column named as '${columnName}' is defined twice.");
+                throw new ConfigurationException(
+                    $"Column named as '{columnName}' is defined twice.",
+                    ConfigurationExceptionType.DuplicatedColumnName);
 
-            // TODO: support for fields
-            var property = typeof(T).GetNestedProperty(accessor);
-
-            if (property == null)
-                throw new ConfigurationException("Invalid accessor. Needs to return a field or property and do " +
-                                                 $"nothing else. Currently defined as: \n{accessor}");
-
-            var column = new ColumnInfo(columnName, accessor, property.PropertyType);
-
-            ValidateColumnName(column);
+            var column = new ColumnInfo(columnName, memberName, systemType);
 
             _columns.Add(column);
             return this;
@@ -85,14 +94,13 @@ namespace HandyQuery.Language.Configuration
 
         private void ValidateColumnName(ColumnInfo column)
         {
-            // TODO: test
             var reservedChars = _syntax.ReservedChars.ToArray();
             var columnName = column.ColumnName;
             var invalidIndex = columnName.IndexOfAny(reservedChars);
             if (invalidIndex >= 0)
             {
-                var msg = $"Column name ('{columnName}') contains invalid character: {reservedChars[invalidIndex]}.";
-                throw new ConfigurationException(msg);
+                var msg = $"Column name ('{columnName}') contains invalid character: {columnName[invalidIndex]}.";
+                throw new ConfigurationException(msg, ConfigurationExceptionType.InvalidColumnName);
             }
         }
     }

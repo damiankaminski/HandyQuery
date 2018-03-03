@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using FluentAssertions;
 using HandyQuery.Language.Configuration;
 using HandyQuery.Language.Tests.Model;
@@ -8,8 +9,6 @@ namespace HandyQuery.Language.Tests.Configuration
 {
     public class ConfigurationBuilderTests
     {
-        // TODO: moar tests
-        
         [Test]
         public void Should_be_able_to_build_basic_configuration()
         {
@@ -23,13 +22,65 @@ namespace HandyQuery.Language.Tests.Configuration
                 .AddColumn("MiddleName", x => x.LastName);
 
             var configuration = configurationBuilder.Build();
-            
-            configuration.ShouldBeEquivalentTo(new LanguageConfig(typeof(Person), new List<ColumnInfo>()
+
+            configuration.Should().BeEquivalentTo(new LanguageConfig(typeof(Person), new List<ColumnInfo>()
             {
                 new ColumnInfo("FirstName", "FirstName", typeof(string)),
                 new ColumnInfo("LastName", "LastName", typeof(string)),
                 new ColumnInfo("MiddleName", "LastName", typeof(string))
             }, new SyntaxConfig(true, true)));
+        }
+
+        [TestCase(">MiddleName", ">")]
+        [TestCase("Middle>Name", ">")]
+        [TestCase("Middl>eName", ">")]
+        [TestCase("MiddleName>", ">")]
+        [TestCase("=MiddleName", "=")]
+        [TestCase("Middle=Name", "=")]
+        [TestCase("Middl=eName", "=")]
+        [TestCase("MiddleName=", "=")]
+        public void Should_throw_if_column_name_is_not_valid(string columnName, string invalidChar)
+        {
+            var configurationBuilder = HandyQueryLanguage.Configure<Person>()
+                .AddColumn(columnName, x => x.LastName);
+
+            Action action = () => configurationBuilder.Build();
+
+            action.Should()
+                .ThrowExactly<ConfigurationException>()
+                .WithMessage($"Column name ('{columnName}') contains invalid character: {invalidChar}.")
+                .And.ExceptionType.Should().Be(ConfigurationExceptionType.InvalidColumnName);
+        }
+
+        [Test]
+        public void Should_throw_if_column_name_is_duplicated()
+        {
+            var configurationBuilder = HandyQueryLanguage.Configure<Person>()
+                .AddColumn(x => x.FirstName)
+                .AddColumn(x => x.LastName);
+
+            Action action = () => configurationBuilder.AddColumn(x => x.FirstName);
+
+            action.Should()
+                .ThrowExactly<ConfigurationException>()
+                .WithMessage("Column named as 'FirstName' is defined twice.")
+                .And.ExceptionType.Should().Be(ConfigurationExceptionType.DuplicatedColumnName);
+        }
+
+        [Test]
+        public void Should_throw_if_column_name_accessor_is_invalid()
+        {
+            var configurationBuilder = HandyQueryLanguage.Configure<Person>();
+
+            Action action = () => configurationBuilder.AddColumn(x => x.GetHashCode());
+            Action action2 = () => configurationBuilder.AddColumn("Test", x => x.GetHashCode());
+
+            var expected = "Invalid column name definition. 'propertyOrField' argument needs to return a property " +
+                           "or field and nothing else. Currently defined as: x => Convert(x.GetHashCode(), Object)";
+            action.Should().ThrowExactly<ConfigurationException>().WithMessage(expected)
+                .And.ExceptionType.Should().Be(ConfigurationExceptionType.InvalidColumnNameMemberDefinition);
+            action2.Should().ThrowExactly<ConfigurationException>().WithMessage(expected)
+                .And.ExceptionType.Should().Be(ConfigurationExceptionType.InvalidColumnNameMemberDefinition);
         }
     }
 }

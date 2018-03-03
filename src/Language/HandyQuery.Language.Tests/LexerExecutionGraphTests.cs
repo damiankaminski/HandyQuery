@@ -159,7 +159,7 @@ namespace HandyQuery.Language.Tests
             if (testCase.ErrorId != null)
             {
                 Action run = () => CreateGraph(testCase.Grammar);
-                run.ShouldThrowExactly<LexerExecutionGraphException>().Where(x => x.ErrorId == testCase.ErrorId);
+                run.Should().ThrowExactly<LexerExecutionGraphException>().Where(x => x.ErrorId == testCase.ErrorId);
             }
             else
             {

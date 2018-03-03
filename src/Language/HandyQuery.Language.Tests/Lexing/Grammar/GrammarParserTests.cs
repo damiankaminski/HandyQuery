@@ -31,8 +31,8 @@ namespace HandyQuery.Language.Tests.Lexing.Grammar
                     ");
             };
             
-            action1.ShouldThrowExactly<GrammarParserException>().WithMessage(expectedMessage);
-            action2.ShouldThrowExactly<GrammarParserException>().WithMessage(expectedMessage);
+            action1.Should().ThrowExactly<GrammarParserException>().WithMessage(expectedMessage);
+            action2.Should().ThrowExactly<GrammarParserException>().WithMessage(expectedMessage);
         }
 
         private static Language.Lexing.Grammar.Grammar Parse(string grammarText)
