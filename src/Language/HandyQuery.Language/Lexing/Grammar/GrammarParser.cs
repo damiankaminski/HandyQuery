@@ -45,7 +45,7 @@ namespace HandyQuery.Language.Lexing.Grammar
                     continue;
                 }
 
-                if (reader.StartsWith(Comment.AsSpan()))
+                if (reader.StartsWith(Comment.AsReadOnlySpan()))
                 {
                     reader.MoveToNextLine();
                     continue;
@@ -53,7 +53,7 @@ namespace HandyQuery.Language.Lexing.Grammar
 
                 reader.ReadTillEndOfWhitespace();
 
-                if (reader.StartsWith(GrammarNonTerminalStart.ToString().AsSpan()))
+                if (reader.StartsWith(GrammarNonTerminalStart.ToString().AsReadOnlySpan()))
                 {
                     // _________________________________________
                     // <value> ::= Literal|<function-invokation>
@@ -86,7 +86,7 @@ namespace HandyQuery.Language.Lexing.Grammar
                     continue;
                 }
 
-                if (reader.StartsWith(Return.AsSpan()))
+                if (reader.StartsWith(Return.AsReadOnlySpan()))
                 {
                     final = ParseReturn(ref reader);
                     break;
@@ -175,7 +175,7 @@ namespace HandyQuery.Language.Lexing.Grammar
 
             IGrammarBodyItem result;
 
-            if (nameSpan.StartsWith(GrammarNonTerminalStart.ToString().AsSpan()))
+            if (nameSpan.StartsWith(GrammarNonTerminalStart.ToString().AsReadOnlySpan()))
             {
                 result = new GrammarNonTerminalUsage(nameString, GetNonTerminalByName(nameString));
             }

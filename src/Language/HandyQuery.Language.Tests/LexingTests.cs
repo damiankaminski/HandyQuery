@@ -30,7 +30,7 @@ namespace HandyQuery.Language.Tests
             // TODO: implement test query builder
 
             var firstName = "FirstName";
-            var isEmpty = "is empty";
+            //var isEmpty = "is empty";
             var expected = new TokenList()
             {
                 new ColumnToken(0, firstName.Length, config.GetColumnInfo(firstName)),

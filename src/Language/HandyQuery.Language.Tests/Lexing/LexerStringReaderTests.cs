@@ -250,7 +250,7 @@ namespace HandyQuery.Language.Tests.Lexing
         {
             var reader = CreateReader(query);
             
-            var result = reader.StartsWith(value.AsSpan());
+            var result = reader.StartsWith(value.AsReadOnlySpan());
 
             result.Should().Be(expectedResult);
         }

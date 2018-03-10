@@ -26,6 +26,14 @@ namespace HandyQuery.Language.Lexing.Grammar.Structure
         {
             return usage.Name == Name && usage.Impl.GetType() == Impl.GetType();
         }
+        
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return ((Name != null ? Name.GetHashCode() : 0) * 397) ^ (Impl != null ? Impl.GetHashCode() : 0);
+            }
+        }
 
         public override string ToString()
         {

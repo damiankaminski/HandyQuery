@@ -9,14 +9,14 @@ namespace HandyQuery.Language.Lexing
     /// <summary>
     /// Provides methods to read a string using different scenarios, e.g. till the end of whitespaces, or till the first whitespace.
     /// </summary>
-    internal struct LexerStringReader
+    internal ref struct LexerStringReader
     {
         public LexerStringReader(string query, int position)
         {
             if (position >= query.Length) throw new IndexOutOfRangeException();
             
             CurrentPosition = position;
-            _query = query.AsSpan();
+            _query = query.AsReadOnlySpan();
             _queryLength = query.Length;
             ReadLength = 0;
         }

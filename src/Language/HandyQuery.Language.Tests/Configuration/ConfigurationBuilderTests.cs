@@ -140,14 +140,25 @@ namespace HandyQuery.Language.Tests.Configuration
 
         private class TestModel
         {
-            public int Salary;
-
-            public PersonInfo Person { get; set; }
+            public readonly int Salary;
+            public PersonInfo Person { get; }
+            
+            public TestModel(PersonInfo person, int salary)
+            {
+                Person = person;
+                Salary = salary;
+            }
             
             public class PersonInfo
             {
-                public string FirstName;
-                public string LastName { get; set; }
+                public readonly string FirstName;
+                public string LastName { get; }
+                
+                public PersonInfo(string lastName, string firstName)
+                {
+                    LastName = lastName;
+                    FirstName = firstName;
+                }
             }
         }
     }
