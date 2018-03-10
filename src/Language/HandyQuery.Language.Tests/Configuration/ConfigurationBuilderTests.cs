@@ -7,6 +7,8 @@ using NUnit.Framework;
 
 namespace HandyQuery.Language.Tests.Configuration
 {
+    // TODO: test all supported types
+    
     public class ConfigurationBuilderTests
     {
         [Test]
@@ -30,7 +32,60 @@ namespace HandyQuery.Language.Tests.Configuration
                 new ColumnInfo("MiddleName", "LastName", typeof(string))
             }, new SyntaxConfig(true, true)));
         }
+        
+        [Test]
+        public void Should_allow_to_build_multiple_times()
+        {
+            var configurationBuilder = HandyQueryLanguage.Configure<Person>()
+                .AddColumn(x => x.FirstName)
+                .AddColumn(x => x.LastName);
 
+            configurationBuilder.Build();
+            configurationBuilder.Build();
+            configurationBuilder.Build();
+            var configuration = configurationBuilder.Build();
+
+            configuration.Should().BeEquivalentTo(new LanguageConfig(typeof(Person), new List<ColumnInfo>()
+            {
+                new ColumnInfo("FirstName", "FirstName", typeof(string)),
+                new ColumnInfo("LastName", "LastName", typeof(string))
+            }, new SyntaxConfig(false, false)));
+        }
+        
+        [Test]
+        public void Should_support_fields_as_columns()
+        {
+            var configurationBuilder = HandyQueryLanguage.Configure<TestModel>()
+                .AddColumn(x => x.Salary);
+
+            var configuration = configurationBuilder.Build();
+
+            configuration.Should().BeEquivalentTo(new LanguageConfig(typeof(TestModel), new List<ColumnInfo>()
+            {
+                new ColumnInfo("Salary", "Salary", typeof(int)),
+            }, new SyntaxConfig(false, false)));
+        }
+        
+        [Test]
+        public void Should_support_nested_members_as_columns()
+        {
+            var configurationBuilder = HandyQueryLanguage.Configure<TestModel>()
+                .AddColumn(x => x.Salary)
+                .AddColumn(x => x.Person.FirstName)
+                .AddColumn(x => x.Person.LastName)
+                .AddColumn("MiddleName", x => x.Person.LastName);
+
+            var configuration = configurationBuilder.Build();
+
+            configuration.Should().BeEquivalentTo(new LanguageConfig(typeof(TestModel), new List<ColumnInfo>()
+            {
+                new ColumnInfo("Salary", "Salary", typeof(int)),
+                new ColumnInfo("FirstName", "Person.FirstName", typeof(string)),
+                new ColumnInfo("LastName", "Person.LastName", typeof(string)),
+                new ColumnInfo("MiddleName", "Person.LastName", typeof(string))
+            }, new SyntaxConfig(false, false)));
+        }
+        
         [TestCase(">MiddleName", ">")]
         [TestCase("Middle>Name", ">")]
         [TestCase("Middl>eName", ">")]
@@ -81,6 +136,19 @@ namespace HandyQuery.Language.Tests.Configuration
                 .And.ExceptionType.Should().Be(ConfigurationExceptionType.InvalidColumnNameMemberDefinition);
             action2.Should().ThrowExactly<ConfigurationException>().WithMessage(expected)
                 .And.ExceptionType.Should().Be(ConfigurationExceptionType.InvalidColumnNameMemberDefinition);
+        }
+
+        private class TestModel
+        {
+            public int Salary;
+
+            public PersonInfo Person { get; set; }
+            
+            public class PersonInfo
+            {
+                public string FirstName;
+                public string LastName { get; set; }
+            }
         }
     }
 }

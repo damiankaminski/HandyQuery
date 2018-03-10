@@ -35,7 +35,8 @@ namespace HandyQuery.Language.Configuration
         public ConfigurationBuilder<T> AddColumn(Expression<Func<T, object>> propertyOrField)
         {
             var (memberName, memberType) = AnalyzeMemberDefinition(propertyOrField);
-            return AddColumn(memberName, memberName, memberType);
+            var parts = memberName.Split(new[] {'.'}, StringSplitOptions.RemoveEmptyEntries);
+            return AddColumn(parts.Last(), memberName, memberType);
         }
 
         /// <summary>
@@ -47,21 +48,21 @@ namespace HandyQuery.Language.Configuration
             return AddColumn(columnName, memberName, memberType);
         }
 
-        private static (string MemberName, Type MemberType) AnalyzeMemberDefinition(Expression<Func<T, object>> propertyOrField)
+        private static (string MemberName, Type MemberType) AnalyzeMemberDefinition(
+            Expression<Func<T, object>> propertyOrField)
         {
-            // TODO: support for fields
-            var memberName = propertyOrField.GetFullPropertyName();
-            var property = typeof(T).GetNestedProperty(memberName);
+            var memberName = propertyOrField.GetFullPropertyOrFieldName();
+            var member = TypeExtensions.GetNestedType(typeof(T), memberName);
 
-            if (property == null)
+            if (member == null)
                 throw new ConfigurationException(
                     "Invalid column name definition. 'propertyOrField' argument needs to return a property or field " +
                     $"and nothing else. Currently defined as: {propertyOrField}",
                     ConfigurationExceptionType.InvalidColumnNameMemberDefinition);
-            
-            return (memberName, property.PropertyType);
+
+            return (memberName, member);
         }
-        
+
         private ConfigurationBuilder<T> AddColumn(string columnName, string memberName, Type systemType)
         {
             var tmpConfig = CreateConfig();

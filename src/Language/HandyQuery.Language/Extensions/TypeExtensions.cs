@@ -5,23 +5,32 @@ namespace HandyQuery.Language.Extensions
 {
     internal static class TypeExtensions
     {
-        public static PropertyInfo GetNestedProperty(this Type type, string fullPropertyName)
+        public static Type GetNestedType(this Type type, string fullPropertyOrFieldName)
         {
-            if (type == null || String.IsNullOrWhiteSpace(fullPropertyName))
+            if (type == null || string.IsNullOrWhiteSpace(fullPropertyOrFieldName))
                 return null;
 
-            PropertyInfo result = null;
-            var parts = fullPropertyName.Split('.');
+            var parts = fullPropertyOrFieldName.Split('.');
             foreach (var part in parts)
             {
-                result = type.GetProperty(part);
-                if (result == null)
-                    return null;
-
-                type = result.PropertyType;
+                var field = type.GetField(part);
+                if (field != null)
+                {
+                    type = field.FieldType;
+                    continue;
+                }
+                
+                var property = type.GetProperty(part);
+                if (property != null)
+                {
+                    type = property.PropertyType;
+                    continue;
+                }
+                
+                return null;
             }
 
-            return result;
+            return type;
         }
 
         public static bool IsNullable(this Type type)

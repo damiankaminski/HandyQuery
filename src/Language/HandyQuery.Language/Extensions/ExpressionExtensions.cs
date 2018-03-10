@@ -6,10 +6,9 @@ namespace HandyQuery.Language.Extensions
 {
     internal static class ExpressionExtensions
     {
-        public static string GetFullPropertyName<T, TProperty>(this Expression<Func<T, TProperty>> exp)
+        public static string GetFullPropertyOrFieldName<T, TProperty>(this Expression<Func<T, TProperty>> exp)
         {
-            MemberExpression memberExp;
-            if (!TryFindMemberExpression(exp.Body, out memberExp))
+            if (!TryFindMemberExpression(exp.Body, out var memberExp))
                 return string.Empty;
 
             var memberNames = new Stack<string>();
@@ -36,9 +35,9 @@ namespace HandyQuery.Language.Extensions
             // OR:
             // obj => ConvertChecked(obj.Property) [e.g., int -> long]
             // ...which are the cases checked in IsConversion
-            if (IsConversion(exp) && exp is UnaryExpression)
+            if (IsConversion(exp) && exp is UnaryExpression unary)
             {
-                memberExp = ((UnaryExpression)exp).Operand as MemberExpression;
+                memberExp = unary.Operand as MemberExpression;
                 if (memberExp != null)
                 {
                     return true;
@@ -50,7 +49,7 @@ namespace HandyQuery.Language.Extensions
 
         private static bool IsConversion(Expression exp)
         {
-            return (exp.NodeType == ExpressionType.Convert || exp.NodeType == ExpressionType.ConvertChecked);
+            return exp.NodeType == ExpressionType.Convert || exp.NodeType == ExpressionType.ConvertChecked;
         }
     }
 }

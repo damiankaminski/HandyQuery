@@ -75,10 +75,10 @@ namespace HandyQuery.Language.Configuration
             KeywordCaseSensitive = keywordCaseSensitive;
             ColumnNameCaseSensitive = columnNameCaseSensitive;
 
-            ReservedChars =FindReservedChars();
+            ReservedChars = FindReservedChars();
         }
 
-        // TODO: tests
+        // TODO: change to [azAZ0-9]; otherwise new operators will break compatibility
         private char[] FindReservedChars()
         {
             var fixedReservedChars = new[]
