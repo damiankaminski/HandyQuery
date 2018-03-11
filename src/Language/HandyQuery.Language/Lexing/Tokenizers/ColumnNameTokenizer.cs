@@ -10,8 +10,9 @@ namespace HandyQuery.Language.Lexing.Tokenizers
         public TokenizationResult Tokenize(LexerRuntimeInfo info)
         {
             // TODO: get rid of SlowlyCreateString usage
-            var columnName = info.Reader.ReadTillIvalidCharOrWhitespace(info.Config.SyntaxConfig.ReservedChars).SlowlyCreateString();
-
+            var columnNameSpan = info.Reader.ReadTillIvalidCharOrWhitespace(info.Config.SyntaxConfig.ReservedChars);
+            var columnName = new string(columnNameSpan);
+            
             var token = new ColumnToken(info.Reader.CurrentPosition, info.Reader.ReadLength, info.Config.GetColumnInfo(columnName));
 
             if (token.ColumnInfo == null)

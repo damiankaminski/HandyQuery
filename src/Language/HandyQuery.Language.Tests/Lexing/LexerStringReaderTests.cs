@@ -109,7 +109,7 @@ namespace HandyQuery.Language.Tests.Lexing
             
             var result = reader.ReadWhile(x => x != invalidChar);
 
-            result.SlowlyCreateString().Should().Be(expectedResult);
+            new string(result).Should().Be(expectedResult);
             reader.ReadLength.Should().Be(expectedResult.Length);
         }
         
@@ -124,7 +124,7 @@ namespace HandyQuery.Language.Tests.Lexing
             
             var result = reader.ReadTillEndOfWhitespace();
 
-            result.SlowlyCreateString().Should().Be(expectedResult);
+            new string(result).Should().Be(expectedResult);
             reader.ReadLength.Should().Be(expectedResult.Length);
         }
         
@@ -140,7 +140,7 @@ namespace HandyQuery.Language.Tests.Lexing
             
             var result = reader.ReadTillEndOfWord();
 
-            result.SlowlyCreateString().Should().Be(expectedResult);
+            new string(result).Should().Be(expectedResult);
             reader.ReadLength.Should().Be(expectedResult.Length);
         }
         
@@ -161,7 +161,7 @@ namespace HandyQuery.Language.Tests.Lexing
             
             var result = reader.ReadTillEndOfXWords(x);
 
-            result.SlowlyCreateString().Should().Be(expectedResult);
+            new string(result).Should().Be(expectedResult);
             reader.ReadLength.Should().Be(expectedResult.Length);
         }
         
@@ -181,7 +181,7 @@ namespace HandyQuery.Language.Tests.Lexing
             
             var result = reader.ReadTillEndOfNumber(separator);
 
-            result.SlowlyCreateString().Should().Be(expectedResult);
+            new string(result).Should().Be(expectedResult);
             reader.ReadLength.Should().Be(expectedResult.Length);
         }
 
@@ -198,7 +198,7 @@ namespace HandyQuery.Language.Tests.Lexing
             
             var result = reader.ReadTillIvalidChar(invalidChars);
 
-            result.SlowlyCreateString().Should().Be(expectedResult);
+            new string(result).Should().Be(expectedResult);
             reader.ReadLength.Should().Be(expectedResult.Length);
         }
         
@@ -217,7 +217,7 @@ namespace HandyQuery.Language.Tests.Lexing
             
             var result = reader.ReadTillIvalidCharOrWhitespace(invalidChars);
 
-            result.SlowlyCreateString().Should().Be(expectedResult);
+            new string(result).Should().Be(expectedResult);
             reader.ReadLength.Should().Be(expectedResult.Length);
         }
         
@@ -232,7 +232,7 @@ namespace HandyQuery.Language.Tests.Lexing
             
             var result = reader.ReadTillNewLine();
 
-            result.SlowlyCreateString().Should().Be(expectedResult);
+            new string(result).Should().Be(expectedResult);
             reader.ReadLength.Should().Be(expectedResult.Length);
         }
         

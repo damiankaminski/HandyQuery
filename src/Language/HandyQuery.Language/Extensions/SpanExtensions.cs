@@ -117,19 +117,5 @@ namespace HandyQuery.Language.Extensions
             
             return items.ToArray();
         }
-        
-        // TODO: change it once there will be some faster way
-        // TODO: maybe span.CopyTo(dest); (string)dest?
-        // TODO: I think there already is API to create string from span...
-        [HeapAlloc]
-        public static string SlowlyCreateString(this ReadOnlySpan<char> span)
-        {
-            var builder = new StringBuilder();
-            for (var i = 0; i < span.Length; i++)
-            {
-                builder.Append(span[i]);
-            }
-            return builder.ToString();
-        }
     }
 }

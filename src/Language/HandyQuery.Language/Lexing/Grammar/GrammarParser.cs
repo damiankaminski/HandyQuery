@@ -58,26 +58,26 @@ namespace HandyQuery.Language.Lexing.Grammar
                     // _________________________________________
                     // <value> ::= Literal|<function-invokation>
 
-                    var nonTerminalName = reader.ReadTillEndOfWord(); // <value>
+                    var nonTerminalName = new string(reader.ReadTillEndOfWord()); // <value>
 
                     if (nonTerminalName.EndsWith(GrammarNonTerminalEnd) == false)
                     {
-                        throw new GrammarParserException($"Non-terminal {nonTerminalName.SlowlyCreateString()} name " +
+                        throw new GrammarParserException($"Non-terminal {nonTerminalName} name " +
                                                                  $"should finish with {GrammarNonTerminalEnd}");
                     }
 
-                    var nonTerminal = GetNonTerminalByName(nonTerminalName.SlowlyCreateString());
+                    var nonTerminal = GetNonTerminalByName(nonTerminalName);
 
                     if (nonTerminal.FullyParsed)
                     {
-                        throw new GrammarParserException($"Cannot declare {nonTerminalName.SlowlyCreateString()} more than once.");
+                        throw new GrammarParserException($"Cannot declare {nonTerminalName} more than once.");
                     }
 
                     // skip '::='
-                    var equals = reader.ReadWhile(x => x != '=').SlowlyCreateString() + reader.CurrentChar;
+                    var equals = new string(reader.ReadWhile(x => x != '=')) + reader.CurrentChar;
                     if (equals.EndsWith("::=") == false)
                     {
-                        throw new GrammarParserException($"Invalid syntax for {nonTerminalName.SlowlyCreateString()}.");
+                        throw new GrammarParserException($"Invalid syntax for {nonTerminalName}.");
                     }
                     reader.MoveNext();
                     reader.ReadTillEndOfWhitespace();
@@ -92,7 +92,7 @@ namespace HandyQuery.Language.Lexing.Grammar
                     break;
                 }
 
-                throw new GrammarParserException($"Invalid grammar syntax. Line: {reader.ReadTillNewLine().SlowlyCreateString()}");
+                throw new GrammarParserException($"Invalid grammar syntax. Line: {new string(reader.ReadTillNewLine())}");
             }
 
             if (final == null)
@@ -170,23 +170,22 @@ namespace HandyQuery.Language.Lexing.Grammar
         // <value> ::= Literal|<function-invokation>
         private IGrammarBodyItem ParseNonTerminalBodyItem(ReadOnlySpan<char> blockItem)
         {
-            var nameSpan = blockItem;
-            var nameString = nameSpan.SlowlyCreateString();
+            var name = new string(blockItem);
 
             IGrammarBodyItem result;
 
-            if (nameSpan.StartsWith(GrammarNonTerminalStart.ToString().AsReadOnlySpan()))
+            if (name.StartsWith(GrammarNonTerminalStart))
             {
-                result = new GrammarNonTerminalUsage(nameString, GetNonTerminalByName(nameString));
+                result = new GrammarNonTerminalUsage(name, GetNonTerminalByName(name));
             }
             else
             {
-                if (_tokenizersSource.TryGetTokenizer(nameString, out var tokenizer) == false)
+                if (_tokenizersSource.TryGetTokenizer(name, out var tokenizer) == false)
                 {
-                    throw new GrammarParserException($"Terminal '{nameString}' does not exist.");
+                    throw new GrammarParserException($"Terminal '{name}' does not exist.");
                 }
 
-                result = new GrammarTerminalUsage(nameString, tokenizer);
+                result = new GrammarTerminalUsage(name, tokenizer);
             }
 
             return result;
@@ -197,7 +196,7 @@ namespace HandyQuery.Language.Lexing.Grammar
         private GrammarReturn ParseReturn(ref LexerStringReader reader)
         {
             reader.MoveBy(Return.Length);
-            var nonTerminalName = reader.ReadTillEndOfWord().SlowlyCreateString();
+            var nonTerminalName = new string(reader.ReadTillEndOfWord());
             
             if (_nonTerminals.TryGetValue(nonTerminalName, out var grammarElement) == false)
             {
