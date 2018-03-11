@@ -110,7 +110,6 @@ namespace HandyQuery.Language.Tests.Lexing
             var result = reader.ReadWhile(x => x != invalidChar);
 
             new string(result).Should().Be(expectedResult);
-            reader.ReadLength.Should().Be(expectedResult.Length);
         }
         
         [TestCase("Some    kind of 'query|'", "")]
@@ -125,7 +124,6 @@ namespace HandyQuery.Language.Tests.Lexing
             var result = reader.ReadTillEndOfWhitespace();
 
             new string(result).Should().Be(expectedResult);
-            reader.ReadLength.Should().Be(expectedResult.Length);
         }
         
         [TestCase("Some kind\nof 'query|'", "'")]
@@ -141,7 +139,6 @@ namespace HandyQuery.Language.Tests.Lexing
             var result = reader.ReadTillEndOfWord();
 
             new string(result).Should().Be(expectedResult);
-            reader.ReadLength.Should().Be(expectedResult.Length);
         }
         
         [TestCase("10/12/2017 08:30:2|1", 2, "1")]
@@ -162,7 +159,6 @@ namespace HandyQuery.Language.Tests.Lexing
             var result = reader.ReadTillEndOfXWords(x);
 
             new string(result).Should().Be(expectedResult);
-            reader.ReadLength.Should().Be(expectedResult.Length);
         }
         
         [TestCase("some 123,45|6", '.', "6")]
@@ -182,7 +178,6 @@ namespace HandyQuery.Language.Tests.Lexing
             var result = reader.ReadTillEndOfNumber(separator);
 
             new string(result).Should().Be(expectedResult);
-            reader.ReadLength.Should().Be(expectedResult.Length);
         }
 
         [TestCase("Some kind of 'query|'", "")]
@@ -199,7 +194,6 @@ namespace HandyQuery.Language.Tests.Lexing
             var result = reader.ReadTillIvalidChar(invalidChars);
 
             new string(result).Should().Be(expectedResult);
-            reader.ReadLength.Should().Be(expectedResult.Length);
         }
         
         [TestCase("Some kind of 'query|'", "")]
@@ -218,7 +212,6 @@ namespace HandyQuery.Language.Tests.Lexing
             var result = reader.ReadTillIvalidCharOrWhitespace(invalidChars);
 
             new string(result).Should().Be(expectedResult);
-            reader.ReadLength.Should().Be(expectedResult.Length);
         }
         
         [TestCase("Some kind of 'query|'", "'")]
@@ -233,7 +226,6 @@ namespace HandyQuery.Language.Tests.Lexing
             var result = reader.ReadTillNewLine();
 
             new string(result).Should().Be(expectedResult);
-            reader.ReadLength.Should().Be(expectedResult.Length);
         }
         
         [TestCase("Some kind of 'query|'", "", true)]

@@ -18,19 +18,12 @@ namespace HandyQuery.Language.Lexing
             CurrentPosition = position;
             _query = query.AsReadOnlySpan();
             _queryLength = query.Length;
-            ReadLength = 0;
         }
 
         private readonly ReadOnlySpan<char> _query;
         private readonly int _queryLength;
 
         public int CurrentPosition { get; private set; }
-
-        // TODO: not sure if that's ever needed, length of returned string/span could be used instead
-        /// <summary>
-        /// A number of chars read by 'ReadTill...' methods.
-        /// </summary>
-        public int ReadLength { get; private set; }
 
         public char CurrentChar => _query[CurrentPosition];
 
@@ -153,12 +146,12 @@ namespace HandyQuery.Language.Lexing
         public bool IsEndOfQuery() => IsInRange(CurrentPosition + 1) == false;
 
         /// <summary>
-        /// Moves to next char. Increases <see cref="ReadLength"/>.
+        /// Moves to next char.
         /// </summary>
         public bool MoveNext() => MoveBy(1);
 
         /// <summary>
-        /// Moves <see cref="CurrentPosition"/> and <see cref="ReadLength"/> by <see cref="x"/>.
+        /// Moves <see cref="CurrentPosition"/> by <see cref="x"/>.
         /// </summary>
         public bool MoveBy(int x)
         {
@@ -221,8 +214,6 @@ namespace HandyQuery.Language.Lexing
                 }
             }
 
-            ReadLength += length;
-
             return _query.Slice(startIndex, length);
         }
         
@@ -248,8 +239,6 @@ namespace HandyQuery.Language.Lexing
                     break;
                 }
             }
-
-            ReadLength += length;
 
             return _query.Slice(startIndex, length);
         }
