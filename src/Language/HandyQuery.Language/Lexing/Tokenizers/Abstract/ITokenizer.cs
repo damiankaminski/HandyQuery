@@ -2,6 +2,6 @@
 {
     internal interface ITokenizer
     {
-        TokenizationResult Tokenize(LexerRuntimeInfo info);
+        TokenizationResult Tokenize(ref LexerRuntimeInfo info);
     }
 }

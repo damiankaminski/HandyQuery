@@ -3,9 +3,9 @@ using HandyQuery.Language.Configuration;
 
 namespace HandyQuery.Language.Lexing
 {
-    internal readonly ref struct LexerRuntimeInfo
+    internal ref struct LexerRuntimeInfo
     {
-        public readonly LexerStringReader Reader;
+        public LexerStringReader Reader;
         public readonly LanguageConfig Config;
 
         public LexerRuntimeInfo(LexerStringReader reader, LanguageConfig config)

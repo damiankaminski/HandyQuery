@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using HandyQuery.Language.Lexing.Tokenizers.Abstract;
 
-namespace HandyQuery.Language
+namespace HandyQuery.Language.Lexing
 {
     internal sealed class TokenizersSource
     {
@@ -42,8 +42,7 @@ namespace HandyQuery.Language
 
         public ITokenizer GetTokenizer(string name)
         {
-            ITokenizer tokenizer;
-            if (TryGetTokenizer(name, out tokenizer) == false)
+            if (TryGetTokenizer(name, out var tokenizer) == false)
             {
                 throw new QueryLanguageException($"Terminal '{name}' not found.");
             }

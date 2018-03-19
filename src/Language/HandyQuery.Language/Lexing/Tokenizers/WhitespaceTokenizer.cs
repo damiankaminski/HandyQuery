@@ -8,7 +8,7 @@ namespace HandyQuery.Language.Lexing.Tokenizers
     internal sealed class WhitespaceTokenizer : ITokenizer
     {
         // TODO: tests
-        public TokenizationResult Tokenize(LexerRuntimeInfo info)
+        public TokenizationResult Tokenize(ref LexerRuntimeInfo info)
         {
             var startPosition = info.Reader.CurrentPosition;
             var whitespaceSpan = info.Reader.ReadTillEndOfWhitespace();

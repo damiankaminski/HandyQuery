@@ -95,7 +95,7 @@ namespace HandyQuery.Language.Tests.Lexing.Tokenizers
             
             var (result, token) = Tokenize(query, 0, DefaultConfig);
 
-            DefaultConfig.SyntaxConfig.ColumnNameCaseSensitive.Should().Be(false);
+            DefaultConfig.Syntax.ColumnNameCaseSensitive.Should().Be(false);
             result.Success.Should().BeTrue();
             result.Token.TokenType.Should().Be(TokenType.Column);
             token.StartPosition.Should().Be(0);
@@ -157,7 +157,7 @@ namespace HandyQuery.Language.Tests.Lexing.Tokenizers
             config = config ?? DefaultConfig;
             var reader = new LexerStringReader(query, position);
             var runtimeInfo = new LexerRuntimeInfo(reader, config);
-            var result = Tokenizer.Tokenize(runtimeInfo);
+            var result = Tokenizer.Tokenize(ref runtimeInfo);
             return (result, result.Token as ColumnToken);
         }
     }

@@ -6,13 +6,13 @@ namespace HandyQuery.Language.Lexing.Tokenizers
     [PerformanceCritical]
     internal sealed class ColumnNameTokenizer : ITokenizer
     {
-        public TokenizationResult Tokenize(LexerRuntimeInfo info)
+        public TokenizationResult Tokenize(ref LexerRuntimeInfo info)
         {
             var startPosition = info.Reader.CurrentPosition;
             
             // TODO: make sure there is no struct copy here
             // TODO: it probably is copied because of readonly on Reader in LexerRuntimeInfo...
-            var columnNameSpan = info.Reader.ReadTillIvalidCharOrWhitespace(info.Config.SyntaxConfig.ReservedChars);
+            var columnNameSpan = info.Reader.ReadTillIvalidCharOrWhitespace(info.Config.Syntax.ReservedChars);
             var columnName = new string(columnNameSpan); // TODO: get rid of this allocation
 
             var token = new ColumnToken(

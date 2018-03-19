@@ -10,20 +10,20 @@ namespace HandyQuery.Language.Configuration
     {
         public readonly Type ModelType;
         public readonly IReadOnlyList<ColumnInfo> Columns;
-        public readonly SyntaxConfig SyntaxConfig;
+        public readonly SyntaxConfig Syntax;
 
-        public LanguageConfig(Type modelType, IReadOnlyList<ColumnInfo> columns, SyntaxConfig syntaxConfig)
+        public LanguageConfig(Type modelType, IReadOnlyList<ColumnInfo> columns, SyntaxConfig syntax)
         {
             ModelType = modelType;
             Columns = columns;
-            SyntaxConfig = syntaxConfig;
+            Syntax = syntax;
         }
         
         public ColumnInfo GetColumnInfo(string columnName)
         {
             // TODO: get rid of lambda allocations
             
-            if (SyntaxConfig.ColumnNameCaseSensitive)
+            if (Syntax.ColumnNameCaseSensitive)
                 return Columns.FirstOrDefault(x => x.ColumnName == columnName);
 
             return Columns.FirstOrDefault(x => x.ColumnName.Equals(columnName, StringComparison.InvariantCultureIgnoreCase));

@@ -21,16 +21,10 @@ namespace HandyQuery.Language.Lexing.Tokens.Abstract
         /// </summary>
         public readonly int Length;
 
-        /// <summary>
-        /// End index in the query.
-        /// </summary>
-        public readonly int EndPosition;
-
         protected TokenBase(int startPosition, int length)
         {
             StartPosition = startPosition;
             Length = length;
-            EndPosition = StartPosition + Length;
         }
 
         public T As<T>() where T : TokenBase
@@ -43,7 +37,7 @@ namespace HandyQuery.Language.Lexing.Tokens.Abstract
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
             return other.TokenType == TokenType && StartPosition == other.StartPosition 
-                && Length == other.Length && EndPosition == other.EndPosition;
+                && Length == other.Length;
         }
 
         public override bool Equals(object obj)
@@ -60,7 +54,6 @@ namespace HandyQuery.Language.Lexing.Tokens.Abstract
             {
                 var hashCode = StartPosition;
                 hashCode = (hashCode * 397) ^ Length;
-                hashCode = (hashCode * 397) ^ EndPosition;
                 hashCode = (hashCode * 397) ^ (int)TokenType;
                 return hashCode;
             }

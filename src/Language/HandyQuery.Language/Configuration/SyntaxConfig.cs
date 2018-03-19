@@ -19,7 +19,7 @@ namespace HandyQuery.Language.Configuration
         public readonly char StringLiteralIdentifier = '"';
 
         public readonly IEnumerable<string> DateTimeFormats = new[] {"M/d/yyyy H:m", "M/d/yyyy"};
-        public readonly string NullConstant = "null";
+        public readonly string NullConstant = "null"; // TODO: move to keywords?
         public readonly char NumberDecimalSeparator = '.';
 
         public readonly IReadOnlyDictionary<Keyword, string> KeywordsMap = new Dictionary<Keyword, string>()

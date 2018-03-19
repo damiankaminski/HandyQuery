@@ -39,11 +39,13 @@ namespace HandyQuery.Language.Lexing
             var node = ExecutionGraph.Root.Child;
             while (node != null)
             {
+                // TODO: restore reader position after tokenizetions
+                
                 switch (node)
                 {
                     case TerminalNode terminalNode:
                     {
-                        var tokenizationResult = terminalNode.Tokenizer.Tokenize(runtimeInfo); // TODO: ref runtimeInfo?
+                        var tokenizationResult = terminalNode.Tokenizer.Tokenize(ref runtimeInfo);
                         if (tokenizationResult.Success == false)
                         {
                             // try to go with other branch if any available
@@ -79,7 +81,7 @@ namespace HandyQuery.Language.Lexing
                         finalResult.Tokens.Add(tokenizationResult.Token);
 
                         // search for whitespaces
-                        var whitespaceTokenizationResult = _whitespaceTokenizer.Tokenize(runtimeInfo);
+                        var whitespaceTokenizationResult = _whitespaceTokenizer.Tokenize(ref runtimeInfo);
                         if (whitespaceTokenizationResult.Success && whitespaceTokenizationResult.Token.Length > 0)
                         {
                             finalResult.Tokens.Add(whitespaceTokenizationResult.Token);

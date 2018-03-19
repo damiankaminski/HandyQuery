@@ -5,7 +5,7 @@ namespace HandyQuery.Language.Lexing.Tokenizers
     [PerformanceCritical]
     internal sealed class BooleanOperatorTokenizer : ITokenizer
     {
-        public TokenizationResult Tokenize(LexerRuntimeInfo info)
+        public TokenizationResult Tokenize(ref LexerRuntimeInfo info)
         {
             throw new System.NotImplementedException();
         }

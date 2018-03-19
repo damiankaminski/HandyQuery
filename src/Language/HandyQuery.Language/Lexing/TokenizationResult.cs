@@ -2,11 +2,14 @@
 
 namespace HandyQuery.Language.Lexing
 {
-    // TODO: change to struct
+    // TODO: try to change to ref struct
     internal sealed class TokenizationResult
     {
         public bool Success { get; }
         public TokenBase Token { get; }
+        
+        // TODO: lazy evaluation? should be possible if changed to Action<LexerStringReader> and if
+        //       reader's postion would be properly adjusted 
         public Error Error { get; }
 
         private TokenizationResult(bool success, TokenBase token, Error error)

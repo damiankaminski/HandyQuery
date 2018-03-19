@@ -11,8 +11,8 @@ namespace HandyQuery.Language.Lexing.Tokenizers
         public override StatementToken CreateToken(int startPosition, int length, Keyword keyword) 
             => new StatementToken(startPosition, length, keyword);
 
-        public override IEnumerable<Keyword> GetCandidatesForKeyword(LexerRuntimeInfo info) 
-            => info.Config.SyntaxConfig.Statements;
+        public override IEnumerable<Keyword> GetCandidatesForKeyword(in LexerRuntimeInfo info) 
+            => info.Config.Syntax.Statements;
 
         public override Error OnNotFoundError(string word)
             => new Error($"\"{word}\" is not a statement.", ErrorId.StatementNotFound, word);
