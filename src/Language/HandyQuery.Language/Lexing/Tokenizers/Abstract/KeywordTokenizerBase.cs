@@ -7,13 +7,13 @@ using HandyQuery.Language.Lexing.Tokens.Abstract;
 
 namespace HandyQuery.Language.Lexing.Tokenizers.Abstract
 {
-    [PerformanceCritical]
     internal abstract class KeywordTokenizerBase<TKeywordToken> : ITokenizer
         where TKeywordToken : KeywordTokenBase
     {
         private readonly IDictionary<IReadOnlyDictionary<Keyword, string>, KeywordsTree> _keywordsTrees
             = new Dictionary<IReadOnlyDictionary<Keyword, string>, KeywordsTree>();
 
+        [HotPath]
         public TokenizationResult Tokenize(ref LexerRuntimeInfo info)
         {
             var keywordsTree = GetKeywordsTree(ref info);
@@ -51,6 +51,7 @@ namespace HandyQuery.Language.Lexing.Tokenizers.Abstract
             return TokenizationResult.Successful(token);
         }
 
+        [HotPath]
         private KeywordsTree GetKeywordsTree(ref LexerRuntimeInfo info)
         {
             // TODO: implement container which will be a member of LanguageConfig
@@ -62,6 +63,8 @@ namespace HandyQuery.Language.Lexing.Tokenizers.Abstract
             var keywordsMap = info.Config.Syntax.KeywordsMap;
             if (_keywordsTrees.TryGetValue(keywordsMap, out var keywordsTree) == false)
             {
+                // invoked only once per configuration instance, does not need to be fast
+                
                 // TODO: make sure this approach is thread safe
                 var candidates = GetCandidatesForKeyword(in info);
                 var candidatesMap = keywordsMap
@@ -139,6 +142,7 @@ namespace HandyQuery.Language.Lexing.Tokenizers.Abstract
                 return tree;
             }
 
+            [HotPath]
             public bool TryFind(ref LexerStringReader reader, SyntaxConfig syntax, out Keyword keyword)
             {
                 if (TryFindNode(ref reader, syntax, out var node))
@@ -156,6 +160,7 @@ namespace HandyQuery.Language.Lexing.Tokenizers.Abstract
                 return false;
             }
 
+            [HotPath]
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             private bool TryFindNode(ref LexerStringReader reader, SyntaxConfig syntax, out Node node)
             {

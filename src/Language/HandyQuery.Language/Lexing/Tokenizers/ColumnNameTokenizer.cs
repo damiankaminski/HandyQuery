@@ -3,9 +3,9 @@ using HandyQuery.Language.Lexing.Tokens;
 
 namespace HandyQuery.Language.Lexing.Tokenizers
 {
-    [PerformanceCritical]
     internal sealed class ColumnNameTokenizer : ITokenizer
     {
+        [HotPath]
         public TokenizationResult Tokenize(ref LexerRuntimeInfo info)
         {
             var startPosition = info.Reader.CurrentPosition;

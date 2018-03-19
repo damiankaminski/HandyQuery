@@ -5,15 +5,17 @@ using HandyQuery.Language.Lexing.Tokens;
 
 namespace HandyQuery.Language.Lexing.Tokenizers
 {
-    [PerformanceCritical]
     internal sealed class StatementTokenizer : KeywordTokenizerBase<StatementToken>
     {
+        [HotPath]
         public override StatementToken CreateToken(int startPosition, int length, Keyword keyword) 
             => new StatementToken(startPosition, length, keyword);
 
+        [HotPath]
         public override IEnumerable<Keyword> GetCandidatesForKeyword(in LexerRuntimeInfo info) 
             => info.Config.Syntax.Statements;
 
+        [HotPath]
         public override Error OnNotFoundError(string word)
             => new Error($"\"{word}\" is not a statement.", ErrorId.StatementNotFound, word);
     }

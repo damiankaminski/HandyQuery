@@ -2,9 +2,9 @@
 
 namespace HandyQuery.Language.Lexing.Tokenizers
 {
-    [PerformanceCritical]
     internal sealed class GroupOpenTokenizer : ITokenizer
     {
+        [HotPath]
         public TokenizationResult Tokenize(ref LexerRuntimeInfo info)
         {
             throw new System.NotImplementedException();

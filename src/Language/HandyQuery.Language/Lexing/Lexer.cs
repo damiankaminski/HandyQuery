@@ -24,7 +24,7 @@ namespace HandyQuery.Language.Lexing
             return new Lexer(LexerExecutionGraph.Build(grammar));
         }
 
-        [PerformanceCritical]
+        [HotPath]
         public LexerResult Tokenize(string query, LanguageConfig languageConfig, LexerConfig config = null)
         {
             if (string.IsNullOrWhiteSpace(query)) throw new ArgumentException();

@@ -74,7 +74,6 @@ namespace HandyQuery.Language.Extensions
         }
         
         // TODO: tests
-        [HeapAlloc]
         public static IEnumerable<SplitItem> Split(this ReadOnlySpan<char> span, char value, 
             StringSplitOptions options)
         {
