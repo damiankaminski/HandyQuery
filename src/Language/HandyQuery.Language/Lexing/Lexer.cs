@@ -32,6 +32,7 @@ namespace HandyQuery.Language.Lexing
             config = config ?? LexerConfig.Default;
             var finalResult = new LexerResult();
             var reader = new LexerStringReader(query, 0);
+            var restorableReader = new LexerStringReader.Restorable();
             var runtimeInfo = new LexerRuntimeInfo(reader, languageConfig); // TODO: ref reader?
 
             var stateStack = new Stack<BranchState>(); // TODO: pool?
@@ -39,7 +40,8 @@ namespace HandyQuery.Language.Lexing
             var node = ExecutionGraph.Root.Child;
             while (node != null)
             {
-                // TODO: restore reader position after tokenizetions
+                // TODO: I think this will mess things up on long branch miss scenario...
+                restorableReader.RestorePosition(ref reader);
                 
                 switch (node)
                 {
@@ -49,7 +51,7 @@ namespace HandyQuery.Language.Lexing
                         if (tokenizationResult.Success == false)
                         {
                             // try to go with other branch if any available
-                            // TODO: remove tokens from finalResult.Tokens
+                            // TODO: remove tokens from finalResult.Tokens (or make them "commitable" somehow and just not commit them in this scenario)
                             var nextFound = false;
                             while (true)
                             {
@@ -88,6 +90,7 @@ namespace HandyQuery.Language.Lexing
                         }
                         
                         node = terminalNode.Child;
+                        restorableReader.CaptureCurrentPosition(ref reader);
                         break;
                     }
                         

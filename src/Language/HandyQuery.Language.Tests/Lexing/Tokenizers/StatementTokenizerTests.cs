@@ -164,7 +164,7 @@ namespace HandyQuery.Language.Tests.Lexing.Tokenizers
         private static void WhenTokenized()
         {
             var testCase = TestCase.Current;
-            var lexerRuntimeInfo = new LexerRuntimeInfo(new LexerStringReader(testCase.Query, 5), testCase.Config);
+            var lexerRuntimeInfo = new LexerRuntimeInfo(new LexerStringReader(testCase.Query, testCase.Position), testCase.Config);
             testCase.Result = Tokenizer.Tokenize(ref lexerRuntimeInfo);
         }
 

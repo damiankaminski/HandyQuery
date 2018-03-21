@@ -7,48 +7,38 @@ using HandyQuery.Language.Lexing.Tokens.Abstract;
 
 namespace HandyQuery.Language.Lexing.Tokenizers.Abstract
 {
-    internal abstract class KeywordTokenizerBase<TKeywordToken> : ITokenizer
+    internal abstract class KeywordTokenizerBase<TKeywordToken> : TokenizerBase
         where TKeywordToken : KeywordTokenBase
     {
         private readonly IDictionary<IReadOnlyDictionary<Keyword, string>, KeywordsTree> _keywordsTrees
             = new Dictionary<IReadOnlyDictionary<Keyword, string>, KeywordsTree>();
 
         [HotPath]
-        public TokenizationResult Tokenize(ref LexerRuntimeInfo info)
+        public override TokenizationResult Tokenize(ref LexerRuntimeInfo info)
         {
             var keywordsTree = GetKeywordsTree(ref info);
 
-            var startPosition = info.Reader.CurrentPosition;
+            var startPosition = info.Reader.CaptureCurrentPosition();
 
             var found = keywordsTree.TryFind(ref info.Reader, info.Config.Syntax, out var keyword);
-            var readLength = info.Reader.CurrentPosition - startPosition + 1;
+            var readLength = info.Reader.CurrentPosition - startPosition.Value + 1;
 
             if (found == false)
             {
-                info.Reader.MoveBy(-1 * readLength);
-                var word = info.Reader.ReadTillEndOfWord();
-                return TokenizationResult.Failed(OnNotFoundError(new string(word)));
-            }
-            
-            var isProperEndOfKeyword = true;
-
-            if (info.Reader.IsEndOfQuery() == false)
-            {
-                info.Reader.MoveBy(1);
-                isProperEndOfKeyword = char.IsWhiteSpace(info.Reader.CurrentChar)
-                                       || info.Config.Syntax.ReservedChars.Contains(info.Reader.CurrentChar);
-                info.Reader.MoveBy(-1);
-            }
-            
-            if (isProperEndOfKeyword == false)
-            {
-                info.Reader.MoveBy(-1 * readLength);
-                var word = info.Reader.ReadTillEndOfWord();
-                return TokenizationResult.Failed(OnNotFoundError(new string(word)));
+                info.Reader.MoveTo(startPosition);
+                return TokenizationResult.Failed(CreateError(ref info));
             }
 
-            var token = CreateToken(startPosition, readLength, keyword);
-            return TokenizationResult.Successful(token);
+            var token = CreateToken(startPosition.Value, readLength, keyword);
+            var result = TokenizationResult.Successful(token);
+            return EnsureTrailingSpecialChar(ref info, result);
+        }
+
+        [HotPath]
+        protected override Error CreateError(ref LexerRuntimeInfo info)
+        {
+            var word = info.Reader.ReadTillEndOfWord();
+            return OnNotFoundError(new string(word));
         }
 
         [HotPath]
@@ -64,7 +54,7 @@ namespace HandyQuery.Language.Lexing.Tokenizers.Abstract
             if (_keywordsTrees.TryGetValue(keywordsMap, out var keywordsTree) == false)
             {
                 // invoked only once per configuration instance, does not need to be fast
-                
+
                 // TODO: make sure this approach is thread safe
                 var candidates = GetCandidatesForKeyword(in info);
                 var candidatesMap = keywordsMap
@@ -105,7 +95,7 @@ namespace HandyQuery.Language.Lexing.Tokenizers.Abstract
             public static KeywordsTree Create(IReadOnlyDictionary<Keyword, string> keywordsMap)
             {
                 // invoked only once per configuration instance, does not need to be fast
-                
+
                 var keywords = keywordsMap
                     .Select(x => new {Text = x.Value, Value = x.Key})
                     .OrderByDescending(x => x.Text.Length)
@@ -178,7 +168,7 @@ namespace HandyQuery.Language.Lexing.Tokenizers.Abstract
                     foreach (var child in currentNode.Children)
                     {
                         // TODO: PERF: use zero cost extension point trick (see Performance.md)
-                        if (currentChar == child.Value 
+                        if (currentChar == child.Value
                             || (!syntax.KeywordCaseSensitive && char.ToLower(currentChar) == char.ToLower(child.Value)))
                         {
                             if (child.Keyword != null)
@@ -200,7 +190,6 @@ namespace HandyQuery.Language.Lexing.Tokenizers.Abstract
                 node = null;
                 return false;
             }
-
 
             public class Node
             {

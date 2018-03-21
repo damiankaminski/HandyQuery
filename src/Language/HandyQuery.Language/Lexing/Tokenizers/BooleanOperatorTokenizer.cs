@@ -2,10 +2,16 @@
 
 namespace HandyQuery.Language.Lexing.Tokenizers
 {
-    internal sealed class BooleanOperatorTokenizer : ITokenizer
+    internal sealed class BooleanOperatorTokenizer : TokenizerBase
     {
         [HotPath]
-        public TokenizationResult Tokenize(ref LexerRuntimeInfo info)
+        public override TokenizationResult Tokenize(ref LexerRuntimeInfo info)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        [HotPath]
+        protected override Error CreateError(ref LexerRuntimeInfo info)
         {
             throw new System.NotImplementedException();
         }

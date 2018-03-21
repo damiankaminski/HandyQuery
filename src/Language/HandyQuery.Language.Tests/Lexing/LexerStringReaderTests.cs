@@ -10,7 +10,7 @@ namespace HandyQuery.Language.Tests.Lexing
     public class LexerStringReaderTests
     {
         [Test]
-        public void ShouldAllowToMoveThroughQuery()
+        public void Should_allow_to_move_through_query()
         {
             var reader = CreateReader("|Test");
 
@@ -72,6 +72,63 @@ namespace HandyQuery.Language.Tests.Lexing
             reader.IsEndOfQuery().Should().Be(false);
         }
         
+        [Test]
+        public void Should_allow_to_capture_and_restore_positions()
+        {
+            var restorableReader = new LexerStringReader.Restorable();
+            var reader = CreateReader("Te|st");
+            reader.CurrentPosition.Should().Be(2);
+            reader.CurrentChar.Should().Be('s');
+            
+            restorableReader.RestorePosition(ref reader);
+            reader.CurrentPosition.Should().Be(0);
+            reader.CurrentChar.Should().Be('T');
+
+            reader.MoveBy(3);
+            reader.CurrentPosition.Should().Be(3);
+            reader.CurrentChar.Should().Be('t');
+            
+            restorableReader.CaptureCurrentPosition(ref reader);
+            reader.CurrentPosition.Should().Be(3);
+            reader.CurrentChar.Should().Be('t');
+            
+            reader.MoveBy(-1);
+            reader.CurrentPosition.Should().Be(2);
+            reader.CurrentChar.Should().Be('s');
+            
+            restorableReader.RestorePosition(ref reader);
+            reader.CurrentPosition.Should().Be(3);
+            reader.CurrentChar.Should().Be('t');
+        }
+        
+        [Test]
+        public void Should_allow_to_capture_and_move_to()
+        {
+            var reader = CreateReader("Te|st");
+            reader.CurrentPosition.Should().Be(2);
+            reader.CurrentChar.Should().Be('s');
+            
+            reader.MoveTo(new LexerStringReader.Position(0));
+            reader.CurrentPosition.Should().Be(0);
+            reader.CurrentChar.Should().Be('T');
+
+            reader.MoveBy(3);
+            reader.CurrentPosition.Should().Be(3);
+            reader.CurrentChar.Should().Be('t');
+            
+            var position = reader.CaptureCurrentPosition();
+            reader.CurrentPosition.Should().Be(3);
+            reader.CurrentChar.Should().Be('t');
+            
+            reader.MoveBy(-1);
+            reader.CurrentPosition.Should().Be(2);
+            reader.CurrentChar.Should().Be('s');
+            
+            reader.MoveTo(position);
+            reader.CurrentPosition.Should().Be(3);
+            reader.CurrentChar.Should().Be('t');
+        }
+        
         [TestCase("Some kind of 'query|'", false, null)]
         [TestCase("|Some kind of 'query'", false, null)]
         [TestCase("|Some kind of 'query'\n", false, null)]
@@ -88,7 +145,7 @@ namespace HandyQuery.Language.Tests.Lexing
         [TestCase("So|me \r\nkind of 'query'", true, 'k')]
         [TestCase("Some| \nkind of 'query'", true, 'k')]
         [TestCase("Some |\nkind of 'query'", true, 'k')]
-        public void MoveToNextLine(string query, bool expectedResult, char expectedChar)
+        public void Method_MoveToNextLine_should_work_properly(string query, bool expectedResult, char expectedChar)
         {
             var reader = CreateReader(query);
             
@@ -103,7 +160,7 @@ namespace HandyQuery.Language.Tests.Lexing
         [TestCase("Some |kind of 'query'", '\'', "kind of ")]
         [TestCase("Some| kind of 'query'", '\'', " kind of ")]
         [TestCase("Some kind of |'query'", '"', "'query'")]
-        public void ReadWhile(string query, char invalidChar, string expectedResult)
+        public void Method_ReadWhile_should_work_properly(string query, char invalidChar, string expectedResult)
         {
             var reader = CreateReader(query);
             
@@ -117,7 +174,7 @@ namespace HandyQuery.Language.Tests.Lexing
         [TestCase("S|ome    kind of 'query'", "")]
         [TestCase("Some |   kind of 'query'", "   ")]
         [TestCase("Some| \n\r \t  kind of 'query'", " \n\r \t  ")]
-        public void ReadTillEndOfWhitespace(string query, string expectedResult)
+        public void Method_ReadTillEndOfWhitespace_should_work_properly(string query, string expectedResult)
         {
             var reader = CreateReader(query);
             
@@ -132,7 +189,7 @@ namespace HandyQuery.Language.Tests.Lexing
         [TestCase("Some    |kind of 'query'", "kind")]
         [TestCase("Some |kind\nof 'query'", "kind")]
         [TestCase("Some kind\nof |'query'", "'query'")]
-        public void ReadTillEndOfWord(string query, string expectedResult)
+        public void Method_ReadTillEndOfWord_should_work_properly(string query, string expectedResult)
         {
             var reader = CreateReader(query);
             
@@ -152,7 +209,7 @@ namespace HandyQuery.Language.Tests.Lexing
         [TestCase("Some kind\nof |'query'", 2, "'query'")]
         [TestCase("|10/12/2017 08:30:21 test", 2, "10/12/2017 08:30:21")]
         [TestCase("|10/12/2017 08:30:21", 2, "10/12/2017 08:30:21")]
-        public void ReadTillEndOfXWords(string query, int x, string expectedResult)
+        public void Method_ReadTillEndOfXWords_should_work_properly(string query, int x, string expectedResult)
         {
             var reader = CreateReader(query);
             
@@ -171,7 +228,7 @@ namespace HandyQuery.Language.Tests.Lexing
         [TestCase("some |123", '.', "123")]
         [TestCase("some |123.456", '.', "123.456")]
         [TestCase("some |123,456", ',', "123,456")]
-        public void ReadTillEndOfNumber(string query, char separator, string expectedResult)
+        public void Method_ReadTillEndOfNumber_should_work_properly(string query, char separator, string expectedResult)
         {
             var reader = CreateReader(query);
             
@@ -186,7 +243,7 @@ namespace HandyQuery.Language.Tests.Lexing
         [TestCase("Some |kind of \"query\"", "kind of ")]
         [TestCase("Some| kind of 'query'", " kind of ")]
         [TestCase("Some kind of |'query'", "")]
-        public void ReadTillIvalidChar(string query, string expectedResult)
+        public void Method_ReadTillIvalidChar_should_work_properly(string query, string expectedResult)
         {
             var reader = CreateReader(query);
             var invalidChars = new []{'\'', '"'};
@@ -204,7 +261,7 @@ namespace HandyQuery.Language.Tests.Lexing
         [TestCase("Some |kindof\"query\"", "kindof")]
         [TestCase("Some| kind of 'query'", "")]
         [TestCase("Some kind of |'query'", "")]
-        public void ReadTillIvalidCharOrWhitespace(string query, string expectedResult)
+        public void Method_ReadTillIvalidCharOrWhitespace_should_work_properly(string query, string expectedResult)
         {
             var reader = CreateReader(query);
             var invalidChars = new []{'\'', '"'};
@@ -219,7 +276,7 @@ namespace HandyQuery.Language.Tests.Lexing
         [TestCase("Some |kind of 'query'", "kind of 'query'")]
         [TestCase("Some |kind \nof 'query'", "kind ")]
         [TestCase("|Some kind \r\nof 'query'", "Some kind ")]
-        public void ReadTillNewLine(string query, string expectedResult)
+        public void Method_ReadTillNewLine_should_work_properly(string query, string expectedResult)
         {
             var reader = CreateReader(query);
             
@@ -238,7 +295,7 @@ namespace HandyQuery.Language.Tests.Lexing
         [TestCase("Some |kind \nof 'query'", "kind ", true)]
         [TestCase("|Some kind \r\nof 'query'", "Some kind \r\n", true)]
         [TestCase("|Some kind \r\nof 'query'", "kind", false)]
-        public void StartsWith(string query, string value, bool expectedResult)
+        public void Method_StartsWith_should_work_properly(string query, string value, bool expectedResult)
         {
             var reader = CreateReader(query);
             
