@@ -10,17 +10,17 @@ namespace HandyQuery.Language.Lexing.Tokenizers.Abstract
     internal abstract class KeywordTokenizerBase<TKeywordToken> : TokenizerBase
         where TKeywordToken : KeywordTokenBase
     {
-        private readonly IDictionary<IReadOnlyDictionary<Keyword, string>, KeywordsTree> _keywordsTrees
-            = new Dictionary<IReadOnlyDictionary<Keyword, string>, KeywordsTree>();
+        private readonly IDictionary<IReadOnlyDictionary<Keyword, string>, KeywordsTrie> _keywordsTries
+            = new Dictionary<IReadOnlyDictionary<Keyword, string>, KeywordsTrie>();
 
         [HotPath]
         public override TokenizationResult Tokenize(ref LexerRuntimeInfo info)
         {
-            var keywordsTree = GetKeywordsTree(ref info);
+            var keywordsTrie = GetKeywordsTrie(ref info);
 
             var startPosition = info.Reader.CaptureCurrentPosition();
 
-            var found = keywordsTree.TryFind(ref info.Reader, info.Config.Syntax, out var keyword);
+            var found = keywordsTrie.TryFind(ref info.Reader, info.Config.Syntax, out var keyword);
             var readLength = info.Reader.CurrentPosition - startPosition.Value + 1;
 
             if (found == false)
@@ -42,16 +42,16 @@ namespace HandyQuery.Language.Lexing.Tokenizers.Abstract
         }
 
         [HotPath]
-        private KeywordsTree GetKeywordsTree(ref LexerRuntimeInfo info)
+        private KeywordsTrie GetKeywordsTrie(ref LexerRuntimeInfo info)
         {
             // TODO: implement container which will be a member of LanguageConfig
             // and create single tokenizer per language config?
-            // This way KeywordsTree could be created once and injected via constructor.
+            // This way KeywordsTrie could be created once and injected via constructor.
             // It would also help to implement Zero cost extension points via structs (facade of IKeywordCharComparer
             // would be injected)
 
             var keywordsMap = info.Config.Syntax.KeywordsMap;
-            if (_keywordsTrees.TryGetValue(keywordsMap, out var keywordsTree) == false)
+            if (_keywordsTries.TryGetValue(keywordsMap, out var keywordsTrie) == false)
             {
                 // invoked only once per configuration instance, does not need to be fast
 
@@ -60,11 +60,11 @@ namespace HandyQuery.Language.Lexing.Tokenizers.Abstract
                 var candidatesMap = keywordsMap
                     .Where(x => candidates.Contains(x.Key))
                     .ToDictionary(x => x.Key, x => x.Value);
-                keywordsTree = KeywordsTree.Create(candidatesMap);
-                _keywordsTrees[keywordsMap] = keywordsTree;
+                keywordsTrie = KeywordsTrie.Create(candidatesMap);
+                _keywordsTries[keywordsMap] = keywordsTrie;
             }
 
-            return keywordsTree;
+            return keywordsTrie;
         }
 
         /// <summary>
@@ -83,27 +83,27 @@ namespace HandyQuery.Language.Lexing.Tokenizers.Abstract
         public abstract Error OnNotFoundError(string word);
 
         // TODO: do the same for column names to not allocate strings?
-        private class KeywordsTree
+        private class KeywordsTrie
         {
             private readonly Node _root;
 
-            private KeywordsTree()
+            private KeywordsTrie()
             {
                 _root = new Node();
             }
 
-            public static KeywordsTree Create(IReadOnlyDictionary<Keyword, string> keywordsMap)
+            public static KeywordsTrie Create(IReadOnlyDictionary<Keyword, string> keywordsMap)
             {
                 // invoked only once per configuration instance, does not need to be fast
 
                 var keywords = keywordsMap
                     .Select(x => new {Text = x.Value, Value = x.Key})
-                    .OrderByDescending(x => x.Text.Length)
+                    .OrderBy(x => x.Text.Length)
                     .ThenBy(x => x.Text)
                     .ToList();
 
-                var tree = new KeywordsTree();
-                var current = tree._root;
+                var trie = new KeywordsTrie();
+                var current = trie._root;
 
                 foreach (var keyword in keywords)
                 {
@@ -112,7 +112,7 @@ namespace HandyQuery.Language.Lexing.Tokenizers.Abstract
                         var isLastChar = i == keyword.Text.Length - 1;
                         var c = keyword.Text[i];
                         var indexInCurrent = current.Children.FindIndex(x => x.Value == c);
-                        if (indexInCurrent != -1 && !isLastChar)
+                        if (indexInCurrent != -1)
                         {
                             current = current.Children[indexInCurrent];
                             continue;
@@ -126,10 +126,10 @@ namespace HandyQuery.Language.Lexing.Tokenizers.Abstract
                         current = newNode;
                     }
 
-                    current = tree._root;
+                    current = trie._root;
                 }
 
-                return tree;
+                return trie;
             }
 
             [HotPath]
@@ -154,39 +154,68 @@ namespace HandyQuery.Language.Lexing.Tokenizers.Abstract
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             private bool TryFindNode(ref LexerStringReader reader, SyntaxConfig syntax, out Node node)
             {
+                // TODO: FIXME: Current implementation has a very subtle bug which is not a problem right now
+                // but might be if syntax would change.
+                // Lets assume we've got following keywords:
+                // `=`
+                // `==`
+                // `==t=`
+                // and following input: `==ta`
+                // It would result with false even though `==` is present.
+                // currentNode.Keyword would be null because currentNode would be set to `t`.
+                // It should be set to second `=` and when failed to process `==t=` it should go back using MoveBy(-2)
+                
                 var currentNode = _root;
 
                 while (currentNode != null)
                 {
                     var progressed = false;
-
+                    var endOfQuery = false;
+                    
                     var currentChar = reader.CurrentChar;
-                    if (syntax.ReservedChars.Contains(currentChar)) break;
 
                     // PERF NOTE: bisection could be implemented here, but since number of children should remain small
                     // then overhead could be larger than actual gains
                     foreach (var child in currentNode.Children)
                     {
                         // TODO: PERF: use zero cost extension point trick (see Performance.md)
-                        if (currentChar == child.Value
-                            || (!syntax.KeywordCaseSensitive && char.ToLower(currentChar) == char.ToLower(child.Value)))
+                        if (currentChar != child.Value
+                            && (syntax.KeywordCaseSensitive || char.ToLower(currentChar) != char.ToLower(child.Value)))
                         {
-                            if (child.Keyword != null)
-                            {
-                                node = child;
-                                return true;
-                            }
+                            continue;
+                        }
 
-                            currentNode = child;
-                            progressed = true;
-                            reader.MoveBy(1);
+                        currentNode = child;
+                        
+                        if (reader.IsEndOfQuery())
+                        {
+                            endOfQuery = true;
                             break;
                         }
+                        
+                        progressed = true;
+                        reader.MoveBy(1);
+                        break;
                     }
 
-                    if (!progressed) break;
+                    if (endOfQuery)
+                    {
+                        break;
+                    }
+                    
+                    if (!progressed)
+                    {
+                        reader.MoveBy(-1);
+                        break;
+                    }
                 }
 
+                if (currentNode?.Keyword != null)
+                {
+                    node = currentNode;
+                    return true;
+                }
+                
                 node = null;
                 return false;
             }

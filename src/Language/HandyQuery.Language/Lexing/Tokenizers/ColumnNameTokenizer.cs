@@ -23,7 +23,7 @@ namespace HandyQuery.Language.Lexing.Tokenizers
                 return TokenizationResult.Failed(CreateError(ref info));
             }
 
-            return TokenizationResult.Successful(token);
+            return TokenizationResult.Successful(token); // TODO: EnsureTrailingSpecialChar?
         }
 
         [HotPath]

@@ -29,7 +29,7 @@ namespace HandyQuery.Language.Configuration
             {CompareOperatorKeyword.GreaterThan, ">"},
             {CompareOperatorKeyword.LessThan, "<"},
             {CompareOperatorKeyword.GreaterThanOrEqual, ">="},
-            {CompareOperatorKeyword.LessThanOrEqual, ">="},
+            {CompareOperatorKeyword.LessThanOrEqual, "<="},
             {CompareOperatorKeyword.StartsWith, "starts with"},
             {CompareOperatorKeyword.EndsWith, "ends with"},
             {CompareOperatorKeyword.Contains, "contains"},

@@ -19,6 +19,7 @@
     {
         ColumnNotFound,
         StatementNotFound,
-        CompareOperatorNotFound
+        CompareOperatorNotFound,
+        LogicalOperatorNotFound
     }
 }

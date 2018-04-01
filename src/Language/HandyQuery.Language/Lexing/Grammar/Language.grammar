@@ -8,6 +8,6 @@
 <function-invokation> ::= FunctionName ParamsOpen ParamsClose | FunctionName ParamsOpen <params> ParamsClose
 <params>              ::= <value> ParamsSeparator <params> | <value>
 
-<all-filters> ::= <filter> BooleanOperator <all-filters> | <filter>
+<all-filters> ::= <filter> LogicalOperator <all-filters> | <filter>
 
 return <all-filters>

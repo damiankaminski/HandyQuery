@@ -10,19 +10,19 @@ using NUnit.Framework;
 
 namespace HandyQuery.Language.Tests.Lexing.Tokenizers
 {
-    internal class StatementTokenizerTests : KeywordTokenizerTestsBase
+    internal class LogicalOperatorTokenizerTests : KeywordTokenizerTestsBase
     {
         protected override LanguageConfig DefaultConfig => HandyQueryLanguage.Configure<Person>()
             .AddColumn("Name", x => x.FirstName)
             .AddColumn("LastName", x => x.LastName)
             .Build();
 
-        protected override ITokenizer Tokenizer => new StatementTokenizer();
-
-        protected override TokenType ExpectedTokenType => TokenType.Statement;
+        protected override ITokenizer Tokenizer => new LogicalOperatorTokenizer();
         
-        [TestCaseSource(nameof(GetAllStatements))]
-        public void Should_tokenize_all_statements(Keyword keyword)
+        protected override TokenType ExpectedTokenType => TokenType.LogicalOperator;
+
+        [TestCaseSource(nameof(GetAllLogicalOperators))]
+        public void Should_tokenize_all_logical_operators(Keyword keyword)
         {
             var text = DefaultConfig.Syntax.KeywordsMap[keyword];
             GivenQuery($"Name |{text} and");
@@ -30,8 +30,8 @@ namespace HandyQuery.Language.Tests.Lexing.Tokenizers
             ThenSuccess(keyword, text);
         }
         
-        [TestCaseSource(nameof(GetAllStatements))]
-        public void Should_tokenize_statements_defined_at_the_end_of_query(Keyword keyword)
+        [TestCaseSource(nameof(GetAllLogicalOperators))]
+        public void Should_tokenize_logical_operators_defined_at_the_end_of_query(Keyword keyword)
         {
             var text = DefaultConfig.Syntax.KeywordsMap[keyword];
             GivenQuery($"Name |{text}");
@@ -39,19 +39,19 @@ namespace HandyQuery.Language.Tests.Lexing.Tokenizers
             ThenSuccess(keyword, text);
         }
 
-        [TestCaseSource(nameof(GetAllStatements))]
+        [TestCaseSource(nameof(GetAllLogicalOperators))]
         public void Should_tokenize_case_insensitively_by_default(Keyword keyword)
         {
-            var statementText = DefaultConfig.Syntax
+            var text = DefaultConfig.Syntax
                 .KeywordsMap[keyword]
                 .ToUpper();
 
-            GivenQuery($"Name |{statementText} and");
+            GivenQuery($"Name |{text} and");
             WhenTokenized();
-            ThenSuccess(keyword, statementText);
+            ThenSuccess(keyword, text);
         }
 
-        [TestCaseSource(nameof(GetAllStatements))]
+        [TestCaseSource(nameof(GetAllLogicalOperators))]
         public void Should_tokenize_properly_with_case_sensitivity_configured(Keyword keyword)
         {
             var syntax = HandyQueryLanguage.BuildSyntax().WithCaseSensitiveKeywords();
@@ -78,19 +78,19 @@ namespace HandyQuery.Language.Tests.Lexing.Tokenizers
                 GivenQuery($"Name |{upperCased} and");
                 GivenConfig(config);
                 WhenTokenized();
-                ThenFailedWithError(ErrorId.StatementNotFound);
+                ThenFailedWithError(ErrorId.LogicalOperatorNotFound);
             }
         }
 
         [Test]
-        public void Should_result_with_error_when_statement_is_invalid()
+        public void Should_result_with_error_when_logical_operator_is_invalid()
         {
             GivenQuery("Name |is or isnt 'Test'");
             WhenTokenized();
-            ThenFailedWithError(ErrorId.StatementNotFound);
+            ThenFailedWithError(ErrorId.LogicalOperatorNotFound);
         }
 
-        [TestCaseSource(nameof(GetAllStatements))]
+        [TestCaseSource(nameof(GetAllLogicalOperators))]
         public void Should_result_with_error_when_whitespace_after_token_is_missing(Keyword keyword)
         {
             var text = DefaultConfig.Syntax.KeywordsMap[keyword].ToUpper();
@@ -98,7 +98,7 @@ namespace HandyQuery.Language.Tests.Lexing.Tokenizers
             {
                 GivenQuery($"Name |{text}ornot and");
                 WhenTokenized();
-                ThenFailedWithError(ErrorId.StatementNotFound);                
+                ThenFailedWithError(ErrorId.LogicalOperatorNotFound);                
             }
             else
             {
@@ -108,7 +108,7 @@ namespace HandyQuery.Language.Tests.Lexing.Tokenizers
             }
         }
 
-        private static IEnumerable<Keyword> GetAllStatements() 
-            => HandyQueryLanguage.BuildSyntax().Build().Statements;
+        private static IEnumerable<Keyword> GetAllLogicalOperators() 
+            => HandyQueryLanguage.BuildSyntax().Build().LogicalOperators;
     }
 }

@@ -21,6 +21,11 @@ namespace HandyQuery.Language.Configuration.Keywords
         {
             Type = type;
         }
+        
+        public override string ToString()
+        {
+            return $"{TokenType}: {Type.ToString()}";
+        }
     }
 
     internal enum CompareOperator
