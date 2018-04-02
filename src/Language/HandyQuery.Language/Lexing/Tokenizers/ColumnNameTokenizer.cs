@@ -11,7 +11,7 @@ namespace HandyQuery.Language.Lexing.Tokenizers
             var startPosition = info.Reader.CurrentPosition;
             
             var columnNameSpan = info.Reader.ReadTillIvalidCharOrWhitespace(info.Config.Syntax.ReservedChars);
-            var columnName = new string(columnNameSpan); // TODO: get rid of this allocation
+            var columnName = new string(columnNameSpan); // TODO: get rid of this allocation, use trie like with keywords?
 
             var token = new ColumnToken(
                 startPosition, 
