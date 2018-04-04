@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 
 namespace HandyQuery.Language.Lexing
 {
-    // TODO: tests
+    // TODO: better support for whitespaces (right now they need to match, e.g. wrong number of spaces will hide an item)
 
     internal class SearchTrie<T> where T : class
     {
@@ -17,10 +17,10 @@ namespace HandyQuery.Language.Lexing
             _caseSensitive = caseSensitive;
         }
 
-        public static SearchTrie<T> Create(bool caseSensitive, IReadOnlyDictionary<T, string> values)
+        public static SearchTrie<T> Create(bool caseSensitive, IReadOnlyDictionary<string, T> values)
         {
             var map = values
-                .Select(x => new {Text = x.Value, Value = x.Key})
+                .Select(x => new {Text = x.Key, Value = x.Value})
                 .OrderBy(x => x.Text.Length)
                 .ThenBy(x => x.Text)
                 .ToList();
@@ -42,8 +42,8 @@ namespace HandyQuery.Language.Lexing
                     }
 
                     var newNode = isLastChar
-                        ? new Node(c, pair.Value)
-                        : new Node(c);
+                        ? new Node(c, i + 1, pair.Value)
+                        : new Node(c, i + 1);
 
                     current.Children.Add(newNode);
                     current = newNode;
@@ -55,17 +55,18 @@ namespace HandyQuery.Language.Lexing
             return trie;
         }
 
+        /// <summary>
+        /// Finds an item in a tree. Uses <see cref="reader"/> to move through the query. Does not specifies what will
+        /// be the current position of reader once it finishes its job. If it is relevant then prior to invokation
+        /// of this method reader's current position should be stored. 
+        /// </summary>
+        /// <returns>True if found; otherwise, false.</returns>
         [HotPath]
-        public bool TryFind(ref LexerStringReader reader, out T value)
+        public bool TryFind(ref LexerStringReader reader, out T value, out int length)
         {
-            if (TryFindNode(ref reader, out var node))
+            if (TryFindNode(ref reader, out var node, out length))
             {
                 value = node.Value;
-                if (value == null)
-                {
-                    return false;
-                }
-
                 return true;
             }
 
@@ -75,20 +76,10 @@ namespace HandyQuery.Language.Lexing
 
         [HotPath]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private bool TryFindNode(ref LexerStringReader reader, out Node node)
+        private bool TryFindNode(ref LexerStringReader reader, out Node node, out int length)
         {
-            // TODO: FIXME: Current implementation has a very subtle bug which is not a problem right now
-            // but might be if syntax would change.
-            // Lets assume we've got following keywords:
-            // `=`
-            // `==`
-            // `==t=`
-            // and following input: `==ta`
-            // It would result with false even though `==` is present.
-            // currentNode.Keyword would be null because currentNode would be set to `t`.
-            // It should be set to second `=` and when failed to process `==t=` it should go back using MoveBy(-2)
-
             var currentNode = _root;
+            Node lastSuccessfulNode = null;
 
             while (currentNode != null)
             {
@@ -109,6 +100,11 @@ namespace HandyQuery.Language.Lexing
                     }
 
                     currentNode = child;
+
+                    if (currentNode.Value != null)
+                    {
+                        lastSuccessfulNode = currentNode;
+                    }
 
                     if (reader.IsEndOfQuery())
                     {
@@ -133,19 +129,22 @@ namespace HandyQuery.Language.Lexing
                 }
             }
 
-            if (currentNode?.Value != null)
+            if (lastSuccessfulNode != null)
             {
-                node = currentNode;
+                node = lastSuccessfulNode;
+                length = node.Length;
                 return true;
             }
 
             node = null;
+            length = 0;
             return false;
         }
 
         public class Node
         {
             public readonly char Key;
+            public readonly int Length;
             public readonly List<Node> Children = new List<Node>();
 
             public readonly T Value;
@@ -154,15 +153,17 @@ namespace HandyQuery.Language.Lexing
             {
             }
 
-            public Node(char key)
+            public Node(char key, int length)
             {
                 Key = key;
+                Length = length;
             }
 
-            public Node(char key, T value)
+            public Node(char key, int length, T value)
             {
                 Key = key;
                 Value = value;
+                Length = length;
             }
 
             public override string ToString()

@@ -7,6 +7,8 @@ namespace HandyQuery.Language.Lexing
 {
     // TODO: rename to NoAllocStringReader?
 
+    // TODO: support for lines (there should be CurrentLine property and maybe also CurrentColumn)
+    
     /// <summary>
     /// Provides methods to read a string using different scenarios, e.g. till the end of whitespaces, or till the first whitespace.
     /// </summary>

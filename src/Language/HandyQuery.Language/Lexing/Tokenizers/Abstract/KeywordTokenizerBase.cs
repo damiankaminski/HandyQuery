@@ -1,7 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using HandyQuery.Language.Configuration;
 using HandyQuery.Language.Configuration.Keywords;
 using HandyQuery.Language.Lexing.Tokens.Abstract;
 
@@ -20,8 +18,7 @@ namespace HandyQuery.Language.Lexing.Tokenizers.Abstract
 
             var startPosition = info.Reader.CaptureCurrentPosition();
 
-            var found = keywordsTrie.TryFind(ref info.Reader, out var keyword);
-            var readLength = info.Reader.CurrentPosition - startPosition.Value + 1;
+            var found = keywordsTrie.TryFind(ref info.Reader, out var keyword, out var readLength);
 
             if (found == false)
             {
@@ -59,7 +56,7 @@ namespace HandyQuery.Language.Lexing.Tokenizers.Abstract
                 var candidates = GetCandidatesForKeyword(in info);
                 var candidatesMap = keywordsMap
                     .Where(x => candidates.Contains(x.Key))
-                    .ToDictionary(x => x.Key, x => x.Value);
+                    .ToDictionary(x => x.Value, x => x.Key);
                 keywordsTrie = SearchTrie<Keyword>.Create(info.Config.Syntax.KeywordCaseSensitive, candidatesMap);
                 _keywordsTries[keywordsMap] = keywordsTrie;
             }
