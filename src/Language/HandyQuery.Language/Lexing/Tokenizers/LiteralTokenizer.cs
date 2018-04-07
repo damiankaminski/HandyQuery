@@ -2,6 +2,8 @@
 
 namespace HandyQuery.Language.Lexing.Tokenizers
 {
+    // TODO: use `TryParse(span)` methods!
+    
     internal sealed class LiteralTokenizer : TokenizerBase
     {
         [HotPath]

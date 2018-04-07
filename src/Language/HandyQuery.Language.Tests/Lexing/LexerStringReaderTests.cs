@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Linq;
 using FluentAssertions;
-using HandyQuery.Language.Extensions;
 using HandyQuery.Language.Lexing;
 using NUnit.Framework;
 
@@ -127,6 +126,71 @@ namespace HandyQuery.Language.Tests.Lexing
             reader.MoveTo(position);
             reader.CurrentPosition.Should().Be(3);
             reader.CurrentChar.Should().Be('t');
+        }
+
+        [Test]
+        public void Should_expose_current_line_and_column()
+        {
+            var reader = CreateReader("|Test\nTest2\nTest3");
+
+            reader.CurrentPosition.Should().Be(0);
+            reader.CurrentRelativePositionInfo.Line.Should().Be(1);
+            reader.CurrentRelativePositionInfo.Column.Should().Be(1);
+
+            reader.MoveToNextLine().Should().Be(true);
+            reader.CurrentPosition.Should().Be(5);
+            reader.CurrentRelativePositionInfo.Line.Should().Be(2);
+            reader.CurrentRelativePositionInfo.Column.Should().Be(1);
+            
+            reader.MoveBy(2).Should().Be(true);
+            reader.CurrentPosition.Should().Be(7);
+            reader.CurrentRelativePositionInfo.Line.Should().Be(2);
+            reader.CurrentRelativePositionInfo.Column.Should().Be(3);
+            
+            reader.MoveBy(3).Should().Be(true);
+            reader.CurrentPosition.Should().Be(10);
+            reader.CurrentRelativePositionInfo.Line.Should().Be(2);
+            reader.CurrentRelativePositionInfo.Column.Should().Be(6);
+            
+            reader.MoveToNextLine().Should().Be(true);
+            reader.CurrentPosition.Should().Be(11);
+            reader.CurrentRelativePositionInfo.Line.Should().Be(3);
+            reader.CurrentRelativePositionInfo.Column.Should().Be(1);
+            
+            reader.MoveBy(4).Should().Be(true);
+            reader.CurrentPosition.Should().Be(15);
+            reader.CurrentRelativePositionInfo.Line.Should().Be(3);
+            reader.CurrentRelativePositionInfo.Column.Should().Be(5);
+        }
+        
+        [TestCase(1, 0, 1)]
+        [TestCase(1, 1, 1)]
+        [TestCase(2, 0, 1)]
+        [TestCase(2, 1, 2)]
+        [TestCase(10, 1, 2)]
+        [TestCase(10, 2, 3)]
+        [TestCase(10, 5, 6)]
+        [TestCase(10, 9, 10)]
+        [TestCase(10, 10, 10)]
+        [TestCase(10, 11, 10)]
+        [TestCase(100, 50, 51)]
+        [TestCase(100, 100, 100)]
+        [TestCase(100, 101, 100)]
+        [TestCase(107, 105, 106)]
+        [TestCase(107, 106, 107)]
+        [TestCase(107, 107, 107)]
+        public void Should_calculate_current_line_correctly(int lines, int moveToNextLineTimes, int expectedLine)
+        {
+            var query = "|" + string.Join('\n', Enumerable.Range(0, lines).Select(x => $"Test{x}"));
+            var reader = CreateReader(query);
+
+            for (int i = 0; i < moveToNextLineTimes; i++)
+            {
+                reader.MoveToNextLine();
+            }
+
+            reader.CurrentRelativePositionInfo.Line.Should().Be(expectedLine);
+            reader.CurrentRelativePositionInfo.Column.Should().Be(1);
         }
         
         [TestCase("Some kind of 'query|'", false, null)]
@@ -271,18 +335,19 @@ namespace HandyQuery.Language.Tests.Lexing
             new string(result).Should().Be(expectedResult);
         }
         
-        [TestCase("Some kind of 'query|'", "'")]
-        [TestCase("|Some kind of 'query'", "Some kind of 'query'")]
-        [TestCase("Some |kind of 'query'", "kind of 'query'")]
-        [TestCase("Some |kind \nof 'query'", "kind ")]
-        [TestCase("|Some kind \r\nof 'query'", "Some kind ")]
-        public void Method_ReadTillNewLine_should_work_properly(string query, string expectedResult)
+        [TestCase("Some kind of 'query|'", "'", '\'')]
+        [TestCase("|Some kind of 'query'", "Some kind of 'query'", '\'')]
+        [TestCase("Some |kind of 'query'", "kind of 'query'", '\'')]
+        [TestCase("Some |kind \nof 'query'", "kind ", '\n')]
+        [TestCase("|Some kind \r\nof 'query'", "Some kind ", '\r')]
+        public void Method_ReadTillNewLine_should_work_properly(string query, string expectedResult, char stoppedAt)
         {
             var reader = CreateReader(query);
             
             var result = reader.ReadTillNewLine();
 
             new string(result).Should().Be(expectedResult);
+            reader.CurrentChar.Should().Be(stoppedAt);
         }
         
         [TestCase("Some kind of 'query|'", "", true)]

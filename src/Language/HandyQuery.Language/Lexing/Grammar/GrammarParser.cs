@@ -141,13 +141,13 @@ namespace HandyQuery.Language.Lexing.Grammar
             foreach (var operandSplitItem in orConditions)
             {
                 var operand = new GrammarNonTerminalBody.OrConditionOperand();
-                var operandSpan = operandSplitItem.SliceFrom(ref bodySpan).Trim();
+                var operandSpan = new string(operandSplitItem.SliceFrom(ref bodySpan)).Trim().AsReadOnlySpan();
                 var blockItems = operandSpan
                     .Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
                 foreach (var blockItem in blockItems)
                 {
-                    var bodyItem = ParseNonTerminalBodyItem(blockItem.SliceFrom(ref operandSpan).Trim());
+                    var bodyItem = ParseNonTerminalBodyItem(new string(blockItem.SliceFrom(ref operandSpan)).Trim());
                     if (bodyItem is GrammarNonTerminalUsage nonTerminalUsage
                         && ReferenceEquals(nonTerminal, nonTerminalUsage.Impl))
                     {

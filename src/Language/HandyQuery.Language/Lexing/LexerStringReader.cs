@@ -5,12 +5,9 @@ using System.Runtime.CompilerServices;
 
 namespace HandyQuery.Language.Lexing
 {
-    // TODO: rename to NoAllocStringReader?
-
-    // TODO: support for lines (there should be CurrentLine property and maybe also CurrentColumn)
-    
     /// <summary>
-    /// Provides methods to read a string using different scenarios, e.g. till the end of whitespaces, or till the first whitespace.
+    /// Provides methods to read a string using different scenarios, e.g. till the end of
+    /// whitespaces, till the first whitespace.
     /// </summary>
     internal ref struct LexerStringReader
     {
@@ -21,11 +18,31 @@ namespace HandyQuery.Language.Lexing
             CurrentPosition = position;
             Query = query.AsReadOnlySpan();
             _queryLength = query.Length;
+
+            // TODO: _linesToPositionMap lazy init? there is no need to initialize it if it's gonna be not needed
+            CurrentPosition = 0;
+            // TODO: Marshal.AllocHGlobal? or maybe create an allocator that would preallocate some buffer
+            // on the beggining of each query handling and if went out of space then would allocate on the heap
+            // (but only then! having proper size set it should happen very rarely)
+            var linesToPositionMap = new int[CountLines()];
+            linesToPositionMap[0] = 0;
+            for (var lineIndex = 1; MoveToNextLine(); lineIndex++)
+                linesToPositionMap[lineIndex] = CurrentPosition;
+            CurrentPosition = position;
+            _linesToPositionMap = linesToPositionMap;
         }
 
         public int CurrentPosition { get; private set; }
 
         public char CurrentChar => Query[CurrentPosition];
+
+        public RelativePositionInfo CurrentRelativePositionInfo => GetRelativePositionInfo(CurrentPosition);
+
+        /// <summary>
+        /// Map of lines to position.
+        /// Span index is a line number (counted from 0), value is a start position. 
+        /// </summary>
+        private ReadOnlySpan<int> _linesToPositionMap;
 
         public readonly ReadOnlySpan<char> Query;
         private readonly int _queryLength;
@@ -36,8 +53,9 @@ namespace HandyQuery.Language.Lexing
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ReadOnlySpan<char> ReadTillEndOfWhitespace()
         {
-            // TODO: fix delegate allocation from method group
-            return ReadWhile(char.IsWhiteSpace);
+            // ReSharper disable once ConvertClosureToMethodGroup
+            // method group would allocate on heap
+            return ReadWhile(c => char.IsWhiteSpace(c));
         }
 
         /// <summary>
@@ -165,7 +183,7 @@ namespace HandyQuery.Language.Lexing
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool MoveNext() => MoveBy(1);
-        
+
         /// <summary>
         /// Moves <see cref="CurrentPosition"/> by <see cref="x"/>.
         /// </summary>
@@ -278,7 +296,61 @@ namespace HandyQuery.Language.Lexing
         {
             CurrentPosition = position.Value;
         }
+
+        private int CountLines()
+        {
+            var position = CurrentPosition;
+
+            CurrentPosition = 0;
+
+            var lines = 1;
+            while (MoveToNextLine()) lines++;
+
+            CurrentPosition = position;
+
+            return lines;
+        }
         
+        private RelativePositionInfo GetRelativePositionInfo(int position)
+        {
+            // TODO: use different strategy for larger queries (binary search?)
+
+            if (_linesToPositionMap.Length == 1)
+            {
+                return new RelativePositionInfo(1, position + 1);
+            }
+
+            var nextLinePosition = 0;
+            var line = 0;
+            do
+            {
+                nextLinePosition = _linesToPositionMap[line + 1];
+                line++;
+            } while (nextLinePosition <= position && _linesToPositionMap.Length > line + 1);
+
+            if (nextLinePosition <= position)
+            {
+                // line not found yet then it is last line
+                line++;
+            }
+
+            var linePosition = _linesToPositionMap[line - 1];
+
+            return new RelativePositionInfo(line, position - linePosition + 1);
+        }
+
+        internal readonly ref struct RelativePositionInfo
+        {
+            public readonly int Line;
+            public readonly int Column;
+
+            public RelativePositionInfo(int line, int column)
+            {
+                Line = line;
+                Column = column;
+            }
+        }
+
         internal readonly ref struct Position
         {
             public readonly int Value;
@@ -288,7 +360,7 @@ namespace HandyQuery.Language.Lexing
                 Value = value;
             }
         }
-        
+
         internal ref struct Restorable
         {
             private int _capturedPosition;

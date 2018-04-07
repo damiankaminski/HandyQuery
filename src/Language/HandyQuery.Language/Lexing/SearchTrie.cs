@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 namespace HandyQuery.Language.Lexing
 {
     // TODO: better support for whitespaces (right now they need to match, e.g. wrong number of spaces will hide an item)
+    // or maybe get rid of whitespaces in keywords? that would be the best and probably hardest option
 
     internal class SearchTrie<T> where T : class
     {
@@ -20,9 +21,9 @@ namespace HandyQuery.Language.Lexing
         public static SearchTrie<T> Create(bool caseSensitive, IReadOnlyDictionary<string, T> values)
         {
             var map = values
-                .Select(x => new {Text = x.Key, Value = x.Value})
-                .OrderBy(x => x.Text.Length)
-                .ThenBy(x => x.Text)
+                .Select(x => new {ExpectedText = x.Key, x.Value})
+                .OrderBy(x => x.ExpectedText.Length)
+                .ThenBy(x => x.ExpectedText)
                 .ToList();
 
             var trie = new SearchTrie<T>(caseSensitive);
@@ -30,10 +31,10 @@ namespace HandyQuery.Language.Lexing
 
             foreach (var pair in map)
             {
-                for (var i = 0; i < pair.Text.Length; i++)
+                for (var i = 0; i < pair.ExpectedText.Length; i++)
                 {
-                    var isLastChar = i == pair.Text.Length - 1;
-                    var c = pair.Text[i];
+                    var isLastChar = i == pair.ExpectedText.Length - 1;
+                    var c = pair.ExpectedText[i];
                     var indexInCurrent = current.Children.FindIndex(x => x.Key == c);
                     if (indexInCurrent != -1)
                     {
@@ -141,7 +142,7 @@ namespace HandyQuery.Language.Lexing
             return false;
         }
 
-        public class Node
+        private class Node
         {
             public readonly char Key;
             public readonly int Length;

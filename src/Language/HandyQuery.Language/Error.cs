@@ -6,6 +6,7 @@
         public readonly string Message;
         public readonly ErrorId Id;
         public readonly string Subject;
+        // TODO: include RelativePositionInfo
 
         public Error(string message, ErrorId id, string subject = null)
         {
