@@ -16,7 +16,13 @@ namespace HandyQuery.Language.Lexing.Tokenizers
             => info.Config.Syntax.LogicalOperators;
 
         [HotPath]
-        public override Error OnNotFoundError(string word)
-            => new Error($"\"{word}\" is not a logical operator.", ErrorId.LogicalOperatorNotFound, word);
+        public override Error OnNotFoundError(string word, int position)
+        {
+            return new Error(
+                $"\"{word}\" is not a logical operator.", 
+                ErrorId.LogicalOperatorNotFound,
+                new Error.RangeInfo(position, word.Length),
+                word);
+        }
     }
 }

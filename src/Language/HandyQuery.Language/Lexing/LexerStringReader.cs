@@ -310,8 +310,8 @@ namespace HandyQuery.Language.Lexing
 
             return lines;
         }
-        
-        private RelativePositionInfo GetRelativePositionInfo(int position)
+
+        public RelativePositionInfo GetRelativePositionInfo(int position)
         {
             // TODO: use different strategy for larger queries (binary search?)
 

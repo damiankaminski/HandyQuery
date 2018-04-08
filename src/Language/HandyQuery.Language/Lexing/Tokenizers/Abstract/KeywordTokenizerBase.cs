@@ -34,8 +34,9 @@ namespace HandyQuery.Language.Lexing.Tokenizers.Abstract
         [HotPath]
         protected override Error CreateError(ref LexerRuntimeInfo info)
         {
+            var position = info.Reader.CurrentPosition;
             var word = info.Reader.ReadTillEndOfWord();
-            return OnNotFoundError(new string(word));
+            return OnNotFoundError(new string(word), position);
         }
 
         [HotPath]
@@ -77,6 +78,6 @@ namespace HandyQuery.Language.Lexing.Tokenizers.Abstract
         /// <summary>
         /// Allows to add an error in case if keyword is not found.
         /// </summary>
-        public abstract Error OnNotFoundError(string word);
+        public abstract Error OnNotFoundError(string word, int position);
     }
 }

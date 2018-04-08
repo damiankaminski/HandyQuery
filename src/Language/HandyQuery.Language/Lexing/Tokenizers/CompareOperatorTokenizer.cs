@@ -16,7 +16,13 @@ namespace HandyQuery.Language.Lexing.Tokenizers
             => info.Config.Syntax.CompareOperators;
 
         [HotPath]
-        public override Error OnNotFoundError(string word)
-            => new Error($"\"{word}\" is not a compare operator.", ErrorId.CompareOperatorNotFound, word);
+        public override Error OnNotFoundError(string word, int position)
+        {
+            return new Error(
+                $"\"{word}\" is not a compare operator.", 
+                ErrorId.CompareOperatorNotFound,
+                new Error.RangeInfo(position, word.Length),
+                word);
+        }
     }
 }

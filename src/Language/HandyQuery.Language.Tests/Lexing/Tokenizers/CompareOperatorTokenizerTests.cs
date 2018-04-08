@@ -89,6 +89,16 @@ namespace HandyQuery.Language.Tests.Lexing.Tokenizers
             WhenTokenized();
             ThenFailedWithError(ErrorId.CompareOperatorNotFound);
         }
+        
+        [TestCase("Name |is or isnt 'Test'", 5, 2)]
+        [TestCase("Name |isor isnt 'Test'", 5, 4)]
+        [TestCase("Name \nthat |is or isnt 'Test'", 11, 2)]
+        public void Should_set_correct_error_position(string query, int position, int length)
+        {
+            GivenQuery(query);
+            WhenTokenized();
+            ThenFailedWithRange(position, length);
+        }
 
         [TestCaseSource(nameof(GetAllCompareOperators))]
         public void Should_result_with_error_when_whitespace_after_token_is_missing(Keyword keyword)

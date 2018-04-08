@@ -16,7 +16,13 @@ namespace HandyQuery.Language.Lexing.Tokenizers
             => info.Config.Syntax.Statements;
 
         [HotPath]
-        public override Error OnNotFoundError(string word)
-            => new Error($"\"{word}\" is not a statement.", ErrorId.StatementNotFound, word);
+        public override Error OnNotFoundError(string word, int position)
+        {
+            return new Error(
+                $"\"{word}\" is not a statement.", 
+                ErrorId.StatementNotFound,
+                new Error.RangeInfo(position, word.Length),
+                word);
+        }
     }
 }

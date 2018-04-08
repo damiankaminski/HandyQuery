@@ -137,6 +137,8 @@ namespace HandyQuery.Language.Tests.Lexing.Tokenizers
             result.Success.Should().Be(false);
             result.Token.Should().BeNull();
             result.Error.Id.Should().Be(ErrorId.ColumnNotFound);
+            result.Error.Range.Position.Should().Be(0);
+            result.Error.Range.Length.Should().Be(4);
         }
 
         [Test]
@@ -149,6 +151,37 @@ namespace HandyQuery.Language.Tests.Lexing.Tokenizers
             result.Success.Should().Be(false);
             result.Token.Should().BeNull();
             result.Error.Id.Should().Be(ErrorId.ColumnNotFound);
+            result.Error.Range.Position.Should().Be(0);
+            result.Error.Range.Length.Should().Be(4);
+        }
+        
+        [Test]
+        public void Should_set_correct_error_position_when_in_middle_of_query()
+        {
+            var query = "some kinda of test query";
+            
+            var (result, _) = Tokenize(query, 5);
+
+            result.Success.Should().Be(false);
+            result.Token.Should().BeNull();
+            result.Error.Id.Should().Be(ErrorId.ColumnNotFound);
+            result.Error.Range.Position.Should().Be(5);
+            result.Error.Range.Length.Should().Be(5);
+        }
+        
+        [Test]
+        public void Should_set_correct_error_position_when_in_second_line()
+        {
+            var position = 15;
+            var query = "some kind\nsome kinda of test query";
+            
+            var (result, _) = Tokenize(query, position);
+
+            result.Success.Should().Be(false);
+            result.Token.Should().BeNull();
+            result.Error.Id.Should().Be(ErrorId.ColumnNotFound);
+            result.Error.Range.Position.Should().Be(position);
+            result.Error.Range.Length.Should().Be(5);
         }
         
         private static (TokenizationResult result, ColumnToken token) Tokenize(string query, int position = 0,

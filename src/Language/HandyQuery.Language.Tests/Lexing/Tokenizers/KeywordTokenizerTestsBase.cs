@@ -63,6 +63,17 @@ namespace HandyQuery.Language.Tests.Lexing.Tokenizers
             testCase.Finished = true;
         }
         
+        protected void ThenFailedWithRange(int position, int length)
+        {
+            var testCase = TestCase.Current;
+            testCase.Result.Success.Should().BeFalse();
+            testCase.Result.Token.Should().BeNull();
+            testCase.Result.Error.Range.Position.Should().Be(position);
+            testCase.Result.Error.Range.Length.Should().Be(length);
+
+            testCase.Finished = true;
+        }
+        
         private class TestCase
         {
             public string Query { get; set; }
