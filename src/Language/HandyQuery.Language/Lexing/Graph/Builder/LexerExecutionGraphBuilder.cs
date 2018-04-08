@@ -9,10 +9,10 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
     // TODO: final graph optimization
     // TODO: or maybe runtime should be able to detect it? while moving back it could save items to the stack
     // e.g. 
-    // 1. `<all-filters> ::= <filter> LogicalOperator <all-filters> | <filter>`
+    // 1. `<all-filters> : <filter> LogicalOperator <all-filters> | <filter>`
     // should be optimized to something like `<filter> optional (LogicalOperator <all-filters>)`
     // lexer should tokenize `<filter>` only once
-    // 2. `<function-invokation> ::= FunctionName ParamsOpen ParamsClose | FunctionName ParamsOpen <params> ParamsClose`
+    // 2. `<function-invokation> : FunctionName ParamsOpen ParamsClose | FunctionName ParamsOpen <params> ParamsClose`
     // should be optimized to something like `FunctionName ParamsOpen (ParamsClose | <params> ParamsClose)`
     // lexer should tokenize `FunctionName ParamsOpen` only once
 

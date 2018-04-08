@@ -18,7 +18,7 @@ namespace HandyQuery.Language.Tests.Lexing.Grammar
             Action action1 = () =>
             {
                 Parse(@"
-                        <value> ::= <value>
+                        <value> : <value>
                         return <value>
                     ");
             };
@@ -26,7 +26,7 @@ namespace HandyQuery.Language.Tests.Lexing.Grammar
             Action action2 = () =>
             {
                 Parse(@"
-                        <value> ::= <value> | <value>
+                        <value> : <value> | <value>
                         return <value>
                     ");
             };

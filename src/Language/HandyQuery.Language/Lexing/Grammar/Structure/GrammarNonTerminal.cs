@@ -51,7 +51,7 @@
 
         public override string ToString()
         {
-            return $"{Name} ::= {Body}";
+            return $"{Name} : {Body}";
         }
     }
 }

@@ -18,6 +18,7 @@ namespace HandyQuery.Language.Lexing.Grammar
         private const string Return = "return ";
         private const char GrammarNonTerminalStart = '<';
         private const char GrammarNonTerminalEnd = '>';
+        private const char Assign = ':';
 
         public GrammarParser(string grammar, TokenizersSource tokenizersSource)
         {
@@ -56,7 +57,7 @@ namespace HandyQuery.Language.Lexing.Grammar
                 if (reader.StartsWith(GrammarNonTerminalStart.ToString().AsReadOnlySpan()))
                 {
                     // _________________________________________
-                    // <value> ::= Literal|<function-invokation>
+                    // <value> : Literal|<function-invokation>
 
                     var nonTerminalName = new string(reader.ReadTillEndOfWord()); // <value>
 
@@ -73,9 +74,9 @@ namespace HandyQuery.Language.Lexing.Grammar
                         throw new GrammarParserException($"Cannot declare {nonTerminalName} more than once.");
                     }
 
-                    // skip '::='
-                    var equals = new string(reader.ReadWhile(x => x != '=')) + reader.CurrentChar;
-                    if (equals.EndsWith("::=") == false)
+                    // skip ':'
+                    var assign = new string(reader.ReadWhile(x => x != Assign)) + reader.CurrentChar;
+                    if (assign.EndsWith(Assign) == false)
                     {
                         throw new GrammarParserException($"Invalid syntax for {nonTerminalName}.");
                     }
@@ -131,7 +132,7 @@ namespace HandyQuery.Language.Lexing.Grammar
         }
 
         //             _____________________________
-        // <value> ::= Literal|<function-invokation>
+        // <value> : Literal|<function-invokation>
         private GrammarNonTerminalBody ParseNonTerminalBody(ref LexerStringReader reader, GrammarNonTerminal nonTerminal)
         {
             var body = new GrammarNonTerminalBody();
@@ -163,11 +164,11 @@ namespace HandyQuery.Language.Lexing.Grammar
         }
 
         //             _______
-        // <value> ::= Literal|<function-invokation>
+        // <value> : Literal|<function-invokation>
         // 
         // OR
         //                     _____________________
-        // <value> ::= Literal|<function-invokation>
+        // <value> : Literal|<function-invokation>
         private IGrammarBodyItem ParseNonTerminalBodyItem(ReadOnlySpan<char> blockItem)
         {
             var name = new string(blockItem);

@@ -177,7 +177,7 @@ namespace HandyQuery.Language.Tests
                 yield return new BuildTestCase("Most simple grammar")
                 {
                     Grammar = @"
-                        <all-filters> ::= ColumnName Statement
+                        <all-filters> : ColumnName Statement
                         return <all-filters>
                     ",
                     ExpectedRoot = new RootNode().WithChild(
@@ -190,8 +190,8 @@ namespace HandyQuery.Language.Tests
                 yield return new BuildTestCase("Non-terminal usage")
                 {
                     Grammar = @"
-                        <value> ::= Literal
-                        <all-filters> ::= ColumnName CompareOperator <value>
+                        <value> : Literal
+                        <all-filters> : ColumnName CompareOperator <value>
                         return <all-filters>
                     ",
                     ExpectedRoot = new RootNode().WithChild(
@@ -210,9 +210,9 @@ namespace HandyQuery.Language.Tests
                 yield return new BuildTestCase("Nested non-terminal usage")
                 {
                     Grammar = @"
-                        <test> ::= FunctionName
-                        <value> ::= <test> Literal
-                        <all-filters> ::= ColumnName CompareOperator <value> Statement
+                        <test> : FunctionName
+                        <value> : <test> Literal
+                        <all-filters> : ColumnName CompareOperator <value> Statement
                         return <all-filters>
                     ",
                     ExpectedRoot = new RootNode().WithChild(
@@ -236,10 +236,10 @@ namespace HandyQuery.Language.Tests
                 yield return new BuildTestCase("Or usage")
                 {
                     Grammar = @"
-                        <value> ::= Literal
+                        <value> : Literal
 
-                        <filter> ::= GroupOpen <filter-body> GroupClose
-                        <filter-body> ::= ColumnName CompareOperator <value> | ColumnName Statement
+                        <filter> : GroupOpen <filter-body> GroupClose
+                        <filter-body> : ColumnName CompareOperator <value> | ColumnName Statement
 
                         return <filter>
                     ",
@@ -268,10 +268,10 @@ namespace HandyQuery.Language.Tests
                 yield return new BuildTestCase("Simple recursion")
                 {
                     Grammar = @"
-                        <value> ::= Literal
+                        <value> : Literal
 
-                        <function-invokation> ::= FunctionName ParamsOpen <params> ParamsClose
-                        <params> ::= <value> ParamsSeparator <params> | <value>
+                        <function-invokation> : FunctionName ParamsOpen <params> ParamsClose
+                        <params> : <value> ParamsSeparator <params> | <value>
 
                         return <function-invokation>
                     ",
@@ -299,10 +299,10 @@ namespace HandyQuery.Language.Tests
                 yield return new BuildTestCase("Deep recursion")
                 {
                     Grammar = @"
-                        <value> ::= Literal | <function-invokation>
+                        <value> : Literal | <function-invokation>
 
-                        <function-invokation> ::= FunctionName ParamsOpen <params> ParamsClose
-                        <params> ::= <value> ParamsSeparator <params> | <value>
+                        <function-invokation> : FunctionName ParamsOpen <params> ParamsClose
+                        <params> : <value> ParamsSeparator <params> | <value>
 
                         return <function-invokation>
                     ",
@@ -334,12 +334,12 @@ namespace HandyQuery.Language.Tests
                 yield return new BuildTestCase("Complex deep recursion")
                 {
                     Grammar = @"
-                        <value> ::= Literal | <function-invokation>
+                        <value> : Literal | <function-invokation>
 
-                        <filter-with-compare-op> ::= ColumnName CompareOperator <value>
+                        <filter-with-compare-op> : ColumnName CompareOperator <value>
 
-                        <function-invokation> ::= FunctionName ParamsOpen <params> ParamsClose
-                        <params> ::= <value> ParamsSeparator <params> | <value>
+                        <function-invokation> : FunctionName ParamsOpen <params> ParamsClose
+                        <params> : <value> ParamsSeparator <params> | <value>
 
                         return <filter-with-compare-op>
                     ",
@@ -351,7 +351,7 @@ namespace HandyQuery.Language.Tests
                 yield return new BuildTestCase("Direct head recursive non terminal in or condition")
                 {
                     Grammar = @"
-                        <value> ::= Literal | <value>
+                        <value> : Literal | <value>
 
                         return <value>
                     ",
@@ -363,11 +363,11 @@ namespace HandyQuery.Language.Tests
                 yield return new BuildTestCase("Deep head recursive non terminal")
                 {
                     Grammar = @"
-                        <some> ::= <value>
+                        <some> : <value>
 
-                        <date> ::= <some>
+                        <date> : <some>
 
-                        <value> ::= <date>
+                        <value> : <date>
 
                         return <value>
                     ",
@@ -379,9 +379,9 @@ namespace HandyQuery.Language.Tests
                 yield return new BuildTestCase("Deep head recursive non terminal in or condition")
                 {
                     Grammar = @"
-                        <date> ::= <value>
+                        <date> : <value>
 
-                        <value> ::= Literal | <date>
+                        <value> : Literal | <date>
 
                         return <value>
                     ",
@@ -393,11 +393,11 @@ namespace HandyQuery.Language.Tests
                 yield return new BuildTestCase("Deep head recursive non terminal in deep or condition")
                 {
                     Grammar = @"
-                        <some> ::= Literal | <value>
+                        <some> : Literal | <value>
 
-                        <date> ::= <some>
+                        <date> : <some>
 
-                        <value> ::= <date>
+                        <value> : <date>
 
                         return <value>
                     ",
