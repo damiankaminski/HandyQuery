@@ -5,6 +5,10 @@ using HandyQuery.Language.Lexing.Tokens.Abstract;
 
 namespace HandyQuery.Language.Lexing.Tokenizers.Abstract
 {
+    // TODO: change to struct
+    // TODO: add TState
+    // TODO: add `Dictionary<Position, Keyword> _cache`
+    // TODO: use single instance of KeywordTokanizer along with cache
     internal abstract class KeywordTokenizerBase<TKeywordToken> : TokenizerBase
         where TKeywordToken : KeywordTokenBase
     {

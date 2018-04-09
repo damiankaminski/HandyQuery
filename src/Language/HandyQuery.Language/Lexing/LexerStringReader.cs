@@ -17,7 +17,6 @@ namespace HandyQuery.Language.Lexing
 
             CurrentPosition = position;
             Query = query.AsReadOnlySpan();
-            _queryLength = query.Length;
 
             // TODO: _linesToPositionMap lazy init? there is no need to initialize it if it's gonna be not needed
             CurrentPosition = 0;
@@ -45,7 +44,6 @@ namespace HandyQuery.Language.Lexing
         private ReadOnlySpan<int> _linesToPositionMap;
 
         public readonly ReadOnlySpan<char> Query;
-        private readonly int _queryLength;
 
         /// <summary>
         /// Reads the query till first non whitespace occurrence.
@@ -170,7 +168,7 @@ namespace HandyQuery.Language.Lexing
         /// Checks wheter given <see cref="position"/> is in range of query.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool IsInRange(int position) => _queryLength > position && position >= 0;
+        public bool IsInRange(int position) => Query.Length > position && position >= 0;
 
         /// <summary>
         /// Checks wheter everything has been already read.

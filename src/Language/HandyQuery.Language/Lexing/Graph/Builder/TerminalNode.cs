@@ -7,11 +7,13 @@ namespace HandyQuery.Language.Lexing.Graph.Builder
     internal sealed class TerminalNode : Node
     {
         public readonly ITokenizer Tokenizer;
+        public readonly string ArgumentValue;
         public Node Child { get; private set; }
         
         public TerminalNode(GrammarTerminalUsage terminalUsage)
         {
             Tokenizer = terminalUsage?.Impl;
+            ArgumentValue = terminalUsage?.ArgumentValue;
         }
 
         public TerminalNode WithChild(Node child)

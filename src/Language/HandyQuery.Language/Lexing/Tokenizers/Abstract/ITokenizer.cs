@@ -2,6 +2,7 @@
 {
     internal interface ITokenizer
     {
+        // TODO: pass LexerRuntimeInfo by value? 
         TokenizationResult Tokenize(ref LexerRuntimeInfo info);
     }
 }

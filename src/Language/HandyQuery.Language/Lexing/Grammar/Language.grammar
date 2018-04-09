@@ -1,6 +1,31 @@
 ﻿<value> 
     : Literal | <function-invokation>
 
+// TODO: below would generate HUGE amount of errors... this idea needs to be redesigned. 
+// TODO: maybe tokenizers should not return string errors, instead only error id and subject (>,< etc)?
+// TODO: then error list could be grouped (by tokenizer type?) and error could be evaluate when needed (via `string Tokenizer.EvaluateError(IEnumerable<Error> errors)`?)
+
+<statement>
+    : Keyword("is") Keyword("empty")
+    | Keyword("is") Keyword("not") Keyword("empty")
+    | Keyword("is") Keyword("true")
+    | Keyword("is") Keyword("false")
+
+<compare-operator>
+    : Keyword("=")
+    | Keyword("!=")
+    | Keyword(">")
+    | Keyword("<")
+    | Keyword(">=")
+    | Keyword("<=")
+    | Keyword("starts") Keyword("with")
+    | Keyword("ends") Keyword("with")
+    | Keyword("contains")
+
+<logical-operator>
+    : Keyword("and")
+    | Keyword("or")
+
 <filter>                 
     : GroupOpen <filter-body> GroupClose 
     | <filter-body>
@@ -8,9 +33,9 @@
     : <filter-with-compare-op> 
     | <filter-with-statement>
 <filter-with-compare-op> 
-    : ColumnName CompareOperator <value>
+    : ColumnName <compare-operator> <value>
 <filter-with-statement>  
-    : ColumnName Statement
+    : ColumnName <statement>
 
 <function-invokation> 
     : FunctionName ParamsOpen ParamsClose 
@@ -20,7 +45,7 @@
     | <value>
 
 <all-filters> 
-    : <filter> LogicalOperator <all-filters> 
+    : <filter> <logical-operator> <all-filters> 
     | <filter>
 
 return <all-filters>

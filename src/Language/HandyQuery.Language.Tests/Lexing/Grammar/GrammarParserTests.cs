@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using FluentAssertions;
 using HandyQuery.Language.Lexing;
 using HandyQuery.Language.Lexing.Grammar;
@@ -11,7 +12,7 @@ namespace HandyQuery.Language.Tests.Lexing.Grammar
         private static readonly TokenizersSource TokenizersSource = new TokenizersSource();
 
         [Test]
-        public void ShouldDetectObviousInfiniteRecursions()
+        public void Should_detect_obvious_infinite_recursions()
         {
             var expectedMessage = "Infinite recursion detected in <value> non-terminal. " +
                                   "Use '|' to create escape path.";
@@ -35,6 +36,23 @@ namespace HandyQuery.Language.Tests.Lexing.Grammar
             action2.Should().ThrowExactly<GrammarParserException>().WithMessage(expectedMessage);
         }
 
+        [Test]
+        public void Should_work_with_real_grammar()
+        {
+            var tokenizersSource = new TokenizersSource();
+            
+            using (var stream = typeof(GrammarParser).Assembly
+                .GetManifestResourceStream("HandyQuery.Language.Lexing.Grammar.Language.grammar"))
+            using (var textStream = new StreamReader(stream))
+            {
+                var grammarText = textStream.ReadToEnd();
+                var parser = new GrammarParser(grammarText, tokenizersSource);
+                var grammar = parser.Parse();
+
+                grammar.Should().NotBeNull();
+            }
+        }
+        
         private static Language.Lexing.Grammar.Grammar Parse(string grammarText)
         {
             var parser = new GrammarParser(grammarText, TokenizersSource);

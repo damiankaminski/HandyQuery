@@ -47,6 +47,7 @@ namespace HandyQuery.Language.Lexing
                 {
                     case TerminalNode terminalNode:
                     {
+                        // TODO: pass terminalNode.ArgumentValue to the tokenizer
                         var tokenizationResult = terminalNode.Tokenizer.Tokenize(ref runtimeInfo);
                         if (tokenizationResult.Success == false)
                         {

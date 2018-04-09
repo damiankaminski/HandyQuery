@@ -18,6 +18,9 @@ namespace HandyQuery.Language.Lexing.Grammar
         private const string Return = "return ";
         private const char GrammarNonTerminalStart = '<';
         private const char GrammarNonTerminalEnd = '>';
+        private const char ArgStart = '(';
+        private const char ArgEnd = ')';
+        private const char ArgIdentifier = '"';
         private const char Assign = ':';
 
         public GrammarParser(string grammar, TokenizersSource tokenizersSource)
@@ -56,7 +59,7 @@ namespace HandyQuery.Language.Lexing.Grammar
 
                 if (reader.StartsWith(GrammarNonTerminalStart.ToString().AsReadOnlySpan()))
                 {
-                    // _________________________________________
+                    // _______________________________________
                     // <value> : Literal|<function-invokation>
 
                     var nonTerminalName = new string(reader.ReadTillEndOfWord()); // <value>
@@ -131,7 +134,7 @@ namespace HandyQuery.Language.Lexing.Grammar
             return _nonTerminals[nonTerminalName];
         }
 
-        //             _____________________________
+        //           _____________________________
         // <value> : Literal|<function-invokation>
         private GrammarNonTerminalBody ParseNonTerminalBody(ref LexerStringReader reader, GrammarNonTerminal nonTerminal)
         {
@@ -163,12 +166,16 @@ namespace HandyQuery.Language.Lexing.Grammar
             return body;
         }
 
-        //             _______
-        // <value> : Literal|<function-invokation>
+        //           _______
+        // <value> : Literal|<function-invokation>|Keyword("is")
         // 
         // OR
-        //                     _____________________
-        // <value> : Literal|<function-invokation>
+        //                   _____________________
+        // <value> : Literal|<function-invokation>|Keyword("is")
+        //
+        // OR
+        //                                         _____________                   
+        // <value> : Literal|<function-invokation>|Keyword("is")
         private IGrammarBodyItem ParseNonTerminalBodyItem(ReadOnlySpan<char> blockItem)
         {
             var name = new string(blockItem);
@@ -179,6 +186,30 @@ namespace HandyQuery.Language.Lexing.Grammar
             {
                 result = new GrammarNonTerminalUsage(name, GetNonTerminalByName(name));
             }
+            else if (name.Contains(ArgStart))
+            {
+                if (name.EndsWith(ArgEnd) == false) throw new GrammarParserException("Argument not closed");
+
+                var argStartIndex = name.IndexOf(ArgStart);
+
+                var tokenizerName = name.Substring(0, argStartIndex);
+                
+                var arg = name.Substring(argStartIndex);
+                arg = arg.Substring(1); // remove (
+                arg = arg.Substring(0, arg.Length - 1); // remove )
+                
+                if (arg.StartsWith(ArgIdentifier) == false) throw new GrammarParserException("Argument not closed");
+                if (arg.EndsWith(ArgIdentifier) == false) throw new GrammarParserException("Argument not closed");
+                arg = arg.Substring(1); // remove "
+                arg = arg.Substring(0, arg.Length - 1); // remove "
+                
+                if (_tokenizersSource.TryGetTokenizer(tokenizerName, out var tokenizer) == false)
+                {
+                    throw new GrammarParserException($"Terminal '{tokenizerName}' does not exist.");
+                }
+
+                result = new GrammarTerminalUsage(tokenizerName, arg, tokenizer);
+            }
             else
             {
                 if (_tokenizersSource.TryGetTokenizer(name, out var tokenizer) == false)
@@ -186,7 +217,7 @@ namespace HandyQuery.Language.Lexing.Grammar
                     throw new GrammarParserException($"Terminal '{name}' does not exist.");
                 }
 
-                result = new GrammarTerminalUsage(name, tokenizer);
+                result = new GrammarTerminalUsage(name, null, tokenizer);
             }
 
             return result;

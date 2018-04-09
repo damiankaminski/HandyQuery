@@ -185,6 +185,17 @@ namespace HandyQuery.Language.Tests
                             Terminal("Statement")))
                 };
             }
+            
+            {
+                yield return new BuildTestCase("Terminal with privoded argument")
+                {
+                    Grammar = "<all-filters> : ColumnName Keyword(\"is\") Keyword(\"empty\") \nreturn <all-filters>",
+                    ExpectedRoot = new RootNode().WithChild(
+                        Terminal("ColumnName").WithChild(
+                            Terminal("Keyword", "is").WithChild(
+                                Terminal("Keyword", "empty"))))
+                };
+            }
 
             {
                 yield return new BuildTestCase("Non-terminal usage")
@@ -427,9 +438,9 @@ namespace HandyQuery.Language.Tests
             }
         }
         
-        private static TerminalNode Terminal(string name)
+        private static TerminalNode Terminal(string name, string argumentValue = null)
         {
-            return new TerminalNode(new GrammarTerminalUsage(name, TokenizersSource.GetTokenizer(name)));
+            return new TerminalNode(new GrammarTerminalUsage(name, argumentValue, TokenizersSource.GetTokenizer(name)));
         }
 
         private static LexerExecutionGraph CreateGraph(string grammarText)

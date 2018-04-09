@@ -5,13 +5,15 @@ namespace HandyQuery.Language.Lexing.Grammar.Structure
     internal sealed class GrammarTerminalUsage : IGrammarBodyItem
     {
         public string Name { get; }
+        public string ArgumentValue { get; }
         public ITokenizer Impl { get; }
 
         public GrammarNonTerminalBodyItemType Type => GrammarNonTerminalBodyItemType.TerminalUsage;
 
-        public GrammarTerminalUsage(string name, ITokenizer impl)
+        public GrammarTerminalUsage(string name, string argumentValue, ITokenizer impl)
         {
             Name = name;
+            ArgumentValue = argumentValue;
             Impl = impl;
         }
 
