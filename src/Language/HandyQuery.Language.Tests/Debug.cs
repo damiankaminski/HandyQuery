@@ -17,22 +17,22 @@ namespace HandyQuery.Language.Tests
         [Explicit("Just for debug.")]
         public void GetLexerGraph()
         {
-            var generator = new LexerGenerator();
-            var lexer = generator.GenerateLexer();
-            var mainDir = new DirectoryInfo(TestContext.CurrentContext.TestDirectory).Parent.Parent.Parent.Parent;
-            var visualizerPath = new DirectoryInfo(Path.Combine(
-                mainDir.FullName,
-                "Tools\\LexerExecutionGraphsVisualizer"));
-            
-            if (visualizerPath.Exists == false)
-            {
-                throw new InvalidOperationException();
-            }
+//            var generator = new LexerGenerator();
+//            var lexer = generator.GenerateLexer(TODO);
+//            var mainDir = new DirectoryInfo(TestContext.CurrentContext.TestDirectory).Parent.Parent.Parent.Parent;
+//            var visualizerPath = new DirectoryInfo(Path.Combine(
+//                mainDir.FullName,
+//                "Tools\\LexerExecutionGraphsVisualizer"));
+//            
+//            if (visualizerPath.Exists == false)
+//            {
+//                throw new InvalidOperationException();
+//            }
 
-            var json = new LexerExecutionGraphJsonifier(lexer.ExecutionGraph).GetJson();
-            File.WriteAllText(
-                Path.Combine(visualizerPath.FullName, "data.js"),
-                $"window.data = {json}");
+//            var json = new LexerExecutionGraphJsonifier(lexer.ExecutionGraph).GetJson();
+//            File.WriteAllText(
+//                Path.Combine(visualizerPath.FullName, "data.js"),
+//                $"window.data = {json}");
         }
     }
 

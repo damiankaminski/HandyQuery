@@ -17,7 +17,7 @@ namespace HandyQuery.Language.Tests.Lexing.Tokenizers
             .AddColumn("LastName", x => x.LastName)
             .Build();
 
-        protected override ITokenizer Tokenizer => new CompareOperatorTokenizer();
+        protected override ITokenizer GetTokenizer(LanguageConfig config) => new CompareOperatorTokenizer(config);
 
         protected override TokenType ExpectedTokenType => TokenType.CompareOperator;
 

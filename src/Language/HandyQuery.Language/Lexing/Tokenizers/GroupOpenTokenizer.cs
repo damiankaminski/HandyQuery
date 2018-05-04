@@ -1,9 +1,14 @@
-﻿using HandyQuery.Language.Lexing.Tokenizers.Abstract;
+﻿using HandyQuery.Language.Configuration;
+using HandyQuery.Language.Lexing.Tokenizers.Abstract;
 
 namespace HandyQuery.Language.Lexing.Tokenizers
 {
     internal sealed class GroupOpenTokenizer : TokenizerBase
     {
+        public GroupOpenTokenizer(LanguageConfig languageConfig) : base(languageConfig)
+        {
+        }
+        
         [HotPath]
         public override TokenizationResult Tokenize(ref LexerRuntimeInfo info)
         {

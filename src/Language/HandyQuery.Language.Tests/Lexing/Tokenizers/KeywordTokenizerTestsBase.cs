@@ -11,11 +11,11 @@ namespace HandyQuery.Language.Tests.Lexing.Tokenizers
     internal abstract class KeywordTokenizerTestsBase
     {
         protected abstract LanguageConfig DefaultConfig { get; }
-
-        protected abstract ITokenizer Tokenizer { get; }
         
         protected abstract TokenType ExpectedTokenType { get; }
 
+        protected abstract ITokenizer GetTokenizer(LanguageConfig config);
+        
         protected void GivenQuery(string query)
         {
             var caretIndex = query.IndexOf("|", StringComparison.Ordinal);
@@ -36,7 +36,7 @@ namespace HandyQuery.Language.Tests.Lexing.Tokenizers
         {
             var testCase = TestCase.Current;
             var lexerRuntimeInfo = new LexerRuntimeInfo(new LexerStringReader(testCase.Query, testCase.Position), testCase.Config);
-            testCase.Result = Tokenizer.Tokenize(ref lexerRuntimeInfo);
+            testCase.Result = GetTokenizer(testCase.Config).Tokenize(ref lexerRuntimeInfo);
         }
 
         protected void ThenSuccess(Keyword keyword, string expectedText)

@@ -3,13 +3,15 @@ using System.IO;
 using FluentAssertions;
 using HandyQuery.Language.Lexing;
 using HandyQuery.Language.Lexing.Grammar;
+using HandyQuery.Language.Tests.Model;
 using NUnit.Framework;
 
 namespace HandyQuery.Language.Tests.Lexing.Grammar
 {
     public class GrammarParserTests
     {
-        private static readonly TokenizersSource TokenizersSource = new TokenizersSource();
+        private static readonly TokenizersSource TokenizersSource 
+            = new TokenizersSource(HandyQueryLanguage.Configure<Person>().Build());
 
         [Test]
         public void Should_detect_obvious_infinite_recursions()
@@ -39,14 +41,12 @@ namespace HandyQuery.Language.Tests.Lexing.Grammar
         [Test]
         public void Should_work_with_real_grammar()
         {
-            var tokenizersSource = new TokenizersSource();
-            
             using (var stream = typeof(GrammarParser).Assembly
                 .GetManifestResourceStream("HandyQuery.Language.Lexing.Grammar.Language.grammar"))
             using (var textStream = new StreamReader(stream))
             {
                 var grammarText = textStream.ReadToEnd();
-                var parser = new GrammarParser(grammarText, tokenizersSource);
+                var parser = new GrammarParser(grammarText, TokenizersSource);
                 var grammar = parser.Parse();
 
                 grammar.Should().NotBeNull();

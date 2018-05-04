@@ -6,13 +6,15 @@ using HandyQuery.Language.Lexing.Grammar;
 using HandyQuery.Language.Lexing.Grammar.Structure;
 using HandyQuery.Language.Lexing.Graph;
 using HandyQuery.Language.Lexing.Graph.Builder;
+using HandyQuery.Language.Tests.Model;
 using NUnit.Framework;
 
 namespace HandyQuery.Language.Tests
 {
     public sealed class LexerExecutionGraphTests
     {
-        private static readonly TokenizersSource TokenizersSource = new TokenizersSource();
+        private static readonly TokenizersSource TokenizersSource 
+            = new TokenizersSource(HandyQueryLanguage.Configure<Person>().Build());
 
         [TestCaseSource(nameof(GetIsEquivalentToTestCases))]
         public void IsEquivalentTo_Should_CompareGraphs(IsEquivalentToTestCase testCase)

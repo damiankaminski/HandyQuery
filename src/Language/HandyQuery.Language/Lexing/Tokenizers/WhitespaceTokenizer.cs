@@ -1,4 +1,5 @@
-﻿using HandyQuery.Language.Lexing.Tokenizers.Abstract;
+﻿using HandyQuery.Language.Configuration;
+using HandyQuery.Language.Lexing.Tokenizers.Abstract;
 using HandyQuery.Language.Lexing.Tokens;
 
 namespace HandyQuery.Language.Lexing.Tokenizers
@@ -7,8 +8,13 @@ namespace HandyQuery.Language.Lexing.Tokenizers
     {
         private static readonly TokenizationResult NoWhitespaceResult 
             = TokenizationResult.Successful(new WhitespaceToken(-1, 0));
-        
+
+        public WhitespaceTokenizer(LanguageConfig languageConfig) : base(languageConfig)
+        {
+        }
+
         // TODO: tests
+
         [HotPath]
         public override TokenizationResult Tokenize(ref LexerRuntimeInfo info)
         {

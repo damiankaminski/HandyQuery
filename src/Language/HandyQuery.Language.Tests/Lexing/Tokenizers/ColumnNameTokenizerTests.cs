@@ -15,8 +15,6 @@ namespace HandyQuery.Language.Tests.Lexing.Tokenizers
             .AddColumn("LastName", x => x.LastName)
             .Build();
 
-        private static ColumnNameTokenizer Tokenizer => new ColumnNameTokenizer();
-
         [Test]
         public void Should_tokenize_simplest_query()
         {
@@ -190,7 +188,7 @@ namespace HandyQuery.Language.Tests.Lexing.Tokenizers
             config = config ?? DefaultConfig;
             var reader = new LexerStringReader(query, position);
             var runtimeInfo = new LexerRuntimeInfo(reader, config);
-            var result = Tokenizer.Tokenize(ref runtimeInfo);
+            var result = new ColumnNameTokenizer(config).Tokenize(ref runtimeInfo);
             return (result, result.Token as ColumnToken);
         }
     }

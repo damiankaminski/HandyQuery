@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Reflection;
+using HandyQuery.Language.Configuration;
 
 namespace HandyQuery.Language.Lexing.Grammar
 {
@@ -8,10 +9,11 @@ namespace HandyQuery.Language.Lexing.Grammar
         /// <summary>
         /// Generates a new lexer which can be then reused to tokenize user queries.
         /// </summary>
+        /// <param name="languageConfig"></param>
         /// <remarks>Lexer is generated only once, so there is no need to avoid allocations.</remarks>
-        public Lexer GenerateLexer()
+        public Lexer GenerateLexer(LanguageConfig languageConfig)
         {
-            var tokenizersSource = new TokenizersSource();
+            var tokenizersSource = new TokenizersSource(languageConfig);
             var notFoundException = new QueryLanguageException("Grammar not found.");
             
             using (var stream = Assembly.GetExecutingAssembly()
@@ -22,7 +24,7 @@ namespace HandyQuery.Language.Lexing.Grammar
                 var parser = new GrammarParser(grammarText, tokenizersSource);
                 var grammar = parser.Parse();
 
-                return Lexer.Build(grammar);
+                return Lexer.Build(grammar, languageConfig);
             }
         }
     }

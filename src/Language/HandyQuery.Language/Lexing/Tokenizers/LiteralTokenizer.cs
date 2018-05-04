@@ -1,4 +1,5 @@
-﻿using HandyQuery.Language.Lexing.Tokenizers.Abstract;
+﻿using HandyQuery.Language.Configuration;
+using HandyQuery.Language.Lexing.Tokenizers.Abstract;
 
 namespace HandyQuery.Language.Lexing.Tokenizers
 {
@@ -6,6 +7,10 @@ namespace HandyQuery.Language.Lexing.Tokenizers
     
     internal sealed class LiteralTokenizer : TokenizerBase
     {
+        public LiteralTokenizer(LanguageConfig languageConfig) : base(languageConfig)
+        {
+        }
+
         [HotPath]
         public override TokenizationResult Tokenize(ref LexerRuntimeInfo info)
         {

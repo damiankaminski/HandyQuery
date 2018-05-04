@@ -11,12 +11,11 @@ namespace HandyQuery.Language.Tests
 {
     public class LexingTests
     {
-        private readonly Lexer _lexer;
+        private readonly LexerGenerator _lexerGenerator;
 
         public LexingTests()
         {
-            var generator = new LexerGenerator();
-            _lexer = generator.GenerateLexer();
+            _lexerGenerator = new LexerGenerator();
         }
 
         //[Test]
@@ -38,7 +37,7 @@ namespace HandyQuery.Language.Tests
                 //new StatementToken(10, isEmpty.Length, config.GetCultureConfig(CultureInfo.InvariantCulture).GetKeyword(isEmpty))
             };
 
-            var result = _lexer.Tokenize("FirstName is empty", config);
+            var result = _lexerGenerator.GenerateLexer(config).Tokenize("FirstName is empty");
 
             result.Errors.Should().BeEmpty();
             result.Tokens.IsSameAs(expected).Should().BeTrue();

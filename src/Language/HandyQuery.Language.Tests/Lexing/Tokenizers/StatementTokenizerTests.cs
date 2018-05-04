@@ -17,7 +17,7 @@ namespace HandyQuery.Language.Tests.Lexing.Tokenizers
             .AddColumn("LastName", x => x.LastName)
             .Build();
 
-        protected override ITokenizer Tokenizer => new StatementTokenizer();
+        protected override ITokenizer GetTokenizer(LanguageConfig config) => new StatementTokenizer(config);
 
         protected override TokenType ExpectedTokenType => TokenType.Statement;
         

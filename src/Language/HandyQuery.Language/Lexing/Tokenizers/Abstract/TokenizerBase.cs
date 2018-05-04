@@ -1,7 +1,16 @@
-﻿namespace HandyQuery.Language.Lexing.Tokenizers.Abstract
+﻿using HandyQuery.Language.Configuration;
+
+namespace HandyQuery.Language.Lexing.Tokenizers.Abstract
 {
     internal abstract class TokenizerBase : ITokenizer
     {
+        protected readonly LanguageConfig LanguageConfig;
+
+        protected TokenizerBase(LanguageConfig languageConfig)
+        {
+            LanguageConfig = languageConfig;
+        }
+
         [HotPath]
         public abstract TokenizationResult Tokenize(ref LexerRuntimeInfo info);
 

@@ -1,10 +1,15 @@
-﻿using HandyQuery.Language.Lexing.Tokenizers.Abstract;
+﻿using HandyQuery.Language.Configuration;
+using HandyQuery.Language.Lexing.Tokenizers.Abstract;
 using HandyQuery.Language.Lexing.Tokens;
 
 namespace HandyQuery.Language.Lexing.Tokenizers
 {
     internal sealed class ColumnNameTokenizer : TokenizerBase
     {
+        public ColumnNameTokenizer(LanguageConfig languageConfig) : base(languageConfig)
+        {
+        }
+
         [HotPath]
         public override TokenizationResult Tokenize(ref LexerRuntimeInfo info)
         {

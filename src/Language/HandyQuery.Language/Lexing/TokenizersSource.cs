@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using HandyQuery.Language.Configuration;
 using HandyQuery.Language.Lexing.Tokenizers.Abstract;
 
 namespace HandyQuery.Language.Lexing
@@ -9,7 +10,7 @@ namespace HandyQuery.Language.Lexing
     {
         private readonly Dictionary<string, ITokenizer> _tokenizers = new Dictionary<string, ITokenizer>();
 
-        public TokenizersSource()
+        public TokenizersSource(LanguageConfig languageConfig)
         {
             foreach (var type in Assembly.GetExecutingAssembly().DefinedTypes)
             {
@@ -30,7 +31,7 @@ namespace HandyQuery.Language.Lexing
                     }
 
                     var name = type.Name.Substring(0, index);
-                    _tokenizers.Add(name, (ITokenizer)Activator.CreateInstance(type));
+                    _tokenizers.Add(name, (ITokenizer)Activator.CreateInstance(type, languageConfig));
                 }
             }
         }

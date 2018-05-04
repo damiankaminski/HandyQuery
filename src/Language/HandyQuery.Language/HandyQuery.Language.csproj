@@ -10,4 +10,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Lexing\Grammar\Language.grammar" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="ErrorProne.NET.Structs" Version="0.1.0" />
+  </ItemGroup>
 </Project>

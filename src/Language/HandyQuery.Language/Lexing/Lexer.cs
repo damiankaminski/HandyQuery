@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using HandyQuery.Language.Configuration;
 using HandyQuery.Language.Lexing.Graph;
 using HandyQuery.Language.Lexing.Graph.Builder;
@@ -10,22 +9,24 @@ namespace HandyQuery.Language.Lexing
 {
     internal sealed class Lexer
     {
-        internal readonly LexerExecutionGraph ExecutionGraph;
-
-        private readonly WhitespaceTokenizer _whitespaceTokenizer = new WhitespaceTokenizer();
+        private readonly LexerExecutionGraph _executionGraph;
+        private readonly LanguageConfig _languageConfig;
+        private readonly WhitespaceTokenizer _whitespaceTokenizer;
         
-        private Lexer(LexerExecutionGraph executionGraph)
+        private Lexer(LexerExecutionGraph executionGraph, LanguageConfig languageConfig)
         {
-            ExecutionGraph = executionGraph;
+            _executionGraph = executionGraph;
+            _languageConfig = languageConfig;
+            _whitespaceTokenizer =  new WhitespaceTokenizer(languageConfig);
         }
 
-        public static Lexer Build(Grammar.Grammar grammar)
+        public static Lexer Build(Grammar.Grammar grammar, LanguageConfig languageConfig)
         {
-            return new Lexer(LexerExecutionGraph.Build(grammar));
+            return new Lexer(LexerExecutionGraph.Build(grammar), languageConfig);
         }
 
         [HotPath]
-        public LexerResult Tokenize(string query, LanguageConfig languageConfig, LexerConfig config = null)
+        public LexerResult Tokenize(string query, LexerConfig config = null)
         {
             if (string.IsNullOrWhiteSpace(query)) throw new ArgumentException();
 
@@ -33,11 +34,11 @@ namespace HandyQuery.Language.Lexing
             var finalResult = new LexerResult();
             var reader = new LexerStringReader(query, 0);
             var restorableReader = new LexerStringReader.Restorable();
-            var runtimeInfo = new LexerRuntimeInfo(reader, languageConfig); // TODO: ref reader?
+            var runtimeInfo = new LexerRuntimeInfo(reader, _languageConfig); // TODO: ref reader?
 
             var stateStack = new Stack<BranchState>(); // TODO: pool?
 
-            var node = ExecutionGraph.Root.Child;
+            var node = _executionGraph.Root.Child;
             while (node != null)
             {
                 // TODO: I think this will mess things up on long branch miss scenario...
