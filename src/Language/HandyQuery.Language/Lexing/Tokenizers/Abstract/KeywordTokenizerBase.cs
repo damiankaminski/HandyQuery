@@ -7,6 +7,24 @@ using HandyQuery.Language.Lexing.Tokens.Abstract;
 
 namespace HandyQuery.Language.Lexing.Tokenizers.Abstract
 {
+    // TODO: other
+    // - create new tokenizer for each language configuration? it makes sense as it could affect the way things
+    //   are tokenized
+    
+    // TODO: concept 5
+    // use context struct similar to the one in concept 2, but this time with struct that is created for each 
+    // new position (like in concept 4)
+    
+    // TODO: concept 4 (doesn't make sense in multi threaded environment, field cannot be set to anything to keep state, that would affect other threads)
+    // leave tokenizers as classes as they are, but in case of keyword tokenizer create a sepearate struct
+    // for each new position (information if it's new position or not should be given by Lexer)
+    
+    // TODO: concept 3 (doesn't make sense, because of no real workarounds for boxing issues)
+    // change tokenizers to structs and create new one for each position
+    // then it would allow to store keyword tokenization result for a given position
+    // and keyword tokenizer would became multiinvoke capable (would calculate actual token only once)
+    // interface is out of scope with structs though :/
+    
     // TODO: concept 2
     internal class KeywordTokenizer : TokenizerBase2
     {

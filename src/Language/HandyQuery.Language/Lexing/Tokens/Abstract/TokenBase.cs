@@ -3,6 +3,8 @@ using HandyQuery.Language.Configuration;
 
 namespace HandyQuery.Language.Lexing.Tokens.Abstract
 {
+    // TODO: use struct with interface and "constrained" feature to avoid boxing
+    
     internal abstract class TokenBase : IEquatable<TokenBase>
     {
         /// <summary>
