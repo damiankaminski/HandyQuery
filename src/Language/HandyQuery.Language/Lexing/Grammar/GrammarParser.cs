@@ -49,7 +49,7 @@ namespace HandyQuery.Language.Lexing.Grammar
                     continue;
                 }
 
-                if (reader.StartsWith(Comment.AsReadOnlySpan()))
+                if (reader.StartsWith(Comment.AsSpan()))
                 {
                     reader.MoveToNextLine();
                     continue;
@@ -57,7 +57,7 @@ namespace HandyQuery.Language.Lexing.Grammar
 
                 reader.ReadTillEndOfWhitespace();
 
-                if (reader.StartsWith(GrammarNonTerminalStart.ToString().AsReadOnlySpan()))
+                if (reader.StartsWith(GrammarNonTerminalStart.ToString().AsSpan()))
                 {
                     // _______________________________________
                     // <value> : Literal|<function-invokation>
@@ -90,7 +90,7 @@ namespace HandyQuery.Language.Lexing.Grammar
                     continue;
                 }
 
-                if (reader.StartsWith(Return.AsReadOnlySpan()))
+                if (reader.StartsWith(Return.AsSpan()))
                 {
                     final = ParseReturn(ref reader);
                     break;
@@ -145,7 +145,7 @@ namespace HandyQuery.Language.Lexing.Grammar
             foreach (var operandSplitItem in orConditions)
             {
                 var operand = new GrammarNonTerminalBody.OrConditionOperand();
-                var operandSpan = new string(operandSplitItem.SliceFrom(ref bodySpan)).Trim().AsReadOnlySpan();
+                var operandSpan = new string(operandSplitItem.SliceFrom(ref bodySpan)).Trim().AsSpan();
                 var blockItems = operandSpan
                     .Split(' ', StringSplitOptions.RemoveEmptyEntries);
 

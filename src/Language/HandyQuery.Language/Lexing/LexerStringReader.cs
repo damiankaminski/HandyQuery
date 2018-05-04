@@ -16,7 +16,7 @@ namespace HandyQuery.Language.Lexing
             if (position >= query.Length) throw new IndexOutOfRangeException();
 
             CurrentPosition = position;
-            Query = query.AsReadOnlySpan();
+            Query = query.AsSpan();
 
             // TODO: _linesToPositionMap lazy init? there is no need to initialize it if it's gonna be not needed
             CurrentPosition = 0;

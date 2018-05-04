@@ -364,7 +364,7 @@ namespace HandyQuery.Language.Tests.Lexing
         {
             var reader = CreateReader(query);
             
-            var result = reader.StartsWith(value.AsReadOnlySpan());
+            var result = reader.StartsWith(value.AsSpan());
 
             result.Should().Be(expectedResult);
         }
