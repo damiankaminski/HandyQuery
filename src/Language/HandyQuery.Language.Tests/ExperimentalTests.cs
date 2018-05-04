@@ -29,72 +29,72 @@ namespace HandyQuery.Language.Tests
         // interface is out of scope with structs though :/
 
         // TODO: concept 2
-        internal class KeywordTokenizer : TokenizerBase2
-        {
-            public TokenizationResult Tokenize(ref LexingConfigContext lexingConfigContext)
-            {
-                var context = new KeywordLexingConfigContext(ref lexingConfigContext);
-                var searchTrie = context.KeywordsSearchTrie;
-                return null;
-            }
-
-            public override LexingConfigContext CreateConfigContext(ref LexingConfigContext memory,
-                LanguageConfig config)
-            {
-                var keywordsTrie = SearchTrie<Keyword>.Create(
-                    config.Syntax.KeywordCaseSensitive,
-                    config.Syntax.KeywordsMap.ToDictionary(x => x.Value,
-                        x => x.Key)); // TODO: maybe change typeof KeywordsMap so that this map won't be needed?
-
-                var lexingContext = new KeywordLexingConfigContext(ref memory);
-                lexingContext.KeywordsSearchTrie = keywordsTrie;
-
-                return memory;
-            }
-        }
-
-        internal class TokenizerBase2
-        {
-            public virtual LexingConfigContext CreateConfigContext(ref LexingConfigContext memory,
-                LanguageConfig config)
-            {
-                return memory;
-            }
-        }
-
-        [StructLayout(LayoutKind.Explicit)]
-        internal ref struct KeywordLexingConfigContext
-        {
-            // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
-            // Used as pointer to stack memory.
-            // ReSharper disable once FieldCanBeMadeReadOnly.Local
-            // It is mutated by _keywordsSearchTrie which is at the very same offset.
-            [FieldOffset(0)] private LexingConfigContext _memory;
-
-            [FieldOffset(0)] private SearchTrie<Keyword> _keywordsSearchTrie;
-
-            public SearchTrie<Keyword> KeywordsSearchTrie
-            {
-                get => _keywordsSearchTrie;
-                set => _keywordsSearchTrie = value;
-            }
-
-            public KeywordLexingConfigContext(ref LexingConfigContext memory)
-            {
-                _keywordsSearchTrie = null;
-                _memory = memory;
-            }
-        }
-
-        /// <summary>
-        /// Provides stack memory to be used by tokenizers if needed.
-        /// </summary>
-        [StructLayout(LayoutKind.Explicit)]
-        internal ref struct LexingConfigContext
-        {
-            // ReSharper disable once FieldCanBeMadeReadOnly.Local
-            [FieldOffset(0)] private long _item1;
-        }
+//        internal class KeywordTokenizer : TokenizerBase2
+//        {
+//            public TokenizationResult Tokenize(ref LexingConfigContext lexingConfigContext)
+//            {
+//                var context = new KeywordLexingConfigContext(ref lexingConfigContext);
+//                var searchTrie = context.KeywordsSearchTrie;
+//                return null;
+//            }
+//
+//            public override LexingConfigContext CreateConfigContext(ref LexingConfigContext memory,
+//                LanguageConfig config)
+//            {
+//                var keywordsTrie = SearchTrie<Keyword>.Create(
+//                    config.Syntax.KeywordCaseSensitive,
+//                    config.Syntax.KeywordsMap.ToDictionary(x => x.Value,
+//                        x => x.Key)); // TODO: maybe change typeof KeywordsMap so that this map won't be needed?
+//
+//                var lexingContext = new KeywordLexingConfigContext(ref memory);
+//                lexingContext.KeywordsSearchTrie = keywordsTrie;
+//
+//                return memory;
+//            }
+//        }
+//
+//        internal class TokenizerBase2
+//        {
+//            public virtual LexingConfigContext CreateConfigContext(ref LexingConfigContext memory,
+//                LanguageConfig config)
+//            {
+//                return memory;
+//            }
+//        }
+//
+//        [StructLayout(LayoutKind.Explicit)]
+//        internal ref struct KeywordLexingConfigContext
+//        {
+//            // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
+//            // Used as pointer to stack memory.
+//            // ReSharper disable once FieldCanBeMadeReadOnly.Local
+//            // It is mutated by _keywordsSearchTrie which is at the very same offset.
+//            [FieldOffset(0)] private LexingConfigContext _memory;
+//
+//            [FieldOffset(0)] private SearchTrie<Keyword> _keywordsSearchTrie;
+//
+//            public SearchTrie<Keyword> KeywordsSearchTrie
+//            {
+//                get => _keywordsSearchTrie;
+//                set => _keywordsSearchTrie = value;
+//            }
+//
+//            public KeywordLexingConfigContext(ref LexingConfigContext memory)
+//            {
+//                _keywordsSearchTrie = null;
+//                _memory = memory;
+//            }
+//        }
+//
+//        /// <summary>
+//        /// Provides stack memory to be used by tokenizers if needed.
+//        /// </summary>
+//        [StructLayout(LayoutKind.Explicit)]
+//        internal ref struct LexingConfigContext
+//        {
+//            // ReSharper disable once FieldCanBeMadeReadOnly.Local
+//            [FieldOffset(0)] private long _item1;
+//        }
 
         // TODO: concept:
         //    internal struct KeywordTokenizer : ITokenizer
@@ -157,11 +157,11 @@ namespace HandyQuery.Language.Tests
         [Test]
         public void T()
         {
-            var config = HandyQueryLanguage.Configure<Person>().Build();
-            var tokenizer = new KeywordTokenizer();
-            var context = new LexingConfigContext();
-
-            tokenizer.CreateConfigContext(ref context, config);
+//            var config = HandyQueryLanguage.Configure<Person>().Build();
+//            var tokenizer = new KeywordTokenizer();
+//            var context = new LexingConfigContext();
+//
+//            tokenizer.CreateConfigContext(ref context, config);
         }
     }
 }
