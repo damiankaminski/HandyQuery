@@ -12,6 +12,11 @@ namespace HandyQuery.Language.Lexing.Tokenizers
         {
         }
 
+        public override IEnumerable<Keyword> GetCandidatesForKeyword(LanguageConfig languageConfig)
+        {
+            return languageConfig.Syntax.Statements;
+        }
+        
         [HotPath]
         public override StatementToken CreateToken(int startPosition, int length, Keyword keyword) 
             => new StatementToken(startPosition, length, keyword);

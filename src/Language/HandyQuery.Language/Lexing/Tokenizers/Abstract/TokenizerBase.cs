@@ -2,6 +2,9 @@
 
 namespace HandyQuery.Language.Lexing.Tokenizers.Abstract
 {
+    // TODO: maybe tokenizers should not return string errors, instead only error id and subject (>,< etc)?
+    // TODO: then error list could be grouped (by tokenizer type?) and error could be evaluate when needed (via `string Tokenizer.EvaluateError(IEnumerable<Error> errors)`?)
+    
     internal abstract class TokenizerBase : ITokenizer
     {
         protected readonly LanguageConfig LanguageConfig;

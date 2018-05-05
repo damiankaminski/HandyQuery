@@ -11,7 +11,12 @@ namespace HandyQuery.Language.Lexing.Tokenizers
         public CompareOperatorTokenizer(LanguageConfig languageConfig) : base(languageConfig)
         {
         }
-        
+
+        public override IEnumerable<Keyword> GetCandidatesForKeyword(LanguageConfig languageConfig)
+        {
+            return languageConfig.Syntax.CompareOperators;
+        }
+
         [HotPath]
         public override CompareOperatorToken CreateToken(int startPosition, int length, Keyword keyword)
             => new CompareOperatorToken(startPosition, length, keyword);

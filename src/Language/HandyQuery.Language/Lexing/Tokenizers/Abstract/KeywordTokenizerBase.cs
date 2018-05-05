@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using HandyQuery.Language.Configuration;
 using HandyQuery.Language.Configuration.Keywords;
 using HandyQuery.Language.Lexing.Tokens.Abstract;
@@ -8,22 +10,28 @@ namespace HandyQuery.Language.Lexing.Tokenizers.Abstract
     internal abstract class KeywordTokenizerBase<TKeywordToken> : TokenizerBase
         where TKeywordToken : KeywordTokenBase
     {
-        private readonly SearchTrie<Keyword> _keywordsTrie;
+        private readonly Lazy<SearchTrie<Keyword>> _keywordsTrie;
 
         protected KeywordTokenizerBase(LanguageConfig languageConfig) : base(languageConfig)
         {
-            var map = languageConfig.Syntax.KeywordsMap.ToDictionary(x => x.Value, x => x.Key);
-            _keywordsTrie = SearchTrie<Keyword>.Create(languageConfig.Syntax.KeywordCaseSensitive, map);
+            // Lazy is introduced to not call virtual GetCandidatesForKeyword in a constructor
+            // Here's why: https://stackoverflow.com/a/119543
+            _keywordsTrie = new Lazy<SearchTrie<Keyword>>(() =>
+            {
+                var candidates = GetCandidatesForKeyword(LanguageConfig);
+                var candidatesMap = languageConfig.Syntax.KeywordsMap
+                    .Where(x => candidates.Contains(x.Key))
+                    .ToDictionary(x => x.Value, x => x.Key);
+                return SearchTrie<Keyword>.Create(languageConfig.Syntax.KeywordCaseSensitive, candidatesMap);
+            });
         }
         
         [HotPath]
         public override TokenizationResult Tokenize(ref LexerRuntimeInfo info)
         {
-            // TODO: use Param provided by grammar, tokenize single position once and cache result
-
             var startPosition = info.Reader.CaptureCurrentPosition();
 
-            var found = _keywordsTrie.TryFind(ref info.Reader, out var keyword, out var readLength);
+            var found = _keywordsTrie.Value.TryFind(ref info.Reader, out var keyword, out var readLength);
 
             if (found == false)
             {
@@ -44,6 +52,11 @@ namespace HandyQuery.Language.Lexing.Tokenizers.Abstract
             return OnNotFoundError(new string(word), position);
         }
 
+        /// <summary>
+        /// Should provide possible keywords.
+        /// </summary>
+        public abstract IEnumerable<Keyword> GetCandidatesForKeyword(LanguageConfig languageConfig);
+        
         /// <summary>
         /// Should create an instance of <see cref="TKeywordToken"/> using provided parameters.
         /// </summary>

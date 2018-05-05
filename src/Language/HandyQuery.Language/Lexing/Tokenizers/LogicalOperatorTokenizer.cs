@@ -12,6 +12,11 @@ namespace HandyQuery.Language.Lexing.Tokenizers
         {
         }
 
+        public override IEnumerable<Keyword> GetCandidatesForKeyword(LanguageConfig languageConfig)
+        {
+            return languageConfig.Syntax.LogicalOperators;
+        }
+        
         [HotPath]
         public override LogicalOperatorToken CreateToken(int startPosition, int length, Keyword keyword) 
             => new LogicalOperatorToken(startPosition, length, keyword);

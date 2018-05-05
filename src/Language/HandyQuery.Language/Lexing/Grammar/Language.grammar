@@ -1,34 +1,27 @@
 ﻿<value> 
     : Literal | <function-invokation>
 
-// TODO: below would generate HUGE amount of errors... this idea needs to be redesigned. 
-// TODO: maybe tokenizers should not return string errors, instead only error id and subject (>,< etc)?
-// TODO: then error list could be grouped (by tokenizer type?) and error could be evaluate when needed (via `string Tokenizer.EvaluateError(IEnumerable<Error> errors)`?)
-
-
-// TODO: maybe go back to previous approach with single Statement tokenizer and just compose it there from some components (to allow any whitespaces)?
-// TODO: or maybe at least rename Keyword to Word and create Keywords on a parsing step?
-
-<statement>
-    : Keyword("is") Keyword("empty")
-    | Keyword("is") Keyword("not") Keyword("empty")
-    | Keyword("is") Keyword("true")
-    | Keyword("is") Keyword("false")
-
-<compare-operator>
-    : Keyword("=")
-    | Keyword("!=")
-    | Keyword(">")
-    | Keyword("<")
-    | Keyword(">=")
-    | Keyword("<=")
-    | Keyword("starts") Keyword("with")
-    | Keyword("ends") Keyword("with")
-    | Keyword("contains")
-
-<logical-operator>
-    : Keyword("and")
-    | Keyword("or")
+// TODO: consider to change it to somthing similar to:
+// <statement>
+//     : "is" "empty"
+//     | "is" "not" "empty"
+//     | "is" "true"
+//     | "is" "false"
+// 
+// <compare-operator>
+//     : "="
+//     | "!="
+//     | ">"
+//     | "<"
+//     | ">="
+//     | "<="
+//     | "starts" "with"
+//     | "ends" "with"
+//     | "contains"
+// 
+// <logical-operator>
+//     : "and"
+//     | "or"
 
 <filter>                 
     : GroupOpen <filter-body> GroupClose 
@@ -37,9 +30,9 @@
     : <filter-with-compare-op> 
     | <filter-with-statement>
 <filter-with-compare-op> 
-    : ColumnName <compare-operator> <value>
+    : ColumnName CompareOperator <value>
 <filter-with-statement>  
-    : ColumnName <statement>
+    : ColumnName Statement
 
 <function-invokation> 
     : FunctionName ParamsOpen ParamsClose 
@@ -49,7 +42,7 @@
     | <value>
 
 <all-filters> 
-    : <filter> <logical-operator> <all-filters> 
+    : <filter> LogicalOperator <all-filters> 
     | <filter>
 
 return <all-filters>
