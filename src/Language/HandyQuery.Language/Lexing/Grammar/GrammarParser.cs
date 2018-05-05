@@ -22,6 +22,7 @@ namespace HandyQuery.Language.Lexing.Grammar
         private const char ArgEnd = ')';
         private const char ArgIdentifier = '"';
         private const char Assign = ':';
+        private const char OrSeparator = '|';
 
         public GrammarParser(string grammar, TokenizersSource tokenizersSource)
         {
@@ -140,18 +141,28 @@ namespace HandyQuery.Language.Lexing.Grammar
         {
             var body = new GrammarNonTerminalBody();
 
-            var bodySpan = reader.ReadTillNewLine();
-            var orConditions = bodySpan.Split('|', StringSplitOptions.RemoveEmptyEntries);
+            var bodyString = new string(reader.ReadTillNewLine());
+            while (!reader.IsEndOfQuery())
+            {
+                reader.ReadTillEndOfWhitespace();
+                
+                if (reader.CurrentChar != OrSeparator && reader.CurrentChar != Assign)
+                {
+                    break;
+                }
+
+                bodyString += new string(reader.ReadTillNewLine());
+            }
+            
+            var orConditions = bodyString.Split(OrSeparator, StringSplitOptions.RemoveEmptyEntries);
             foreach (var operandSplitItem in orConditions)
             {
                 var operand = new GrammarNonTerminalBody.OrConditionOperand();
-                var operandSpan = new string(operandSplitItem.SliceFrom(ref bodySpan)).Trim().AsSpan();
-                var blockItems = operandSpan
-                    .Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                var blockItems = operandSplitItem.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
                 foreach (var blockItem in blockItems)
                 {
-                    var bodyItem = ParseNonTerminalBodyItem(new string(blockItem.SliceFrom(ref operandSpan)).Trim());
+                    var bodyItem = ParseNonTerminalBodyItem(blockItem.Trim());
                     if (bodyItem is GrammarNonTerminalUsage nonTerminalUsage
                         && ReferenceEquals(nonTerminal, nonTerminalUsage.Impl))
                     {

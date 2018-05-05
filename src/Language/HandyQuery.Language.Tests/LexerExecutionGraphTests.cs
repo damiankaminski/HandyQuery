@@ -191,11 +191,11 @@ namespace HandyQuery.Language.Tests
             {
                 yield return new BuildTestCase("Terminal with privoded argument")
                 {
-                    Grammar = "<all-filters> : ColumnName Keyword(\"is\") Keyword(\"empty\") \nreturn <all-filters>",
+                    Grammar = "<all-filters> : ColumnName Statement(\"is\") Statement(\"empty\") \nreturn <all-filters>",
                     ExpectedRoot = new RootNode().WithChild(
                         Terminal("ColumnName").WithChild(
-                            Terminal("Keyword", "is").WithChild(
-                                Terminal("Keyword", "empty"))))
+                            Terminal("Statement", "is").WithChild(
+                                Terminal("Statement", "empty"))))
                 };
             }
 
