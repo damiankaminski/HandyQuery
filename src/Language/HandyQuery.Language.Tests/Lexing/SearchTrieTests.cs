@@ -15,7 +15,7 @@ namespace HandyQuery.Language.Tests.Lexing
             var trie = SearchTrie<Person>.Create(testCase.CaseSensitive, testCase.Map);
             var reader = new LexerStringReader(testCase.Query, testCase.StartPosition);
 
-            var found = trie.TryFind(ref reader, out var person, out var readLength);
+            var found = trie.TryFind(reader, out var person, out var readLength);
 
             found.Should().Be(testCase.ShouldBeFound);
             person.Should().Be(testCase.ExpectedValue);
@@ -99,6 +99,36 @@ namespace HandyQuery.Language.Tests.Lexing
                     ShouldBeFound = true,
                     ExpectedValue = "John",
                     ExpectedReadLength = "foobar".Length
+                };
+                
+                yield return new TestCase
+                {
+                    CaseSensitive = true,
+                    Map = new Dictionary<string, Person>
+                    {
+                        ["foo"] = "Jane",
+                        ["bar"] = "Jack",
+                        ["foo bar"] = "John",
+                    },
+                    Query = "foo bar",
+                    ShouldBeFound = true,
+                    ExpectedValue = "John",
+                    ExpectedReadLength = "foo bar".Length
+                };
+                
+                yield return new TestCase
+                {
+                    CaseSensitive = true,
+                    Map = new Dictionary<string, Person>
+                    {
+                        ["foo"] = "Jane",
+                        ["bar"] = "Jack",
+                        ["foo bar"] = "John",
+                    },
+                    Query = "foo \tbar",
+                    ShouldBeFound = true,
+                    ExpectedValue = "John",
+                    ExpectedReadLength = "foo \tbar".Length
                 };
 
                 yield return new TestCase

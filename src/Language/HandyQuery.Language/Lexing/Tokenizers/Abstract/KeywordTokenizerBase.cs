@@ -31,7 +31,7 @@ namespace HandyQuery.Language.Lexing.Tokenizers.Abstract
         {
             var startPosition = info.Reader.CaptureCurrentPosition();
 
-            var found = _keywordsTrie.Value.TryFind(ref info.Reader, out var keyword, out var readLength);
+            var found = _keywordsTrie.Value.TryFind(info.Reader, out var keyword, out var readLength);
 
             if (found == false)
             {

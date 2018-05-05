@@ -4,9 +4,6 @@ using System.Runtime.CompilerServices;
 
 namespace HandyQuery.Language.Lexing
 {
-    // TODO: better support for whitespaces (right now they need to match, e.g. wrong number of spaces will hide an item)
-    // or maybe get rid of whitespaces in keywords? that would be the best and probably hardest option
-
     internal class SearchTrie<T> where T : class
     {
         private readonly Node _root;
@@ -43,8 +40,8 @@ namespace HandyQuery.Language.Lexing
                     }
 
                     var newNode = isLastChar
-                        ? new Node(c, i + 1, pair.Value)
-                        : new Node(c, i + 1);
+                        ? new Node(c, pair.Value)
+                        : new Node(c);
 
                     current.Children.Add(newNode);
                     current = newNode;
@@ -63,7 +60,7 @@ namespace HandyQuery.Language.Lexing
         /// </summary>
         /// <returns>True if found; otherwise, false.</returns>
         [HotPath]
-        public bool TryFind(ref LexerStringReader reader, out T value, out int length)
+        public bool TryFind(LexerStringReader reader, out T value, out int length)
         {
             if (TryFindNode(ref reader, out var node, out length))
             {
@@ -79,13 +76,16 @@ namespace HandyQuery.Language.Lexing
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private bool TryFindNode(ref LexerStringReader reader, out Node node, out int length)
         {
+            var initialPosition = reader.CurrentPosition;
             var currentNode = _root;
             Node lastSuccessfulNode = null;
+            var lastSuccessfulLength = 0;
+
+            var endOfQuery = false;
 
             while (currentNode != null)
             {
                 var progressed = false;
-                var endOfQuery = false;
 
                 var currentChar = reader.CurrentChar;
 
@@ -93,28 +93,38 @@ namespace HandyQuery.Language.Lexing
                 // then overhead could be larger than actual gains
                 foreach (var child in currentNode.Children)
                 {
-                    // TODO: PERF: use zero cost extension point trick (see Performance.md)
-                    if (currentChar != child.Key
-                        && (_caseSensitive || char.ToLower(currentChar) != char.ToLower(child.Key)))
+                    var isWhitespace = false;
+
+                    if (char.IsWhiteSpace(child.Key) && char.IsWhiteSpace(currentChar))
                     {
+                        isWhitespace = true;
+                    }
+                    else if (currentChar != child.Key
+                             && (_caseSensitive || char.ToLower(currentChar) != char.ToLower(child.Key)))
+                    {
+                        // TODO: PERF: use zero cost extension point trick to implement case sensivity flag (see Performance.md)
                         continue;
                     }
 
-                    currentNode = child;
+                    // check if not the end
+                    if (reader.IsEndOfQuery()) endOfQuery = true;
 
+                    // read characters
+                    if (isWhitespace) reader.ReadTillEndOfWhitespace(); // TODO: multi whitespace read opt in (perhaps use extension point trick?) 
+                    else reader.MoveBy(1);
+                    
+                    // assign results
+                    currentNode = child;
                     if (currentNode.Value != null)
                     {
                         lastSuccessfulNode = currentNode;
+                        lastSuccessfulLength = reader.CurrentPosition - initialPosition;
                     }
 
-                    if (reader.IsEndOfQuery())
-                    {
-                        endOfQuery = true;
-                        break;
-                    }
+                    // break if nothing more to be processed
+                    if (endOfQuery) break;
 
                     progressed = true;
-                    reader.MoveBy(1);
                     break;
                 }
 
@@ -125,15 +135,16 @@ namespace HandyQuery.Language.Lexing
 
                 if (!progressed)
                 {
-                    reader.MoveBy(-1);
                     break;
                 }
             }
 
             if (lastSuccessfulNode != null)
             {
+                length = lastSuccessfulLength;
+                if (endOfQuery) length++;
+
                 node = lastSuccessfulNode;
-                length = node.Length;
                 return true;
             }
 
@@ -145,7 +156,6 @@ namespace HandyQuery.Language.Lexing
         private class Node
         {
             public readonly char Key;
-            public readonly int Length;
             public readonly List<Node> Children = new List<Node>();
 
             public readonly T Value;
@@ -154,17 +164,15 @@ namespace HandyQuery.Language.Lexing
             {
             }
 
-            public Node(char key, int length)
+            public Node(char key)
             {
                 Key = key;
-                Length = length;
             }
 
-            public Node(char key, int length, T value)
+            public Node(char key, T value)
             {
                 Key = key;
                 Value = value;
-                Length = length;
             }
 
             public override string ToString()
