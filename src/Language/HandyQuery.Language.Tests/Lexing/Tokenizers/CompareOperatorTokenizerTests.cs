@@ -39,6 +39,15 @@ namespace HandyQuery.Language.Tests.Lexing.Tokenizers
             ThenSuccess(keyword, text);
         }
 
+        [TestCaseSource(nameof(GetAllCompareOperatorsWithWhiteSpaces))]
+        public void Should_tokenize_all_compare_operators_with_multiple_whitespaces(Keyword keyword, string text)
+        {
+            var textWithMultipleWhitespaces = text.Replace(" ", "   \t");
+            GivenQuery($"Name |{textWithMultipleWhitespaces} and");
+            WhenTokenized();
+            ThenSuccess(keyword, textWithMultipleWhitespaces);
+        }
+        
         [TestCaseSource(nameof(GetAllCompareOperators))]
         public void Should_tokenize_case_insensitively_by_default(Keyword keyword)
         {
@@ -120,5 +129,18 @@ namespace HandyQuery.Language.Tests.Lexing.Tokenizers
 
         private static IEnumerable<Keyword> GetAllCompareOperators()
             => HandyQueryLanguage.BuildSyntax().Build().CompareOperators;
+        
+        private static IEnumerable<TestCaseData> GetAllCompareOperatorsWithWhiteSpaces()
+        {
+            var config = HandyQueryLanguage.Configure<Person>().Build();
+            foreach (var compareOperatorKeyword in HandyQueryLanguage.BuildSyntax().Build().CompareOperators)
+            {
+                var text = config.Syntax.KeywordsMap[compareOperatorKeyword];
+                if (text.Contains(" "))
+                {
+                    yield return new TestCaseData(compareOperatorKeyword, text);
+                }
+            }
+        }
     }
 }

@@ -39,6 +39,15 @@ namespace HandyQuery.Language.Tests.Lexing.Tokenizers
             ThenSuccess(keyword, text);
         }
 
+        [TestCaseSource(nameof(GetAllStatementsWithWhiteSpaces))]
+        public void Should_tokenize_all_statements_with_multiple_whitespaces(Keyword keyword, string text)
+        {
+            var textWithMultipleWhitespaces = text.Replace(" ", "   \t");
+            GivenQuery($"Name |{textWithMultipleWhitespaces} and");
+            WhenTokenized();
+            ThenSuccess(keyword, textWithMultipleWhitespaces);
+        }
+        
         [TestCaseSource(nameof(GetAllStatements))]
         public void Should_tokenize_case_insensitively_by_default(Keyword keyword)
         {
@@ -120,5 +129,18 @@ namespace HandyQuery.Language.Tests.Lexing.Tokenizers
 
         private static IEnumerable<Keyword> GetAllStatements() 
             => HandyQueryLanguage.BuildSyntax().Build().Statements;
+        
+        private static IEnumerable<TestCaseData> GetAllStatementsWithWhiteSpaces()
+        {
+            var config = HandyQueryLanguage.Configure<Person>().Build();
+            foreach (var statementKeyword in HandyQueryLanguage.BuildSyntax().Build().Statements)
+            {
+                var text = config.Syntax.KeywordsMap[statementKeyword];
+                if (text.Contains(" "))
+                {
+                    yield return new TestCaseData(statementKeyword, text);
+                }
+            }
+        }
     }
 }
