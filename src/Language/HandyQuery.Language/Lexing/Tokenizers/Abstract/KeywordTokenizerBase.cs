@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
+﻿using System.Linq;
 using HandyQuery.Language.Configuration;
 using HandyQuery.Language.Configuration.Keywords;
 using HandyQuery.Language.Lexing.Tokens.Abstract;
@@ -10,9 +8,6 @@ namespace HandyQuery.Language.Lexing.Tokenizers.Abstract
     internal abstract class KeywordTokenizerBase<TKeywordToken> : TokenizerBase
         where TKeywordToken : KeywordTokenBase
     {
-        private readonly IDictionary<IReadOnlyDictionary<Keyword, string>, SearchTrie<Keyword>> _keywordsTries
-            = new Dictionary<IReadOnlyDictionary<Keyword, string>, SearchTrie<Keyword>>();
-
         private readonly SearchTrie<Keyword> _keywordsTrie;
 
         protected KeywordTokenizerBase(LanguageConfig languageConfig) : base(languageConfig)

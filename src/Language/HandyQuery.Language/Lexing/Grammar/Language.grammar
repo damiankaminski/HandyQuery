@@ -5,6 +5,10 @@
 // TODO: maybe tokenizers should not return string errors, instead only error id and subject (>,< etc)?
 // TODO: then error list could be grouped (by tokenizer type?) and error could be evaluate when needed (via `string Tokenizer.EvaluateError(IEnumerable<Error> errors)`?)
 
+
+// TODO: maybe go back to previous approach with single Statement tokenizer and just compose it there from some components (to allow any whitespaces)?
+// TODO: or maybe at least rename Keyword to Word and create Keywords on a parsing step?
+
 <statement>
     : Keyword("is") Keyword("empty")
     | Keyword("is") Keyword("not") Keyword("empty")
