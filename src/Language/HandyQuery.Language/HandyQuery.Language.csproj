@@ -8,9 +8,9 @@
     <None Remove="Lexing\Grammar\Language.grammar" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Lexing\Grammar\Language.grammar" />
+    <PackageReference Include="ErrorProne.NET.Structs" Version="0.1.0" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="ErrorProne.NET.Structs" Version="0.1.0" />
+    <EmbeddedResource Include="Parsing\Grammar\Language.grammar" />
   </ItemGroup>
 </Project>

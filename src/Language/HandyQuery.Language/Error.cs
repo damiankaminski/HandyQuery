@@ -31,9 +31,6 @@
     
     internal enum ErrorId
     {
-        ColumnNotFound,
-        StatementNotFound,
-        CompareOperatorNotFound,
-        LogicalOperatorNotFound
+        KeywordNotFound
     }
 }

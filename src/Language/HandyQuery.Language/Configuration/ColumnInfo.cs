@@ -136,14 +136,14 @@ namespace HandyQuery.Language.Configuration
         /// <returns>True if allowed; false otherwise.</returns>
         internal bool IsAllowed(StatementKeyword statementKeyword)
         {
-            switch (statementKeyword.Type)
+            switch (statementKeyword.StatementType)
             {
-                case Statement.Empty:
-                case Statement.NotEmpty:
+                case StatementType.Empty:
+                case StatementType.NotEmpty:
                     return SystemType.IsNullable();
 
-                case Statement.IsFalse:
-                case Statement.IsTrue:
+                case StatementType.IsFalse:
+                case StatementType.IsTrue:
                     return SystemType == typeof(bool) || SystemType == typeof(bool?);
             }
 

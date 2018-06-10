@@ -1,14 +1,12 @@
-﻿using HandyQuery.Language.Lexing;
-
-namespace HandyQuery.Language.Configuration.Keywords
+﻿namespace HandyQuery.Language.Configuration.Keywords
 {
     internal abstract class Keyword
     {
-        public abstract TokenType TokenType { get; }
+        public abstract KeywordType KeywordType { get; }
 
         public override string ToString()
         {
-            return TokenType.ToString();
+            return KeywordType.ToString();
         }
     }
 }

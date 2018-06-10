@@ -1,27 +1,25 @@
-using HandyQuery.Language.Lexing;
-
 namespace HandyQuery.Language.Configuration.Keywords
 {
     internal sealed class LogicalOperatorKeyword : Keyword
     {
-        public static readonly LogicalOperatorKeyword And = new LogicalOperatorKeyword(LogicalOperator.And);
-        public static readonly LogicalOperatorKeyword Or = new LogicalOperatorKeyword(LogicalOperator.Or);
+        public static readonly LogicalOperatorKeyword And = new LogicalOperatorKeyword(LogicalOperatorType.And);
+        public static readonly LogicalOperatorKeyword Or = new LogicalOperatorKeyword(LogicalOperatorType.Or);
 
-        public LogicalOperator Type { get; }
-        public override TokenType TokenType { get; } = TokenType.LogicalOperator;
+        public LogicalOperatorType LogicalOperatorType { get; }
+        public override KeywordType KeywordType { get; } = KeywordType.LogicalOperator;
 
-        private LogicalOperatorKeyword(LogicalOperator type)
+        private LogicalOperatorKeyword(LogicalOperatorType logicalOperatorType)
         {
-            Type = type;
+            LogicalOperatorType = logicalOperatorType;
         }
         
         public override string ToString()
         {
-            return $"{TokenType}: {Type.ToString()}";
+            return $"{KeywordType}: {LogicalOperatorType.ToString()}";
         }
     }
 
-    internal enum LogicalOperator
+    internal enum LogicalOperatorType
     {
         And,
         Or

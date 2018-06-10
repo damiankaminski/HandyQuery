@@ -1,6 +1,4 @@
-﻿using System;
-using HandyQuery.Language.Configuration;
-using HandyQuery.Language.Lexing.Tokens.Abstract;
+﻿using HandyQuery.Language.Lexing.Tokens.Abstract;
 
 namespace HandyQuery.Language.Lexing.Tokens
 {

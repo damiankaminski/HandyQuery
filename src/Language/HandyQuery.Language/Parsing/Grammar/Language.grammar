@@ -1,0 +1,31 @@
+﻿<value> 
+    : TextLiteral 
+    | DateLiteral 
+    | NumberLiteral 
+    | <function-invokation>
+
+
+<filter> 
+    : Keyword("ParenOpen") <filter-body> Keyword("ParenClose") 
+    | <filter-body>
+    
+<filter-body> 
+    : TextLiteral Keyword("CompareOperator") <value> 
+    | TextLiteral Keyword("Statement")
+
+
+<function-invokation> 
+    : TextLiteral Keyword("ParenOpen") Keyword("ParenClose") 
+    | TextLiteral Keyword("ParenOpen") <params> Keyword("ParenClose")
+    
+<params>
+    : <value> Keyword("ParamsSeparator") <params> 
+    | <value>
+
+
+<all-filters> 
+    : <filter> Keyword("LogicalOperator") <all-filters> 
+    | <filter>
+
+
+return <all-filters>

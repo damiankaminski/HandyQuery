@@ -3,35 +3,16 @@ using HandyQuery.Language.Configuration;
 
 namespace HandyQuery.Language.Lexing.Tokens.Abstract
 {
-    // TODO: use struct with interface and "constrained" feature to avoid boxing
-    
     internal abstract class TokenBase : IEquatable<TokenBase>
     {
-        /// <summary>
-        /// Type of a token. Each token should have their own <see cref="TokenType"/>. 
-        /// Allows to ensure token type without casting.
-        /// </summary>
         public abstract TokenType TokenType { get; }
-
-        /// <summary>
-        /// Start index in the query.
-        /// </summary>
         public readonly int StartPosition;
-
-        /// <summary>
-        /// Length of token in the query.
-        /// </summary>
         public readonly int Length;
 
         protected TokenBase(int startPosition, int length)
         {
             StartPosition = startPosition;
             Length = length;
-        }
-
-        public T As<T>() where T : TokenBase
-        {
-            return this as T;
         }
 
         public bool Equals(TokenBase other)
@@ -46,7 +27,7 @@ namespace HandyQuery.Language.Lexing.Tokens.Abstract
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != this.GetType()) return false;
+            if (obj.GetType() != GetType()) return false;
             return Equals((TokenBase) obj);
         }
 

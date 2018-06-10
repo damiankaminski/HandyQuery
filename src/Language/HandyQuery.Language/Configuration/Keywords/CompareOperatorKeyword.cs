@@ -1,34 +1,32 @@
-using HandyQuery.Language.Lexing;
-
 namespace HandyQuery.Language.Configuration.Keywords
 {
     internal sealed class CompareOperatorKeyword : Keyword
     {
-        public static readonly CompareOperatorKeyword Equal = new CompareOperatorKeyword(CompareOperator.Equal);
-        public static readonly CompareOperatorKeyword NotEqual = new CompareOperatorKeyword(CompareOperator.NotEqual);
-        public static readonly CompareOperatorKeyword GreaterThan = new CompareOperatorKeyword(CompareOperator.GreaterThan);
-        public static readonly CompareOperatorKeyword LessThan = new CompareOperatorKeyword(CompareOperator.LessThan);
-        public static readonly CompareOperatorKeyword GreaterThanOrEqual = new CompareOperatorKeyword(CompareOperator.GreaterThanOrEqual);
-        public static readonly CompareOperatorKeyword LessThanOrEqual = new CompareOperatorKeyword(CompareOperator.LessThanOrEqual);
-        public static readonly CompareOperatorKeyword StartsWith = new CompareOperatorKeyword(CompareOperator.StartsWith);
-        public static readonly CompareOperatorKeyword EndsWith = new CompareOperatorKeyword(CompareOperator.EndsWith);
-        public static readonly CompareOperatorKeyword Contains = new CompareOperatorKeyword(CompareOperator.Contains);
+        public static readonly CompareOperatorKeyword Equal = new CompareOperatorKeyword(CompareOperatorType.Equal);
+        public static readonly CompareOperatorKeyword NotEqual = new CompareOperatorKeyword(CompareOperatorType.NotEqual);
+        public static readonly CompareOperatorKeyword GreaterThan = new CompareOperatorKeyword(CompareOperatorType.GreaterThan);
+        public static readonly CompareOperatorKeyword LessThan = new CompareOperatorKeyword(CompareOperatorType.LessThan);
+        public static readonly CompareOperatorKeyword GreaterThanOrEqual = new CompareOperatorKeyword(CompareOperatorType.GreaterThanOrEqual);
+        public static readonly CompareOperatorKeyword LessThanOrEqual = new CompareOperatorKeyword(CompareOperatorType.LessThanOrEqual);
+        public static readonly CompareOperatorKeyword StartsWith = new CompareOperatorKeyword(CompareOperatorType.StartsWith);
+        public static readonly CompareOperatorKeyword EndsWith = new CompareOperatorKeyword(CompareOperatorType.EndsWith);
+        public static readonly CompareOperatorKeyword Contains = new CompareOperatorKeyword(CompareOperatorType.Contains);
 
-        public CompareOperator Type { get; }
-        public override TokenType TokenType { get; } = TokenType.CompareOperator;
+        public CompareOperatorType CompareOperatorType { get; }
+        public override KeywordType KeywordType { get; } = KeywordType.CompareOperator;
 
-        private CompareOperatorKeyword(CompareOperator type)
+        private CompareOperatorKeyword(CompareOperatorType compareOperatorType)
         {
-            Type = type;
+            CompareOperatorType = compareOperatorType;
         }
         
         public override string ToString()
         {
-            return $"{TokenType}: {Type.ToString()}";
+            return $"{KeywordType}: {CompareOperatorType.ToString()}";
         }
     }
 
-    internal enum CompareOperator
+    internal enum CompareOperatorType
     {
         Equal,
         NotEqual,

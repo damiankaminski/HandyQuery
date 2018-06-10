@@ -2,7 +2,7 @@
 
 namespace HandyQuery.Language.Lexing.Tokenizers.Abstract
 {
-    // TODO: maybe tokenizers should not return string errors, instead only error id and subject (>,< etc)?
+    // TODO: maybe tokenizers should not return string errors, instead only error id and subject (>,< etc, via span)?
     // TODO: then error list could be grouped (by tokenizer type?) and error could be evaluate when needed (via `string Tokenizer.EvaluateError(IEnumerable<Error> errors)`?)
     
     internal abstract class TokenizerBase : ITokenizer
@@ -23,6 +23,7 @@ namespace HandyQuery.Language.Lexing.Tokenizers.Abstract
         /// </summary>
         /// <example>
         /// `Name starts with` -> good
+        /// `"Name"starts with` -> good
         /// `Namestarts with` -> bad
         /// `Name5starts with` -> bad
         /// `Age >= 5` -> good
@@ -44,14 +45,10 @@ namespace HandyQuery.Language.Lexing.Tokenizers.Abstract
                 char.IsLetterOrDigit(reader.Query[lastPosition])) // last is letter or digit
             {
                 // letter or digit right next to each other, between tokens, detected
-                reader.MoveTo(new LexerStringReader.Position(token.StartPosition));
-                return TokenizationResult.Failed(CreateError(ref info));
+                return TokenizationResult.Failed();
             }
 
             return result;
         }
-        
-        [HotPath]
-        protected abstract Error CreateError(ref LexerRuntimeInfo info);
     }
 }

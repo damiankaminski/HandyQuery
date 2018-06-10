@@ -2,7 +2,7 @@
 using System.IO;
 using FluentAssertions;
 using HandyQuery.Language.Lexing;
-using HandyQuery.Language.Lexing.Grammar;
+using HandyQuery.Language.Parsing.Grammar;
 using HandyQuery.Language.Tests.Model;
 using NUnit.Framework;
 
@@ -53,7 +53,7 @@ namespace HandyQuery.Language.Tests.Lexing.Grammar
             }
         }
         
-        private static Language.Lexing.Grammar.Grammar Parse(string grammarText)
+        private static Parsing.Grammar.Grammar Parse(string grammarText)
         {
             var parser = new GrammarParser(grammarText, TokenizersSource);
             return parser.Parse();

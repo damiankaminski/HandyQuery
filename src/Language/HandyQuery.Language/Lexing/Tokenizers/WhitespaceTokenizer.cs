@@ -29,11 +29,5 @@ namespace HandyQuery.Language.Lexing.Tokenizers
             var token = new WhitespaceToken(startPosition, whitespaceSpan.Length);
             return TokenizationResult.Successful(token);
         }
-
-        protected override Error CreateError(ref LexerRuntimeInfo info)
-        {
-            throw new System.NotSupportedException(
-                "Somthing terribly wrong happened. WhitespaceTokenizer should never lead to error.");
-        }
     }
 }

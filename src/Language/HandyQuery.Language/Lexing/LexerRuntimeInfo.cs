@@ -8,13 +8,10 @@ namespace HandyQuery.Language.Lexing
         // PERF: Reader cannot be marked as readonly as it changes while progressing in the query and if
         //       marked as readonly then C# would make defensive copies to make sure that it remains unchanged
         public LexerStringReader Reader;
-        
-        public readonly LanguageConfig Config;
-
-        public LexerRuntimeInfo(LexerStringReader reader, LanguageConfig config)
+       
+        public LexerRuntimeInfo(LexerStringReader reader)
         {
             Reader = reader;
-            Config = config;
         }
     }
 }

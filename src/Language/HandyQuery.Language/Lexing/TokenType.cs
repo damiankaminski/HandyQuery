@@ -4,13 +4,9 @@
     {
         Unknown,
         Whitespace,
-        Column,
-        CompareOperator,
-        LogicalOperator,
-        Literal,
-        Function,
-        Statement,
-        ParenOpen,
-        ParenClose
+        TextLiteral,
+        DateLiteral,
+        NumberLiteral,
+        Keyword
     }
 }

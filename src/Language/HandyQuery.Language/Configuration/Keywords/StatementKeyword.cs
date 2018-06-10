@@ -1,29 +1,27 @@
-using HandyQuery.Language.Lexing;
-
 namespace HandyQuery.Language.Configuration.Keywords
 {
     internal sealed class StatementKeyword : Keyword
     {
-        public static readonly StatementKeyword Empty = new StatementKeyword(Statement.Empty);
-        public static readonly StatementKeyword NotEmpty = new StatementKeyword(Statement.NotEmpty);
-        public static readonly StatementKeyword IsTrue = new StatementKeyword(Statement.IsTrue);
-        public static readonly StatementKeyword IsFalse = new StatementKeyword(Statement.IsFalse);
+        public static readonly StatementKeyword Empty = new StatementKeyword(StatementType.Empty);
+        public static readonly StatementKeyword NotEmpty = new StatementKeyword(StatementType.NotEmpty);
+        public static readonly StatementKeyword IsTrue = new StatementKeyword(StatementType.IsTrue);
+        public static readonly StatementKeyword IsFalse = new StatementKeyword(StatementType.IsFalse);
 
-        public Statement Type { get; }
-        public override TokenType TokenType { get; } = TokenType.Statement;
+        public StatementType StatementType { get; }
+        public override KeywordType KeywordType { get; } = KeywordType.Statement;
 
-        private StatementKeyword(Statement type)
+        private StatementKeyword(StatementType statementType)
         {
-            Type = type;
+            StatementType = statementType;
         }
 
         public override string ToString()
         {
-            return $"{TokenType}: {Type.ToString()}";
+            return $"{KeywordType}: {StatementType.ToString()}";
         }
     }
 
-    internal enum Statement
+    internal enum StatementType
     {
         Empty,
         NotEmpty,

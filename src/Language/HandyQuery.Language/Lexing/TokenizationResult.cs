@@ -7,26 +7,28 @@ namespace HandyQuery.Language.Lexing
     {
         public bool Success { get; }
         public TokenBase Token { get; }
-        
-        // TODO: lazy evaluation? should be possible if changed to Action<LexerStringReader> and if
-        //       reader's postion would be properly adjusted 
-        public Error Error { get; }
 
-        private TokenizationResult(bool success, TokenBase token, Error error)
+        public bool IsPartiallySuccessful => !Success && Token != null;
+        
+        private TokenizationResult(bool success, TokenBase token)
         {
             Success = success;
-            Error = error;
             Token = token;
         }
 
         public static TokenizationResult Successful(TokenBase token)
         {
-            return new TokenizationResult(true, token, null);
+            return new TokenizationResult(true, token);
+        }
+        
+        public static TokenizationResult PartiallySuccessful(TokenBase token)
+        {
+            return new TokenizationResult(false, token);
         }
 
-        public static TokenizationResult Failed(Error error)
+        public static TokenizationResult Failed()
         {
-            return new TokenizationResult(false, null, error);
+            return new TokenizationResult(false, null);
         }
     }
 }

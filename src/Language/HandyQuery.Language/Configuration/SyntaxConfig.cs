@@ -10,17 +10,9 @@ namespace HandyQuery.Language.Configuration
         public readonly bool KeywordCaseSensitive;
         public readonly bool ColumnNameCaseSensitive;
 
-        public readonly char ParenOpen = '(';
-        public readonly char ParenClose = ')';
-
-        public readonly char ParamsOpen = '(';
-        public readonly char ParamsClose = ')';
-
         public readonly char StringLiteralIdentifier = '"';
-
-        public readonly IEnumerable<string> DateTimeFormats = new[] {"M/d/yyyy H:m", "M/d/yyyy"};
-        public readonly string NullConstant = "null"; // TODO: move to keywords?
         public readonly char NumberDecimalSeparator = '.';
+        public readonly IEnumerable<string> DateTimeFormats = new[] {"M/d/yyyy H:m", "M/d/yyyy"};
 
         public readonly IReadOnlyDictionary<Keyword, string> KeywordsMap = new Dictionary<Keyword, string>()
         {
@@ -38,7 +30,11 @@ namespace HandyQuery.Language.Configuration
             {StatementKeyword.IsTrue, "is true"},
             {StatementKeyword.IsFalse, "is false"},
             {LogicalOperatorKeyword.And, "and"},
-            {LogicalOperatorKeyword.Or, "or"}
+            {LogicalOperatorKeyword.Or, "or"},
+            {TrivialKeyword.ParenOpen, "("},
+            {TrivialKeyword.ParenClose, ")"},
+            {TrivialKeyword.ParamsSeparator, ","},
+            {TrivialKeyword.Null, "null"}
         };
 
         public readonly IReadOnlyCollection<CompareOperatorKeyword> CompareOperators = new[]
@@ -83,10 +79,6 @@ namespace HandyQuery.Language.Configuration
         {
             var fixedReservedChars = new[]
             {
-                ParamsClose,
-                ParamsOpen,
-                ParenClose,
-                ParenOpen,
                 StringLiteralIdentifier
             };
 
