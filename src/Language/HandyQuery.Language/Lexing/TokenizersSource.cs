@@ -41,6 +41,8 @@ namespace HandyQuery.Language.Lexing
             return _tokenizers.TryGetValue(name, out tokenizer);
         }
 
+        // TODO: GetOrderedTokenizers? Each tokenizer should be decorated with [Tokenizer(after: typeof(KeywordTokenizer))]
+        
         public ITokenizer GetTokenizer(string name)
         {
             if (TryGetTokenizer(name, out var tokenizer) == false)

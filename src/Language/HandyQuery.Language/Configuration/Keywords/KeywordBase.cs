@@ -1,6 +1,6 @@
 ﻿namespace HandyQuery.Language.Configuration.Keywords
 {
-    internal abstract class Keyword
+    internal abstract class KeywordBase
     {
         public abstract KeywordType KeywordType { get; }
 

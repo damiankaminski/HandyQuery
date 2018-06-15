@@ -1,6 +1,6 @@
 namespace HandyQuery.Language.Configuration.Keywords
 {
-    internal sealed class LogicalOperatorKeyword : Keyword
+    internal sealed class LogicalOperatorKeyword : KeywordBase
     {
         public static readonly LogicalOperatorKeyword And = new LogicalOperatorKeyword(LogicalOperatorType.And);
         public static readonly LogicalOperatorKeyword Or = new LogicalOperatorKeyword(LogicalOperatorType.Or);

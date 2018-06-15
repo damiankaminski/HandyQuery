@@ -1,6 +1,6 @@
 namespace HandyQuery.Language.Configuration.Keywords
 {
-    internal sealed class TrivialKeyword : Keyword
+    internal sealed class TrivialKeyword : KeywordBase
     {
         public static readonly TrivialKeyword ParenOpen = new TrivialKeyword(TrivialKeywordType.ParenOpen);
         public static readonly TrivialKeyword ParenClose = new TrivialKeyword(TrivialKeywordType.ParenClose);

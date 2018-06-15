@@ -1,6 +1,6 @@
 namespace HandyQuery.Language.Configuration.Keywords
 {
-    internal sealed class StatementKeyword : Keyword
+    internal sealed class StatementKeyword : KeywordBase
     {
         public static readonly StatementKeyword Empty = new StatementKeyword(StatementType.Empty);
         public static readonly StatementKeyword NotEmpty = new StatementKeyword(StatementType.NotEmpty);

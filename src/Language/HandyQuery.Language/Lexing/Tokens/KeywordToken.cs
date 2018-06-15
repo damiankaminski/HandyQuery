@@ -8,9 +8,9 @@ namespace HandyQuery.Language.Lexing.Tokens
     {
         public override TokenType TokenType => TokenType.Keyword;
 
-        public readonly Keyword Keyword;
+        public readonly KeywordBase Keyword;
         
-        public KeywordToken(int startPosition, int length, Keyword keyword) : base(startPosition, length)
+        public KeywordToken(int startPosition, int length, KeywordBase keyword) : base(startPosition, length)
         {
             Keyword = keyword;
         }

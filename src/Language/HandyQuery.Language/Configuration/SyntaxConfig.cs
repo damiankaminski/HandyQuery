@@ -14,7 +14,7 @@ namespace HandyQuery.Language.Configuration
         public readonly char NumberDecimalSeparator = '.';
         public readonly IEnumerable<string> DateTimeFormats = new[] {"M/d/yyyy H:m", "M/d/yyyy"};
 
-        public readonly IReadOnlyDictionary<Keyword, string> KeywordsMap = new Dictionary<Keyword, string>()
+        public readonly IReadOnlyDictionary<KeywordBase, string> KeywordsMap = new Dictionary<KeywordBase, string>()
         {
             {CompareOperatorKeyword.Equal, "="},
             {CompareOperatorKeyword.NotEqual, "!="},
@@ -35,33 +35,6 @@ namespace HandyQuery.Language.Configuration
             {TrivialKeyword.ParenClose, ")"},
             {TrivialKeyword.ParamsSeparator, ","},
             {TrivialKeyword.Null, "null"}
-        };
-
-        public readonly IReadOnlyCollection<CompareOperatorKeyword> CompareOperators = new[]
-        {
-            CompareOperatorKeyword.Equal,
-            CompareOperatorKeyword.NotEqual,
-            CompareOperatorKeyword.GreaterThan,
-            CompareOperatorKeyword.LessThan,
-            CompareOperatorKeyword.GreaterThanOrEqual,
-            CompareOperatorKeyword.LessThanOrEqual,
-            CompareOperatorKeyword.StartsWith,
-            CompareOperatorKeyword.EndsWith,
-            CompareOperatorKeyword.Contains
-        };
-
-        public readonly IReadOnlyCollection<StatementKeyword> Statements = new[]
-        {
-            StatementKeyword.Empty,
-            StatementKeyword.NotEmpty,
-            StatementKeyword.IsTrue,
-            StatementKeyword.IsFalse
-        };
-
-        public readonly IReadOnlyCollection<LogicalOperatorKeyword> LogicalOperators = new[]
-        {
-            LogicalOperatorKeyword.And,
-            LogicalOperatorKeyword.Or
         };
 
         public readonly IReadOnlyCollection<char> ReservedChars;

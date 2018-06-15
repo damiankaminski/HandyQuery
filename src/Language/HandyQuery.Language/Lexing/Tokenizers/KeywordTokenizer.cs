@@ -8,13 +8,13 @@ namespace HandyQuery.Language.Lexing.Tokenizers
 {
     internal sealed class KeywordTokenizer : TokenizerBase
     {
-        private readonly SearchTrie<Keyword> _keywordsTrie;
+        private readonly SearchTrie<KeywordBase> _keywordsTrie;
 
         public KeywordTokenizer(LanguageConfig languageConfig) : base(languageConfig)
         {
             var candidatesMap = languageConfig.Syntax.KeywordsMap
                 .ToDictionary(x => x.Value, x => x.Key);
-            _keywordsTrie = SearchTrie<Keyword>.Create(languageConfig.Syntax.KeywordCaseSensitive, candidatesMap);
+            _keywordsTrie = SearchTrie<KeywordBase>.Create(languageConfig.Syntax.KeywordCaseSensitive, candidatesMap);
         }
         
         [HotPath]

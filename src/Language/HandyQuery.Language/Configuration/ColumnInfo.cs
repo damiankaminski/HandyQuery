@@ -37,11 +37,11 @@ namespace HandyQuery.Language.Configuration
         /// </summary>
         public HandyType HandyType { get; }
 
-        private static readonly Dictionary<HandyType, Keyword[]> AllowedColumnKeywords = new Dictionary<HandyType, Keyword[]>
+        private static readonly Dictionary<HandyType, KeywordBase[]> AllowedColumnKeywords = new Dictionary<HandyType, KeywordBase[]>
         {
             {
                 HandyType.DateTime,
-                new Keyword[]
+                new KeywordBase[]
                 {
                     StatementKeyword.Empty, StatementKeyword.NotEmpty,
                     CompareOperatorKeyword.Equal, CompareOperatorKeyword.NotEqual,
@@ -51,7 +51,7 @@ namespace HandyQuery.Language.Configuration
             },
             {
                 HandyType.Float,
-                new Keyword[]
+                new KeywordBase[]
                 {
                     StatementKeyword.Empty, StatementKeyword.NotEmpty,
                     CompareOperatorKeyword.Equal, CompareOperatorKeyword.NotEqual,
@@ -61,7 +61,7 @@ namespace HandyQuery.Language.Configuration
             },
             {
                 HandyType.Integer,
-                new Keyword[]
+                new KeywordBase[]
                 {
                     StatementKeyword.Empty, StatementKeyword.NotEmpty,
                     CompareOperatorKeyword.Equal, CompareOperatorKeyword.NotEqual,
@@ -71,7 +71,7 @@ namespace HandyQuery.Language.Configuration
             },
             {
                 HandyType.String,
-                new Keyword[]
+                new KeywordBase[]
                 {
                     StatementKeyword.Empty, StatementKeyword.NotEmpty,
                     CompareOperatorKeyword.Equal, CompareOperatorKeyword.NotEqual,
@@ -81,7 +81,7 @@ namespace HandyQuery.Language.Configuration
             },
             {
                 HandyType.Boolean,
-                new Keyword[]
+                new KeywordBase[]
                 {
                     StatementKeyword.Empty, StatementKeyword.NotEmpty,
                     StatementKeyword.IsTrue, StatementKeyword.IsFalse

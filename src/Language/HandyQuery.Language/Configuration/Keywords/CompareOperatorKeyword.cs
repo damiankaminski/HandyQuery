@@ -1,6 +1,6 @@
 namespace HandyQuery.Language.Configuration.Keywords
 {
-    internal sealed class CompareOperatorKeyword : Keyword
+    internal sealed class CompareOperatorKeyword : KeywordBase
     {
         public static readonly CompareOperatorKeyword Equal = new CompareOperatorKeyword(CompareOperatorType.Equal);
         public static readonly CompareOperatorKeyword NotEqual = new CompareOperatorKeyword(CompareOperatorType.NotEqual);
