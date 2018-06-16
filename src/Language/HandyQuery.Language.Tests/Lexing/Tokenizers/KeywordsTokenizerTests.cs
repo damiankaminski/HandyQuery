@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using FluentAssertions;
 using HandyQuery.Language.Configuration;
@@ -8,12 +7,13 @@ using HandyQuery.Language.Lexing;
 using HandyQuery.Language.Lexing.Tokenizers;
 using HandyQuery.Language.Lexing.Tokenizers.Abstract;
 using HandyQuery.Language.Lexing.Tokens;
+using HandyQuery.Language.Tests.Lexing.Tokenizers.Abstract;
 using HandyQuery.Language.Tests.Model;
 using NUnit.Framework;
 
 namespace HandyQuery.Language.Tests.Lexing.Tokenizers
 {
-    internal class KeywordsTokenizerTests : KeywordTokenizerTestsBase
+    internal class KeywordsTokenizerTests : TokenizerTestsBase
     {
         protected override LanguageConfig DefaultConfig => HandyQueryLanguage.Configure<Person>()
             .AddColumn("Name", x => x.FirstName)
@@ -118,6 +118,19 @@ namespace HandyQuery.Language.Tests.Lexing.Tokenizers
             }
         }
 
+        private static void ThenSuccess(KeywordBase keyword, string expectedText)
+        {
+            var testCase = TestCase.Current;
+            testCase.Result.Success.Should().BeTrue();
+            var token = testCase.Result.Token.As<KeywordToken>();
+            token.StartPosition.Should().Be(testCase.Position);
+            token.TokenType.Should().Be(TokenType.Keyword);
+            token.Keyword.Should().BeEquivalentTo(keyword);
+            token.Length.Should().Be(expectedText.Length);
+            
+            testCase.Finished = true;
+        }
+        
         private static IEnumerable<KeywordBase> GetAllKeywords()
             => HandyQueryLanguage.BuildSyntax().Build().KeywordsMap.Keys;
         
@@ -127,92 +140,5 @@ namespace HandyQuery.Language.Tests.Lexing.Tokenizers
                 .Where(x => x.Value.Contains(" "))
                 .Select(x => new TestCaseData(x.Key, x.Value));
         }
-    }
-    
-    internal abstract class KeywordTokenizerTestsBase
-    {
-        protected abstract LanguageConfig DefaultConfig { get; }
-
-        protected abstract ITokenizer GetTokenizer(LanguageConfig config);
-        
-        protected void GivenQuery(string query)
-        {
-            var caretIndex = query.IndexOf("|", StringComparison.Ordinal);
-            var withoutCaret = $"{query.Substring(0, caretIndex)}{query.Substring(caretIndex + 1)}";
-
-            var testCase = TestCase.RefreshCurrent(this);
-            testCase.Query = withoutCaret;
-            testCase.Position = caretIndex;
-        }
-
-        protected void GivenConfig(LanguageConfig config)
-        {
-            var testCase = TestCase.RefreshCurrent(this);
-            testCase.Config = config;
-        }
-
-        protected void WhenTokenized()
-        {
-            var testCase = TestCase.Current;
-            var lexerRuntimeInfo = new LexerRuntimeInfo(new LexerStringReader(testCase.Query, testCase.Position));
-            testCase.Result = GetTokenizer(testCase.Config).Tokenize(ref lexerRuntimeInfo);
-        }
-
-        protected void ThenSuccess(KeywordBase keyword, string expectedText)
-        {
-            var testCase = TestCase.Current;
-            testCase.Result.Success.Should().BeTrue();
-            var token = testCase.Result.Token.As<KeywordToken>();
-            token.StartPosition.Should().Be(5);
-            token.TokenType.Should().Be(TokenType.Keyword);
-            token.Keyword.Should().BeEquivalentTo(keyword);
-            token.Length.Should().Be(expectedText.Length);
-            
-            testCase.Finished = true;
-        }
-
-        protected void ThenFailed()
-        {
-            var testCase = TestCase.Current;
-            testCase.Result.Success.Should().BeFalse();
-            testCase.Result.Token.Should().BeNull();
-
-            testCase.Finished = true;
-        }
-        
-        private class TestCase
-        {
-            public string Query { get; set; }
-            public int Position { get; set; }
-            public LanguageConfig Config { get; set; }
-
-            public TokenizationResult Result { get; set; }
-
-            public bool Finished { private get; set; }
-
-            public static TestCase Current { get; private set; }
-
-            private TestCase(LanguageConfig defaultConfig)
-            {
-                Config = defaultConfig;
-            }
-
-            /// <summary>
-            /// Creates new instance of test case if current one has been aleady used through
-            /// full pipeline (i.e. any of `Then...` method was called at least once with current test case).
-            /// </summary>
-            /// <returns></returns>
-            public static TestCase RefreshCurrent(KeywordTokenizerTestsBase test)
-            {
-                if (Current == null)
-                {
-                    Current = new TestCase(test.DefaultConfig);
-                    return Current;
-                }
-
-                Current = Current.Finished ? new TestCase(test.DefaultConfig) : Current;
-                return Current;
-            }
-        }
-    }
+    }    
 }

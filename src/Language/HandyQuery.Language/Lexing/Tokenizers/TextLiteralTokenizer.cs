@@ -4,8 +4,6 @@ using HandyQuery.Language.Lexing.Tokens;
 
 namespace HandyQuery.Language.Lexing.Tokenizers
 {
-    // TODO: tests
-
     internal sealed class TextLiteralTokenizer : TokenizerBase
     {
         public TextLiteralTokenizer(LanguageConfig languageConfig) : base(languageConfig)
@@ -15,26 +13,52 @@ namespace HandyQuery.Language.Lexing.Tokenizers
         [HotPath]
         public override TokenizationResult Tokenize(ref LexerRuntimeInfo info)
         {
-            var startPosition = info.Reader.CaptureCurrentPosition();
+            ref var reader = ref info.Reader;
+            
+            var startPosition = reader.CaptureCurrentPosition();
 
             var identifier = LanguageConfig.Syntax.StringLiteralIdentifier;
-
-            if (info.Reader.CurrentChar == identifier)
+            
+            if (reader.CurrentChar == identifier)
             {
-                if (!info.Reader.MoveNext())
+                // starts with '"'
+                
+                if (!reader.MoveNext())
                 {
                     return TokenizationResult.Failed();
                 }
+                
+                var length = 1;
+                var isProperlyClosed = false; // indicates whether string is closed with '"'
+                var isInEscapeContext = false;
+                var hasEscapeChar = false;
+                
+                do
+                {   
+                    length++;
+                    
+                    var c = reader.CurrentChar;
 
-                // TODO: allow for escape via \
-                var value = info.Reader.ReadWhile(identifier, (x, i) => x != i && x != '\n' && x != '\r');
+                    isInEscapeContext = !isInEscapeContext && c == '\\';
 
-                if (info.Reader.CurrentChar != identifier)
+                    if (isInEscapeContext) hasEscapeChar = true;
+                    if (isInEscapeContext && !reader.MoveNext()) break;
+
+                    if (c == identifier && !isInEscapeContext)
+                    {
+                        isProperlyClosed = true;
+                        break;
+                    }
+
+                    if (c == '\n' || c == '\r') break;
+                } while(reader.MoveNext());
+
+                if (!isProperlyClosed)
                 {
-                    // string not closed
+                    // string not closed with "
 
-                    info.Reader.MoveTo(startPosition);
-                    var word = info.Reader.ReadTillEndOfWord(); // assumes it meant to be single word
+                    reader.MoveTo(startPosition);
+                    var word = reader.ReadTillEndOfWord(); // assumes it meant to be single word
 
                     return TokenizationResult.PartiallySuccessful(
                         new TextLiteralToken(
@@ -43,6 +67,10 @@ namespace HandyQuery.Language.Lexing.Tokenizers
                             new string(word.Slice(1))));
                 }
 
+                // TODO: rewrite value if it has escape char (needs to be removed)
+                
+                var value = reader.Query.Slice(startPosition.Value, length);
+                
                 return TokenizationResult.Successful(
                     new TextLiteralToken(
                         startPosition.Value,
@@ -50,7 +78,7 @@ namespace HandyQuery.Language.Lexing.Tokenizers
                         new string(value.Slice(1, value.Length - 2))));
             }
 
-            var singleWord = info.Reader.ReadTillIvalidCharOrWhitespace(LanguageConfig.Syntax.ReservedChars);
+            var singleWord = reader.ReadTillIvalidCharOrWhitespace(LanguageConfig.Syntax.ReservedChars);
 
             return TokenizationResult.Successful(
                 new TextLiteralToken(
