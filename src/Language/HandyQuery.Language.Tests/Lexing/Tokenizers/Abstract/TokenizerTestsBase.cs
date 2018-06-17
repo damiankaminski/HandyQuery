@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using FluentAssertions;
 using HandyQuery.Language.Configuration;
 using HandyQuery.Language.Lexing;
@@ -14,12 +15,23 @@ namespace HandyQuery.Language.Tests.Lexing.Tokenizers.Abstract
         
         protected void GivenQuery(string query)
         {
+            if (query.Count(x => x == '|') > 2)
+            {
+                throw new InvalidOperationException("Query cannot contain more than 2 pipes, one for caret index " +
+                                                    "and the other one for end of token index.");
+            }
+            
             var caretIndex = query.IndexOf("|", StringComparison.Ordinal);
-            var withoutCaret = $"{query.Substring(0, caretIndex)}{query.Substring(caretIndex + 1)}";
+            query = $"{query.Substring(0, caretIndex)}{query.Substring(caretIndex + 1)}";
 
+            var endOfTokenIndex = query.IndexOf("|", StringComparison.Ordinal);
+            if (endOfTokenIndex >= 0) 
+                query = $"{query.Substring(0, endOfTokenIndex)}{query.Substring(endOfTokenIndex + 1)}";
+            
             var testCase = TestCase.RefreshCurrent(this);
-            testCase.Query = withoutCaret;
+            testCase.Query = query;
             testCase.Position = caretIndex;
+            testCase.ExpectedLength = endOfTokenIndex != -1 ? endOfTokenIndex - caretIndex : (int?)null;
         }
 
         protected void GivenConfig(LanguageConfig config)
@@ -48,6 +60,7 @@ namespace HandyQuery.Language.Tests.Lexing.Tokenizers.Abstract
         {
             public string Query { get; set; }
             public int Position { get; set; }
+            public int? ExpectedLength { get; set; }
             public LanguageConfig Config { get; set; }
 
             public TokenizationResult Result { get; set; }

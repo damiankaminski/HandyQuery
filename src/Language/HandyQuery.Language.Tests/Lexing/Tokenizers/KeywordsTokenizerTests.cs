@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using FluentAssertions;
 using HandyQuery.Language.Configuration;
@@ -26,27 +27,27 @@ namespace HandyQuery.Language.Tests.Lexing.Tokenizers
         public void Should_tokenize_all_keywords(KeywordBase keyword)
         {
             var text = DefaultConfig.Syntax.KeywordsMap[keyword];
-            GivenQuery($"Name |{text} and");
+            GivenQuery($"Name |{text}| and");
             WhenTokenized();
-            ThenSuccess(keyword, text);
+            ThenSuccess(keyword);
         }
 
         [TestCaseSource(nameof(GetAllKeywords))]
         public void Should_tokenize_keywords_defined_at_the_end_of_query(KeywordBase keyword)
         {
             var text = DefaultConfig.Syntax.KeywordsMap[keyword];
-            GivenQuery($"Name |{text}");
+            GivenQuery($"Name |{text}|");
             WhenTokenized();
-            ThenSuccess(keyword, text);
+            ThenSuccess(keyword);
         }
 
         [TestCaseSource(nameof(GetAllKeywordsWithWhiteSpaces))]
         public void Should_tokenize_all_keywords_with_multiple_whitespaces(KeywordBase keyword, string text)
         {
             var textWithMultipleWhitespaces = text.Replace(" ", "   \t");
-            GivenQuery($"Name |{textWithMultipleWhitespaces} and");
+            GivenQuery($"Name |{textWithMultipleWhitespaces}| and");
             WhenTokenized();
-            ThenSuccess(keyword, textWithMultipleWhitespaces);
+            ThenSuccess(keyword);
         }
         
         [TestCaseSource(nameof(GetAllKeywords))]
@@ -56,9 +57,9 @@ namespace HandyQuery.Language.Tests.Lexing.Tokenizers
                 .KeywordsMap[keyword]
                 .ToUpper();
 
-            GivenQuery($"Name |{text} and");
+            GivenQuery($"Name |{text}| and");
             WhenTokenized();
-            ThenSuccess(keyword, text);
+            ThenSuccess(keyword);
         }
 
         [TestCaseSource(nameof(GetAllKeywords))]
@@ -76,10 +77,10 @@ namespace HandyQuery.Language.Tests.Lexing.Tokenizers
 
             // original case - should be able to tokenize
             {
-                GivenQuery($"Name |{text} and");
+                GivenQuery($"Name |{text}| and");
                 GivenConfig(config);
                 WhenTokenized();
-                ThenSuccess(keyword, text);
+                ThenSuccess(keyword);
             }
 
             // upper cased - should not be able to tokenize
@@ -112,21 +113,23 @@ namespace HandyQuery.Language.Tests.Lexing.Tokenizers
             }
             else
             {
-                GivenQuery($"Name |{text}ornot and");
+                GivenQuery($"Name |{text}|ornot and");
                 WhenTokenized();
-                ThenSuccess(keyword, text);
+                ThenSuccess(keyword);
             }
         }
 
-        private static void ThenSuccess(KeywordBase keyword, string expectedText)
+        private static void ThenSuccess(KeywordBase keyword)
         {
             var testCase = TestCase.Current;
+            if(testCase.ExpectedLength == null) throw new NullReferenceException();
+            
             testCase.Result.Success.Should().BeTrue();
             var token = testCase.Result.Token.As<KeywordToken>();
             token.StartPosition.Should().Be(testCase.Position);
             token.TokenType.Should().Be(TokenType.Keyword);
             token.Keyword.Should().BeEquivalentTo(keyword);
-            token.Length.Should().Be(expectedText.Length);
+            token.Length.Should().Be(testCase.ExpectedLength);
             
             testCase.Finished = true;
         }

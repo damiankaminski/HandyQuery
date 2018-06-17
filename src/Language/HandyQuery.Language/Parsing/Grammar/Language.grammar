@@ -1,4 +1,6 @@
-﻿<value> 
+﻿// TODO: get rid of quotes around arguments
+
+<value> 
     : TextLiteral 
     | DateLiteral 
     | NumberLiteral 

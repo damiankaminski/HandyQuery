@@ -15,4 +15,7 @@
   <ItemGroup>
     <ProjectReference Include="..\HandyQuery.Language\HandyQuery.Language.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Parsing" />
+  </ItemGroup>
 </Project>

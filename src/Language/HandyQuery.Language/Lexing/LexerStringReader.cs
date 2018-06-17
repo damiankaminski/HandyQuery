@@ -18,6 +18,8 @@ namespace HandyQuery.Language.Lexing
             CurrentPosition = position;
             Query = query.AsSpan();
 
+            // TODO: lines mapping to a separate class, e.g. QueryPositionMapper?
+            
             // TODO: _linesToPositionMap lazy init? there is no need to initialize it if it's gonna be not needed
             CurrentPosition = 0;
             // TODO: Marshal.AllocHGlobal? or maybe create an allocator that would preallocate some buffer
