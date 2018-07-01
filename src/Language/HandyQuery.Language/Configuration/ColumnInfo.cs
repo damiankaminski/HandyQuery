@@ -43,7 +43,7 @@ namespace HandyQuery.Language.Configuration
                 HandyType.DateTime,
                 new KeywordBase[]
                 {
-                    StatementKeyword.Empty, StatementKeyword.NotEmpty,
+                    StatementKeyword.IsEmpty, StatementKeyword.IsNotEmpty,
                     CompareOperatorKeyword.Equal, CompareOperatorKeyword.NotEqual,
                     CompareOperatorKeyword.GreaterThan, CompareOperatorKeyword.GreaterThanOrEqual,
                     CompareOperatorKeyword.LessThan, CompareOperatorKeyword.LessThanOrEqual
@@ -53,7 +53,7 @@ namespace HandyQuery.Language.Configuration
                 HandyType.Float,
                 new KeywordBase[]
                 {
-                    StatementKeyword.Empty, StatementKeyword.NotEmpty,
+                    StatementKeyword.IsEmpty, StatementKeyword.IsNotEmpty,
                     CompareOperatorKeyword.Equal, CompareOperatorKeyword.NotEqual,
                     CompareOperatorKeyword.GreaterThan, CompareOperatorKeyword.GreaterThanOrEqual,
                     CompareOperatorKeyword.LessThan, CompareOperatorKeyword.LessThanOrEqual
@@ -63,7 +63,7 @@ namespace HandyQuery.Language.Configuration
                 HandyType.Integer,
                 new KeywordBase[]
                 {
-                    StatementKeyword.Empty, StatementKeyword.NotEmpty,
+                    StatementKeyword.IsEmpty, StatementKeyword.IsNotEmpty,
                     CompareOperatorKeyword.Equal, CompareOperatorKeyword.NotEqual,
                     CompareOperatorKeyword.GreaterThan, CompareOperatorKeyword.GreaterThanOrEqual,
                     CompareOperatorKeyword.LessThan, CompareOperatorKeyword.LessThanOrEqual
@@ -73,7 +73,7 @@ namespace HandyQuery.Language.Configuration
                 HandyType.String,
                 new KeywordBase[]
                 {
-                    StatementKeyword.Empty, StatementKeyword.NotEmpty,
+                    StatementKeyword.IsEmpty, StatementKeyword.IsNotEmpty,
                     CompareOperatorKeyword.Equal, CompareOperatorKeyword.NotEqual,
                     CompareOperatorKeyword.Contains,
                     CompareOperatorKeyword.StartsWith, CompareOperatorKeyword.EndsWith
@@ -83,7 +83,7 @@ namespace HandyQuery.Language.Configuration
                 HandyType.Boolean,
                 new KeywordBase[]
                 {
-                    StatementKeyword.Empty, StatementKeyword.NotEmpty,
+                    StatementKeyword.IsEmpty, StatementKeyword.IsNotEmpty,
                     StatementKeyword.IsTrue, StatementKeyword.IsFalse
                 }
             }
@@ -138,8 +138,8 @@ namespace HandyQuery.Language.Configuration
         {
             switch (statementKeyword.StatementType)
             {
-                case StatementType.Empty:
-                case StatementType.NotEmpty:
+                case StatementType.IsEmpty:
+                case StatementType.IsNotEmpty:
                     return SystemType.IsNullable();
 
                 case StatementType.IsFalse:

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using HandyQuery.Language.Configuration;
 using HandyQuery.Language.Lexing.Tokenizers;
+using HandyQuery.Language.Lexing.Tokens;
 using HandyQuery.Language.Parsing.StateTransition.Nodes;
 
 namespace HandyQuery.Language.Lexing
@@ -23,21 +24,49 @@ namespace HandyQuery.Language.Lexing
         }
 
         [HotPath]
-        public LexerResult Tokenize(string query, LexerConfig config = null)
+        public LexerResult Tokenize(string query)
         {
             if (string.IsNullOrWhiteSpace(query)) throw new ArgumentException();
 
-            config = config ?? LexerConfig.Default;
-            
-            var tokenizersSource = new TokenizersSource(_languageConfig);
             var finalResult = new LexerResult();
             var reader = new LexerStringReader(query, 0);
-            var restorableReader = new LexerStringReader.Restorable();
-            var runtimeInfo = new LexerRuntimeInfo(reader); // TODO: ref reader?
 
-            // TODO
+            while (reader.IsEndOfQuery() == false)
+            {
+                reader.MoveBy(SkipWhitespaces(reader));
 
+                var tokenFound = false;
+                
+                foreach (var tokenizer in _languageConfig.TokenizersSource.OrderedTokenizers)
+                {
+                    var runtimeInfo = new LexerRuntimeInfo(reader);
+                    var result = tokenizer.Tokenize(ref runtimeInfo);
+                    if (result.Success || result.IsPartiallySuccessful)
+                    {
+                        finalResult.Tokens.Add(result.Token);
+                        reader.ForceMoveBy(result.Token.Length);
+                        tokenFound = true;
+                        break;
+                    }
+                }
+
+                if (tokenFound == false)
+                {
+                    var startPosition = reader.CurrentPosition;
+                    var word = reader.ReadTillEndOfWord();
+                    var unknownToken = new UnknownToken(startPosition, word.Length);
+                    finalResult.Tokens.Add(unknownToken);
+                }
+            }
+            
             return finalResult;
+        }
+
+        private int SkipWhitespaces(LexerStringReader reader)
+        {
+            var whitespaceRuntimeInfo = new LexerRuntimeInfo(reader);
+            var whitespaceResult = _whitespaceTokenizer.Tokenize(ref whitespaceRuntimeInfo);
+            return whitespaceResult.Token?.Length ?? 0;
         }
     }
 }

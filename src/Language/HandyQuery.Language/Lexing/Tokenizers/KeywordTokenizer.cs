@@ -6,6 +6,7 @@ using HandyQuery.Language.Lexing.Tokens;
 
 namespace HandyQuery.Language.Lexing.Tokenizers
 {
+    [Tokenizer(null)]
     internal sealed class KeywordTokenizer : TokenizerBase
     {
         private readonly SearchTrie<KeywordBase> _keywordsTrie;

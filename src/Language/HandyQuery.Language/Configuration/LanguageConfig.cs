@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
-using HandyQuery.Language.Extensions;
+using HandyQuery.Language.Lexing;
 
 namespace HandyQuery.Language.Configuration
 {
@@ -11,12 +10,15 @@ namespace HandyQuery.Language.Configuration
         public readonly Type ModelType;
         public readonly IReadOnlyList<ColumnInfo> Columns;
         public readonly SyntaxConfig Syntax;
+        public readonly TokenizersSource TokenizersSource;
 
         public LanguageConfig(Type modelType, IReadOnlyList<ColumnInfo> columns, SyntaxConfig syntax)
         {
             ModelType = modelType;
             Columns = columns;
             Syntax = syntax;
+
+            TokenizersSource = new TokenizersSource(this);
         }
         
         public ColumnInfo GetColumnInfo(string columnName)

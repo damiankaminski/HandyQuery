@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using HandyQuery.Language.Configuration;
 using HandyQuery.Language.Lexing.Tokenizers.Abstract;
@@ -8,49 +9,89 @@ namespace HandyQuery.Language.Lexing
 {
     internal sealed class TokenizersSource
     {
-        private readonly Dictionary<string, ITokenizer> _tokenizers = new Dictionary<string, ITokenizer>();
+        public IEnumerable<ITokenizer> OrderedTokenizers => _orderedTokenizers;
+        private readonly List<ITokenizer> _orderedTokenizers = new List<ITokenizer>();
 
         public TokenizersSource(LanguageConfig languageConfig)
         {
+            // TODO: tests
+            var tokenizers = new List<ITokenizer>();
+
             foreach (var type in Assembly.GetExecutingAssembly().DefinedTypes)
             {
-                if (type.IsInterface || type.IsAbstract)
+                if (type.IsInterface || type.IsAbstract) continue;
+                if (!typeof(ITokenizer).IsAssignableFrom(type)) continue;
+
+                const string suffix = "Tokenizer";
+                var index = type.Name.LastIndexOf(suffix, StringComparison.Ordinal);
+                if (index == -1)
                 {
+                    throw new HandyQueryInitializationException(
+                        $"Tokenizer {type.FullName} implements ITokenizer, but it does not follow naming " +
+                        $"convention. Each tokenizer should end with \'{suffix}\' suffix.");
+                }
+
+                if (type.GetCustomAttribute<TokenizerAttribute>() == null)
+                {
+                    throw new HandyQueryInitializationException(
+                        $"Tokenizer {type.FullName} implements ITokenizer, but it does not follow attribute " +
+                        $"convention. Each tokenizer should define TokenizerAttribute .");
+                }
+
+                var tokenizer = (ITokenizer) Activator.CreateInstance(type, languageConfig);
+                tokenizers.Add(tokenizer);
+            }
+
+            var waitingTokenizers = new List<ITokenizer>();
+            foreach (var tokenizer in tokenizers)
+            {
+                EvaluateWaiting();
+                var tokenizerAttribute = GetTokenizerAttribute(tokenizer);
+                if (tokenizerAttribute.ManualUsage) continue;
+                
+                var after = tokenizerAttribute.AfterTokenizer;
+
+                if (after == null || _orderedTokenizers.Any(x => x.GetType() == after))
+                {
+                    _orderedTokenizers.Add(tokenizer);
                     continue;
                 }
+                
+                waitingTokenizers.Add(tokenizer);
+            }
+            
+            EvaluateWaiting();
 
-                if (typeof(ITokenizer).IsAssignableFrom(type))
+            if (waitingTokenizers.Any())
+            {
+                throw new HandyQueryInitializationException(
+                    "Unable to create tokenizers in proper order. Inifnite loop via TokenizerAttribute.AfterTokenizer?");
+            }
+            
+            void EvaluateWaiting()
+            {
+                var evaluatedTokenizers = new List<ITokenizer>();
+                
+                foreach (var tokenizer in waitingTokenizers)
                 {
-                    const string suffix = "Tokenizer";
-                    var index = type.Name.LastIndexOf(suffix, StringComparison.Ordinal);
-                    if (index == -1)
+                    var after = GetTokenizerAttribute(tokenizer).AfterTokenizer;
+                    if (_orderedTokenizers.Any(x => x.GetType() == after))
                     {
-                        throw new HandyQueryInitializationException($"Tokenizer {type.FullName} implements ITokenizer, but " +
-                                                                    $"it does not follow naming convention. Each tokenizer should end " +
-                                                                    $"with '{suffix}' suffix.");
-                    }
-
-                    var name = type.Name.Substring(0, index);
-                    _tokenizers.Add(name, (ITokenizer)Activator.CreateInstance(type, languageConfig));
+                        _orderedTokenizers.Add(tokenizer);
+                        evaluatedTokenizers.Add(tokenizer);
+                    }                    
+                }
+                
+                foreach (var tokenizer in evaluatedTokenizers)
+                {
+                    waitingTokenizers.Remove(tokenizer);
                 }
             }
-        }
-
-        public bool TryGetTokenizer(string name, out ITokenizer tokenizer)
-        {
-            return _tokenizers.TryGetValue(name, out tokenizer);
-        }
-
-        // TODO: GetOrderedTokenizers? Each tokenizer should be decorated with [Tokenizer(after: typeof(KeywordTokenizer))]
-        
-        public ITokenizer GetTokenizer(string name)
-        {
-            if (TryGetTokenizer(name, out var tokenizer) == false)
+            
+            TokenizerAttribute GetTokenizerAttribute(ITokenizer tokenizer)
             {
-                throw new QueryLanguageException($"Terminal '{name}' not found.");
+                return tokenizer.GetType().GetCustomAttribute<TokenizerAttribute>();
             }
-
-            return tokenizer;
         }
     }
 }

@@ -72,6 +72,71 @@ namespace HandyQuery.Language.Tests.Lexing
         }
         
         [Test]
+        public void Should_allow_to_force_move()
+        {
+            var reader = CreateReader("|Test");
+            
+            reader.CurrentPosition.Should().Be(0);
+            reader.CurrentChar.Should().Be('T');
+            reader.IsInRange().Should().Be(true);
+            reader.IsEndOfQuery().Should().Be(false);
+            
+            reader.ForceMoveBy(2);
+            reader.CurrentPosition.Should().Be(2);
+            reader.CurrentChar.Should().Be('s');
+            reader.IsInRange().Should().Be(true);
+            reader.IsEndOfQuery().Should().Be(false);
+            
+            reader.ForceMoveBy(2);
+            reader.CurrentPosition.Should().Be(3);
+            reader.CurrentChar.Should().Be('t');
+            reader.IsInRange().Should().Be(true);
+            reader.IsEndOfQuery().Should().Be(true);
+            
+            reader.ForceMoveBy(1);
+            reader.CurrentPosition.Should().Be(3);
+            reader.CurrentChar.Should().Be('t');
+            reader.IsInRange().Should().Be(true);
+            reader.IsEndOfQuery().Should().Be(true);
+            
+            reader.ForceMoveBy(-1);
+            reader.CurrentPosition.Should().Be(2);
+            reader.CurrentChar.Should().Be('s');
+            reader.IsInRange().Should().Be(true);
+            reader.IsEndOfQuery().Should().Be(false);
+            
+            reader.ForceMoveBy(1);
+            reader.CurrentPosition.Should().Be(3);
+            reader.CurrentChar.Should().Be('t');
+            reader.IsInRange().Should().Be(true);
+            reader.IsEndOfQuery().Should().Be(true);
+            
+            reader.ForceMoveBy(-5);
+            reader.CurrentPosition.Should().Be(0);
+            reader.CurrentChar.Should().Be('T');
+            reader.IsInRange().Should().Be(true);
+            reader.IsEndOfQuery().Should().Be(false);
+            
+            reader.ForceMoveBy(-1);
+            reader.CurrentPosition.Should().Be(0);
+            reader.CurrentChar.Should().Be('T');
+            reader.IsInRange().Should().Be(true);
+            reader.IsEndOfQuery().Should().Be(false);
+            
+            reader.ForceMoveBy(1);
+            reader.CurrentPosition.Should().Be(1);
+            reader.CurrentChar.Should().Be('e');
+            reader.IsInRange().Should().Be(true);
+            reader.IsEndOfQuery().Should().Be(false);
+            
+            reader.ForceMoveBy(-2);
+            reader.CurrentPosition.Should().Be(0);
+            reader.CurrentChar.Should().Be('T');
+            reader.IsInRange().Should().Be(true);
+            reader.IsEndOfQuery().Should().Be(false);
+        }
+        
+        [Test]
         public void Should_allow_to_capture_and_restore_positions()
         {
             var restorableReader = new LexerStringReader.Restorable();

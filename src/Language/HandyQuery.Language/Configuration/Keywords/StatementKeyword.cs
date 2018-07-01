@@ -2,8 +2,8 @@ namespace HandyQuery.Language.Configuration.Keywords
 {
     internal sealed class StatementKeyword : KeywordBase
     {
-        public static readonly StatementKeyword Empty = new StatementKeyword(StatementType.Empty);
-        public static readonly StatementKeyword NotEmpty = new StatementKeyword(StatementType.NotEmpty);
+        public static readonly StatementKeyword IsEmpty = new StatementKeyword(StatementType.IsEmpty);
+        public static readonly StatementKeyword IsNotEmpty = new StatementKeyword(StatementType.IsNotEmpty);
         public static readonly StatementKeyword IsTrue = new StatementKeyword(StatementType.IsTrue);
         public static readonly StatementKeyword IsFalse = new StatementKeyword(StatementType.IsFalse);
 
@@ -23,8 +23,8 @@ namespace HandyQuery.Language.Configuration.Keywords
 
     internal enum StatementType
     {
-        Empty,
-        NotEmpty,
+        IsEmpty,
+        IsNotEmpty,
         IsTrue,
         IsFalse
     }

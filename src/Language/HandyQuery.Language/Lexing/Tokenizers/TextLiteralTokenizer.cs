@@ -7,6 +7,7 @@ using HandyQuery.Language.Lexing.Tokens;
 
 namespace HandyQuery.Language.Lexing.Tokenizers
 {
+    [Tokenizer(typeof(KeywordTokenizer))]
     internal sealed class TextLiteralTokenizer : TokenizerBase
     {
         private static readonly Dictionary<char, char> EscapeSequences = new Dictionary<char, char>()

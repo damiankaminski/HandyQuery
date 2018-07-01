@@ -200,6 +200,30 @@ namespace HandyQuery.Language.Lexing
             CurrentPosition = newPosition;
             return true;
         }
+        
+        /// <summary>
+        /// Moves <see cref="CurrentPosition"/> by <see cref="x"/>. If moving by <see cref="x"/> would pass
+        /// outside of query then it moves to the last character.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void ForceMoveBy(int x)
+        {
+            var newPosition = CurrentPosition + x;
+
+            if (newPosition > Query.Length - 1)
+            {
+                CurrentPosition = Query.Length - 1;
+                return;
+            }
+            
+            if (newPosition < 0)
+            {
+                CurrentPosition = 0;
+                return;
+            }
+
+            CurrentPosition = newPosition;
+        }
 
         /// <summary>
         /// Moves <see cref="CurrentPosition"/> until passes new line.
@@ -361,6 +385,7 @@ namespace HandyQuery.Language.Lexing
             }
         }
 
+        // TODO: remove it? not sure if it's ever gonna be needed
         internal ref struct Restorable
         {
             private int _capturedPosition;

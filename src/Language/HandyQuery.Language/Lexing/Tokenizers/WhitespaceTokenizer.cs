@@ -4,10 +4,11 @@ using HandyQuery.Language.Lexing.Tokens;
 
 namespace HandyQuery.Language.Lexing.Tokenizers
 {
+    [Tokenizer(manualUsage: true)]
     internal sealed class WhitespaceTokenizer : TokenizerBase
     {
         private static readonly TokenizationResult NoWhitespaceResult 
-            = TokenizationResult.Successful(new WhitespaceToken(-1, 0));
+            = TokenizationResult.Failed();
 
         public WhitespaceTokenizer(LanguageConfig languageConfig) : base(languageConfig)
         {
