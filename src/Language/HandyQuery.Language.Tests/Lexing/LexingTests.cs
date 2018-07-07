@@ -1,38 +1,67 @@
-﻿using FluentAssertions;
-using HandyQuery.Language.Configuration.Keywords;
+﻿using System.Collections.Generic;
+using FluentAssertions;
+using HandyQuery.Language.Configuration;
 using HandyQuery.Language.Lexing;
-using HandyQuery.Language.Lexing.Tokens;
 using HandyQuery.Language.Tests.Model;
 using NUnit.Framework;
+// ReSharper disable InconsistentNaming
 
 namespace HandyQuery.Language.Tests.Lexing
 {
-    public class LexingTests
+    internal class LexingTests
     {
-        [Test]
-        public void Lexer_ShouldBeAbleToTokenizeStatements()
+        [TestCaseSource(nameof(Lexer_should_tokenize_valid_queries_test_cases))]
+        public void Lexer_should_tokenize_valid_queries(TestCase testCase)
         {
-            var config = HandyQueryLanguage.Configure<Person>()
-                .AddColumn(x => x.FirstName)
-                .AddColumn(x => x.LastName)
-                .Build();
+            var result = Lexer.Build(testCase.Config).Tokenize(testCase.Query);
 
-            // TODO: implement test query builder?
+            result.Tokens.IsSameAs(testCase.ExpectedTokens).Should().BeTrue();
+        }
 
-            var firstName = "FirstName";
-            var isEmpty = "is empty";
-            var expected = new TokenList()
+        public class TestCase
+        {
+            public string Query { get; }
+            public TokenList ExpectedTokens { get; }
+            public LanguageConfig Config { get; }
+
+            public TestCase(string query, TokenList expectedTokens, LanguageConfig config)
             {
-                new TextLiteralToken(0, firstName.Length, firstName),
-                //new WhitespaceToken(9, 1),
-                new KeywordToken(10, isEmpty.Length, StatementKeyword.IsEmpty)
-            };
+                Query = query;
+                ExpectedTokens = expectedTokens;
+                Config = config;
+            }
 
-            var result = Lexer.Build(config).Tokenize("FirstName is empty");
-
-            result.Tokens.IsSameAs(expected).Should().BeTrue();
+            public override string ToString()
+            {
+                return Query;
+            }
         }
         
-        // TODO: MOAR tests
+        // ReSharper disable once MemberCanBePrivate.Global
+        public static IEnumerable<TestCase> Lexer_should_tokenize_valid_queries_test_cases
+        {
+            get
+            {
+                var config = HandyQueryLanguage.Configure<Person>().Build();
+                var testCases = new List<TestCase>();
+                
+                TestCase(new TestQueryBuilder().Column("FirstName").IsEmpty());
+                TestCase(new TestQueryBuilder().Column("FirstName").IsNotEmpty());
+                TestCase(new TestQueryBuilder().Column("Checked").IsTrue());
+                TestCase(new TestQueryBuilder().Column("Checked").IsFalse());
+                
+                // TODO: MOAR tests
+
+                return testCases;       
+                void TestCase(TestQueryBuilder.PartBase partBase)
+                {
+                    var buildResults = partBase.TestQueryBuilder.BuildMultipleVariants(config);
+                    foreach (var result in buildResults)
+                    {
+                        testCases.Add(new TestCase(result.Query, result.ExpectedTokens, config));
+                    }
+                }
+            }
+        }
     }
 }
