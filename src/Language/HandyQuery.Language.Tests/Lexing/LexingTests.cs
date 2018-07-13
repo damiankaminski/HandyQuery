@@ -37,9 +37,10 @@ namespace HandyQuery.Language.Tests.Lexing
             }
         }
         
-        // ReSharper disable once MemberCanBePrivate.Global
+        // ReSharper disable MemberCanBePrivate.Global
         public static IEnumerable<TestCase> Lexer_should_tokenize_valid_queries_test_cases
         {
+            // ReSharper disable once UnusedMember.Global
             get
             {
                 var config = HandyQueryLanguage.Configure<Person>().Build();
@@ -49,6 +50,11 @@ namespace HandyQuery.Language.Tests.Lexing
                 TestCase(new TestQueryBuilder().Column("FirstName").IsNotEmpty());
                 TestCase(new TestQueryBuilder().Column("Checked").IsTrue());
                 TestCase(new TestQueryBuilder().Column("Checked").IsFalse());
+                
+                // TODO: test all compare operators
+                TestCase(new TestQueryBuilder().Column("Description").Equal("Foo"));
+                TestCase(new TestQueryBuilder().Column("Description").Equal("Foo Bar"));
+                //TestCase(new TestQueryBuilder().Column("Salary").Equal(2000f));
                 
                 // TODO: MOAR tests
 
