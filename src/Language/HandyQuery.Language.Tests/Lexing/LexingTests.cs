@@ -1,9 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using FluentAssertions;
 using HandyQuery.Language.Configuration;
 using HandyQuery.Language.Lexing;
 using HandyQuery.Language.Tests.Model;
 using NUnit.Framework;
+
+using static HandyQuery.Language.Tests.Lexing.TestQueryBuilder;
+
 // ReSharper disable InconsistentNaming
 
 namespace HandyQuery.Language.Tests.Lexing
@@ -44,27 +49,42 @@ namespace HandyQuery.Language.Tests.Lexing
             get
             {
                 var config = HandyQueryLanguage.Configure<Person>().Build();
-                var testCases = new List<TestCase>();
                 
-                TestCase(new TestQueryBuilder().Column("FirstName").IsEmpty());
-                TestCase(new TestQueryBuilder().Column("FirstName").IsNotEmpty());
-                TestCase(new TestQueryBuilder().Column("Checked").IsTrue());
-                TestCase(new TestQueryBuilder().Column("Checked").IsFalse());
-                
-                // TODO: test all compare operators
-                TestCase(new TestQueryBuilder().Column("Description").Equal("Foo"));
-                TestCase(new TestQueryBuilder().Column("Description").Equal("Foo Bar"));
-                //TestCase(new TestQueryBuilder().Column("Salary").Equal(2000f));
+                var cases = new List<PartBase>
+                {
+                    Column("FirstName").IsEmpty(),
+                    Column("FirstName").IsNotEmpty(),
+                    Column("Checked").IsTrue(),
+                    Column("Checked").IsFalse(),
+                    
+                    // TODO: test all compare operators
+                    // TODO: all types
+                    Column("Description").Equal("Foo"),
+                    Column("Description").Equal("Foo Bar"),
+                    
+                    // TODO: number tokenizers
+//                    Column("Salary").Equal(2000m),
+//                    Column("Salary").Equal(2000.56m),
+//                    Column("Salary").Equal(decimal.MaxValue),
+//                    Column("Salary").Equal(decimal.MinValue),
+//                    Column("Salary").Equal(decimal.Zero),
+//                    Column("Height").Equal(180f),
+//                    Column("Height").Equal(180.56f),
+//                    Column("Height").Equal(float.MaxValue),
+//                    Column("Height").Equal(float.MinValue),
+//                    Column("Height").Equal(0f)
+                };
                 
                 // TODO: MOAR tests
 
-                return testCases;       
-                void TestCase(TestQueryBuilder.PartBase partBase)
+                return cases.SelectMany(BuildTestCase).ToList();
+                
+                IEnumerable<TestCase> BuildTestCase(PartBase partBase)
                 {
                     var buildResults = partBase.TestQueryBuilder.BuildMultipleVariants(config);
                     foreach (var result in buildResults)
                     {
-                        testCases.Add(new TestCase(result.Query, result.ExpectedTokens, config));
+                        yield return new TestCase(result.Query, result.ExpectedTokens, config);
                     }
                 }
             }

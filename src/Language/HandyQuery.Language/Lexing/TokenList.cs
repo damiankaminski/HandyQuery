@@ -5,6 +5,14 @@ namespace HandyQuery.Language.Lexing
 {
     internal sealed class TokenList : List<TokenBase>
     {
+        public TokenList()
+        {
+        }
+        
+        public TokenList(IEnumerable<TokenBase> collection) : base(collection)
+        {
+        }
+
         public bool IsSameAs(TokenList other)
         {
             if (Count != other?.Count) return false;

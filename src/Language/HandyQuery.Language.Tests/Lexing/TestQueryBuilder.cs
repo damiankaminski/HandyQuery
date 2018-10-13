@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
 using HandyQuery.Language.Configuration;
@@ -14,7 +15,12 @@ namespace HandyQuery.Language.Tests.Lexing
     {
         private readonly List<PartBase> _queryParts = new List<PartBase>();
 
-        public ColumnPart Column(string columnName)
+        public static ColumnPart Column(string columnName)
+        {
+            return new TestQueryBuilder().AddColumn(columnName);
+        }
+        
+        public ColumnPart AddColumn(string columnName)
         {
             var part = new ColumnPart(columnName, this);
             _queryParts.Add(part);
@@ -23,141 +29,131 @@ namespace HandyQuery.Language.Tests.Lexing
 
         public IEnumerable<BuildResult> BuildMultipleVariants(LanguageConfig languageConfig)
         {
-            // TODO: instead of receving languageConfig build one here with different settings?
+            // TODO: instead of receiving languageConfig build one here with different settings?
 
-            // most standard case
+            var variants = new BuildVariants();
+
+            foreach (var part in _queryParts)
             {
-                var variants = new BuildVariants();
-                var tokens = new TokenList();
-
-                foreach (var part in _queryParts)
+                switch (part)
                 {
-                    switch (part)
+                    case ColumnPart column:
                     {
-                        case ColumnPart column:
-                        {
-                            variants.AddTokenToAll(column.ColumnName, 
-                                index => new TextLiteralToken(index, column.ColumnName.Length, column.ColumnName));
-                            break;
-                        }
-
-                        case StatementPart statement:
-                        {
-                            variants.AppendToAll(" ");
-
-                            var keyword = languageConfig.Syntax.KeywordsMap[statement.StatementKeyword];
-                            variants.AddTokenToAll(keyword, 
-                                index => new KeywordToken(index, keyword.Length, statement.StatementKeyword));
-                            break;
-                        }
-
-                        case CompareOperatorPart compareOperator:
-                        {
-                            var keyword = languageConfig.Syntax.KeywordsMap[compareOperator.CompareOperatorKeyword];
-                            
-                            // TODO: make it simpler?
-                            // maybe: variants.AppendToAllExceptNewVariant(" ", () => char.IsLetterOrDigit(keyword.First()) == false)
-                            BuildVariants.Variant noSpaceBeforeVariant = null;
-                            if (char.IsLetterOrDigit(keyword.First()) == false)
-                            {
-                                // produce variant without whitespace if comp op starts with special char
-                                noSpaceBeforeVariant = variants.AddNewVariant();
-                            }
-                            variants.AppendToAll(" ");
-                            noSpaceBeforeVariant?.ReleaseToMainPool();
-                            
-                            variants.AddTokenToAll(keyword, 
-                                index => new KeywordToken(index, keyword.Length, compareOperator.CompareOperatorKeyword));
-
-                            BuildVariants.Variant noSpaceAfterVariant = null;
-                            if (char.IsLetterOrDigit(keyword.First()) == false)
-                            {
-                                // produce variant without whitespace if comp op ends with special char
-                                noSpaceAfterVariant = variants.AddNewVariant();
-                            }
-                            variants.AppendToAll(" ");
-                            noSpaceAfterVariant?.ReleaseToMainPool();
-
-                            string operand;
-                            TokenBase token;
-
-                            switch (compareOperator.Value)
-                            {
-                                case string s:
-                                    operand = $"\"{s}\""; // TODO: produce variant without quote if single word
-                                    variants.AddTokenToAll(operand, 
-                                        index => new TextLiteralToken(index, operand.Length, s));
-                                    break;
-                                case float f:
-                                    // TODO: use correct separator, as in lang config
-                                    operand = f.ToString(CultureInfo.InvariantCulture); 
-                                    variants.AddTokenToAll(operand, 
-                                        index => new NumberLiteralToken(index, operand.Length, f));
-                                    break;
-                                default:
-                                    throw new NotSupportedException();
-                                // TODO: all  other cases
-                            }
-
-                            break;
-                        }
+                        // TODO: quoted column name, especially when with multiple words
+                        variants.AddTokenToAll(column.ColumnName,
+                            index => new TextLiteralToken(index, column.ColumnName.Length, column.ColumnName));
+                        break;
                     }
-                }
 
-                return variants.CreateBuildResults();
+                    case StatementPart statement:
+                    {
+                        variants.AppendToAll(" ");
+
+                        var keyword = languageConfig.Syntax.KeywordsMap[statement.StatementKeyword];
+                        variants.AddTokenToAll(keyword,
+                            index => new KeywordToken(index, keyword.Length, statement.StatementKeyword));
+                        break;
+                    }
+
+                    case CompareOperatorPart compareOperator:
+                    {
+                        var keyword = languageConfig.Syntax.KeywordsMap[compareOperator.CompareOperatorKeyword];
+
+                        // produce variant without whitespace if comp op starts with special char
+                        var newVariant = char.IsLetterOrDigit(keyword.First()) ? null : variants[0].Copy();
+                        variants.AppendToAll(" ", exceptNewVariant: newVariant);
+
+                        variants.AddTokenToAll(keyword,
+                            index => new KeywordToken(index, keyword.Length, compareOperator.CompareOperatorKeyword));
+
+                        // produce variant without whitespace if comp op ends with special char
+                        newVariant = char.IsLetterOrDigit(keyword.Last()) ? null : variants[0].Copy();
+                        variants.AppendToAll(" ", exceptNewVariant: newVariant);
+
+                        string operand;
+
+                        switch (compareOperator.Value)
+                        {
+                            case string s:
+                                var noQuoteVariant = variants[0].Copy();
+
+                                operand = $"\"{s}\"";
+                                variants.AddTokenToAll(operand,
+                                    index => new TextLiteralToken(index, operand.Length, s));
+
+                                if (s.Trim().Any(char.IsWhiteSpace) == false)
+                                {
+                                    // produce variant without quote if single word
+                                    noQuoteVariant.AddToken(s, index => new TextLiteralToken(index, s.Length, s));
+                                    variants.Add(noQuoteVariant);
+                                }
+
+                                break;
+                            case float v:
+                                operand = v.ToString(languageConfig.Syntax.CultureInfo);
+                                variants.AddTokenToAll(operand,
+                                    index => new NumberLiteralToken(index, operand.Length, v));
+                                break;
+                            case decimal v:
+                                operand = v.ToString(languageConfig.Syntax.CultureInfo);
+                                variants.AddTokenToAll(operand,
+                                    index => new NumberLiteralToken(index, operand.Length, v));
+                                break;
+                            case double v:
+                                operand = v.ToString(languageConfig.Syntax.CultureInfo);
+                                variants.AddTokenToAll(operand,
+                                    index => new NumberLiteralToken(index, operand.Length, v));
+                                break;
+                            // TODO: all types
+                            
+                            default:
+                                throw new NotSupportedException();
+
+                            // TODO: all  other cases
+                        }
+
+                        break;
+                    }
+
+                    default:
+                        throw new NotSupportedException();
+                }
             }
+
+            return variants.CreateBuildResults();
         }
 
-        public class BuildVariants
+        public class BuildVariants : Collection<BuildVariants.Variant>
         {
-            private readonly List<Variant> _variants;
-
             public BuildVariants()
             {
-                _variants = new List<Variant> {new Variant(this)};
+                Add(new Variant());
             }
-
-            public void AppendToAll(string queryPart)
+            
+            public void AppendToAll(string queryPart, Variant exceptNewVariant = null)
             {
-                foreach (var variant in _variants)
-                {
+                foreach (var variant in this)
                     variant.ExtendVariant(queryPart);
-                }
+
+                if (exceptNewVariant != null)
+                    Add(exceptNewVariant);
             }
             
             public void AddTokenToAll(string queryPart, Func<int, TokenBase> createToken)
             {
-                foreach (var variant in _variants)
-                {
+                foreach (var variant in this)
                     variant.AddToken(queryPart, createToken);
-                }
-            }
-
-            public Variant AddNewVariant()
-            {
-                return new Variant(this);
             }
 
             public IEnumerable<BuildResult> CreateBuildResults()
             {
-                return _variants.Select(x => new BuildResult(x.Query, x.ExpectedTokens)).ToList();
+                return this.Select(x => new BuildResult(x.Query, x.ExpectedTokens)).ToList();
             }
             
             public class Variant
             {
-                private readonly BuildVariants _mainPool;
-                public string Query { get; private set; }
-                public TokenList ExpectedTokens { get; } = new TokenList();
-
-                public Variant(BuildVariants mainPool)
-                {
-                    _mainPool = mainPool;
-                    
-                    var baseVariant = mainPool._variants?.FirstOrDefault();
-                    Query = baseVariant?.Query ?? string.Empty;
-                    // TODO: copy tokens from baseVariant!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                    // TODO: or maybe save factory functions instead and use them on demand?
-                }
+                public string Query { get; private set; } = string.Empty;
+                public TokenList ExpectedTokens { get; private set; } = new TokenList();
 
                 public void ExtendVariant(string queryPart)
                 {
@@ -170,9 +166,13 @@ namespace HandyQuery.Language.Tests.Lexing
                     ExtendVariant(queryPart);
                 }
 
-                public void ReleaseToMainPool()
+                public Variant Copy()
                 {
-                    _mainPool._variants.Add(this);
+                    return new Variant()
+                    {
+                        Query = Query,
+                        ExpectedTokens = new TokenList(ExpectedTokens)
+                    };
                 }
             }
         }
@@ -213,11 +213,21 @@ namespace HandyQuery.Language.Tests.Lexing
             public StatementPart IsTrue() => Build(StatementKeyword.IsTrue);
             public StatementPart IsFalse() => Build(StatementKeyword.IsFalse);
 
-            // TODO: all operators
-            // TODO: all value types
             public CompareOperatorPart Equal(string value) => Build(CompareOperatorKeyword.Equal, value);
-
+            public CompareOperatorPart Equal(char value) => Build(CompareOperatorKeyword.Equal, value);
+            public CompareOperatorPart Equal(byte value) => Build(CompareOperatorKeyword.Equal, value);
+            public CompareOperatorPart Equal(sbyte value) => Build(CompareOperatorKeyword.Equal, value);
             public CompareOperatorPart Equal(float value) => Build(CompareOperatorKeyword.Equal, value);
+            public CompareOperatorPart Equal(decimal value) => Build(CompareOperatorKeyword.Equal, value);
+            public CompareOperatorPart Equal(double value) => Build(CompareOperatorKeyword.Equal, value);
+            public CompareOperatorPart Equal(short value) => Build(CompareOperatorKeyword.Equal, value);
+            public CompareOperatorPart Equal(ushort value) => Build(CompareOperatorKeyword.Equal, value);
+            public CompareOperatorPart Equal(int value) => Build(CompareOperatorKeyword.Equal, value);
+            public CompareOperatorPart Equal(uint value) => Build(CompareOperatorKeyword.Equal, value);
+            public CompareOperatorPart Equal(long value) => Build(CompareOperatorKeyword.Equal, value);
+            public CompareOperatorPart Equal(ulong value) => Build(CompareOperatorKeyword.Equal, value);
+            
+            // TODO: all operators
 //            public CompareOperatorPart NotEqual() => BuildCompareOperatorPart(CompareOperatorKeyword.NotEqual);
 //            public CompareOperatorPart GreaterThan() => BuildCompareOperatorPart(CompareOperatorKeyword.GreaterThan);
 //            public CompareOperatorPart LessThan() => BuildCompareOperatorPart(CompareOperatorKeyword.LessThan);

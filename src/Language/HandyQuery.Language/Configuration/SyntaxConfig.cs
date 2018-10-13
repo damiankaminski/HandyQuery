@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using HandyQuery.Language.Configuration.Keywords;
 using HandyQuery.Language.Extensions;
@@ -14,6 +15,8 @@ namespace HandyQuery.Language.Configuration
         public readonly char NumberDecimalSeparator = '.';
         public readonly IEnumerable<string> DateTimeFormats = new[] {"M/d/yyyy H:m", "M/d/yyyy"};
 
+        public readonly CultureInfo CultureInfo;
+        
         public readonly IReadOnlyDictionary<KeywordBase, string> KeywordsMap = new Dictionary<KeywordBase, string>()
         {
             {CompareOperatorKeyword.Equal, "="},
@@ -45,6 +48,15 @@ namespace HandyQuery.Language.Configuration
             ColumnNameCaseSensitive = columnNameCaseSensitive;
 
             ReservedChars = FindReservedChars();
+
+            var cultureInfo = new CultureInfo(CultureInfo.InvariantCulture.LCID)
+            {
+                NumberFormat =
+                {
+                    NumberDecimalSeparator = NumberDecimalSeparator.ToString()
+                }
+            };
+            CultureInfo = CultureInfo.ReadOnly(cultureInfo);
         }
 
         // TODO: change to [azAZ0-9]; otherwise new operators will break compatibility
