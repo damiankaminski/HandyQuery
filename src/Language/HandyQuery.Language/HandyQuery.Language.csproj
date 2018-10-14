@@ -13,4 +13,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Parsing\Grammar\Language.grammar" />
   </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <HintPath>..\..\..\..\..\..\.nuget\packages\system.runtime.compilerservices.unsafe\4.4.0\ref\netstandard2.0\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    </Reference>
+  </ItemGroup>
 </Project>

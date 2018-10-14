@@ -92,17 +92,17 @@ namespace HandyQuery.Language.Tests.Lexing
                             case float v:
                                 operand = v.ToString(languageConfig.Syntax.CultureInfo);
                                 variants.AddTokenToAll(operand,
-                                    index => new NumberLiteralToken(index, operand.Length, v));
+                                    index => new NumberLiteralToken(index, operand.Length));
                                 break;
                             case decimal v:
                                 operand = v.ToString(languageConfig.Syntax.CultureInfo);
                                 variants.AddTokenToAll(operand,
-                                    index => new NumberLiteralToken(index, operand.Length, v));
+                                    index => new NumberLiteralToken(index, operand.Length));
                                 break;
                             case double v:
                                 operand = v.ToString(languageConfig.Syntax.CultureInfo);
                                 variants.AddTokenToAll(operand,
-                                    index => new NumberLiteralToken(index, operand.Length, v));
+                                    index => new NumberLiteralToken(index, operand.Length));
                                 break;
                             // TODO: all types
                             
@@ -214,7 +214,7 @@ namespace HandyQuery.Language.Tests.Lexing
             public StatementPart IsFalse() => Build(StatementKeyword.IsFalse);
 
             public CompareOperatorPart Equal(string value) => Build(CompareOperatorKeyword.Equal, value);
-            public CompareOperatorPart Equal(char value) => Build(CompareOperatorKeyword.Equal, value);
+            public CompareOperatorPart Equal(char value) => Build(CompareOperatorKeyword.Equal, value); // TODO: not sure if we'll support this one?
             public CompareOperatorPart Equal(byte value) => Build(CompareOperatorKeyword.Equal, value);
             public CompareOperatorPart Equal(sbyte value) => Build(CompareOperatorKeyword.Equal, value);
             public CompareOperatorPart Equal(float value) => Build(CompareOperatorKeyword.Equal, value);

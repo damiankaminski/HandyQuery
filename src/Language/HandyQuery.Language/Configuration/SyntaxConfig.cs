@@ -53,7 +53,10 @@ namespace HandyQuery.Language.Configuration
             {
                 NumberFormat =
                 {
-                    NumberDecimalSeparator = NumberDecimalSeparator.ToString()
+                    NumberDecimalSeparator = NumberDecimalSeparator.ToString(),
+                    NumberGroupSeparator = "",
+                    
+                    // TODO: other formatting stuff could be needed?
                 }
             };
             CultureInfo = CultureInfo.ReadOnly(cultureInfo);
