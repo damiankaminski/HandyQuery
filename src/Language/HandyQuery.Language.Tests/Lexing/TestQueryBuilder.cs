@@ -214,7 +214,7 @@ namespace HandyQuery.Language.Tests.Lexing
             public StatementPart IsFalse() => Build(StatementKeyword.IsFalse);
 
             public CompareOperatorPart Equal(string value) => Build(CompareOperatorKeyword.Equal, value);
-            public CompareOperatorPart Equal(char value) => Build(CompareOperatorKeyword.Equal, value);
+            public CompareOperatorPart Equal(char value) => Build(CompareOperatorKeyword.Equal, value); // TODO: not sure if we'll support this one?
             public CompareOperatorPart Equal(byte value) => Build(CompareOperatorKeyword.Equal, value);
             public CompareOperatorPart Equal(sbyte value) => Build(CompareOperatorKeyword.Equal, value);
             public CompareOperatorPart Equal(float value) => Build(CompareOperatorKeyword.Equal, value);

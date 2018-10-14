@@ -54,6 +54,7 @@ namespace HandyQuery.Language.Configuration
                 NumberFormat =
                 {
                     NumberDecimalSeparator = NumberDecimalSeparator.ToString()
+                    // TODO: other formatting stuff could be needed?
                 }
             };
             CultureInfo = CultureInfo.ReadOnly(cultureInfo);

@@ -11,12 +11,16 @@ namespace HandyQuery.Language.Lexing
     /// </summary>
     internal ref struct LexerStringReader
     {
-        public LexerStringReader(string query, int position)
+        public LexerStringReader(string query, int position) : this(query.AsSpan(), position)
+        {
+        }
+        
+        public LexerStringReader(ReadOnlySpan<char> query, int position)
         {
             if (position >= query.Length) throw new IndexOutOfRangeException();
 
             CurrentPosition = position;
-            Query = query.AsSpan();
+            Query = query;
             _positionProvider = null;
         }
 
